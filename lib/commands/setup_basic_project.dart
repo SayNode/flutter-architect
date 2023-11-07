@@ -20,11 +20,11 @@ class MakeCommand extends Command {
 
   @override
   Future<void> run() async {
-    final String projectName;
+    final String projectName = argResults?['name'];
 
-    stdout.writeln('Enter the Name of the project:');
-    projectName = stdin.readLineSync() ?? '';
-    stdout.writeln('You typed: $projectName');
+    stdout.writeln('Type something:');
+    final read = stdin.readLineSync() ?? '';
+    stdout.writeln('You typed: $read');
     var directory =
         await Directory('build/$projectName').create(recursive: true);
     print(directory.path);
