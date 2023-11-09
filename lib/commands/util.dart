@@ -12,3 +12,18 @@ Future<void> addDependencyToPubspec(
     stdout.write(result.stdout);
   }
 }
+
+///Format dart code
+Future<void> formatCode() async {
+  var result = await Process.run(
+    'dart',
+    ['format', '.'],
+    runInShell: true,
+  );
+  if (result.stderr != null) {
+    stderr.write(result.stderr);
+  }
+  if (result.stdout != null) {
+    stdout.write(result.stdout);
+  }
+}

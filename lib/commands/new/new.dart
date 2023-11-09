@@ -57,9 +57,9 @@ class Creator extends Command {
     Directory(path.join(basePath, projectName, 'asset')).createSync();
     print('- $projectName/asset ✔');
 
-    // Module
-    Directory(path.join(directory, 'module')).createSync();
-    print('- $directory/module ✔');
+    // model
+    Directory(path.join(directory, 'model')).createSync();
+    print('- $directory/model ✔');
 
     // Page
     Directory(path.join(directory, 'page')).createSync();
