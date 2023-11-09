@@ -53,10 +53,10 @@ class InternationalizationGenerator extends Command {
         if (line.contains('//End MaterialApp')) {
           mainContent += '});\n';
         }
-        // if (line.contains('main(')) {
-        //   mainContent +=
-        //       'Map<String, Map<String, String>> languages = await dependency.init();\n';
-        // }
+        if (line.contains('main(')) {
+          mainContent +=
+              'final LocalizationController localizationController = Get.put(LocalizationController());\nawait localizationController.init();\n';
+        }
       }
 
       File(mainPath).writeAsString(mainContent).then((file) {
