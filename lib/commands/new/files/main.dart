@@ -15,6 +15,7 @@ String content(String projectName) {
           '  \/\/ This widget is the root of your application.\n'
           '  @override\n'
           '  Widget build(BuildContext context) {\n'
+          '    //Start MaterialApp\n'
           '    return GetMaterialApp(\n'
           '      title: \'' +
       projectName +
@@ -22,6 +23,7 @@ String content(String projectName) {
       '      initialRoute: \'\/\',\n' +
       '      theme: ThemeData(),\n' +
       '    );\n' +
+      '    //End MaterialApp\n' +
       '  }\n' +
       '}';
 }
