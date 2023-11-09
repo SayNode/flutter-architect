@@ -2,17 +2,19 @@
 
 String content(String projectName) {
   return 'import \'package:flutter\/material.dart\';\n'
+          'import \'package:get\/get.dart\';\n'
           '\n'
-          'void main() => runApp(MyApp());'
+          'void main() => runApp(const MyApp());'
           '\n'
           '\n'
           '\n'
           '\n'
           'class MyApp extends StatelessWidget {\n'
+          '  const MyApp({super.key});\n'
           '  \/\/ This widget is the root of your application.\n'
           '  @override\n'
           '  Widget build(BuildContext context) {\n'
-          '    return MaterialApp(\n'
+          '    return GetMaterialApp(\n'
           '      title: \'' +
       projectName +
       '\',\n' +

@@ -1,12 +1,13 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/them.dart';
 
 class Generator extends Command {
   //-- Singleton
   Generator._privateConstructor() {
     // Add Sub Commands here
-
+    addSubcommand(GenerateTheme());
     // Add parser options or flag here
   }
 

@@ -34,6 +34,7 @@ class Creator extends Command {
 
     createCommonFolderStructure();
     await addDependencyToPubspec('get', path.join(basePath, projectName));
+    rewriteMain();
   }
 
   void createCommonFolderStructure() {
@@ -48,8 +49,6 @@ class Creator extends Command {
       projectName,
       'lib',
     );
-    print("basepath: $basePath");
-    print("directory: $directory");
 
     Directory(directory).createSync();
     print('- $directory/ ✔');
@@ -77,7 +76,17 @@ class Creator extends Command {
     // Util
     Directory(path.join(directory, 'util')).createSync();
     print('- $directory/util ✔');
+
+    // Helper
+    Directory(path.join(directory, 'helper')).createSync();
+    print('- $directory/helper ✔');
+
+    // Widget
+    Directory(path.join(directory, 'widget')).createSync();
+    print('- $directory/widget ✔');
   }
+
+  helperGenerator() {}
 
   /// Create the main.dart file
   void rewriteMain() {
