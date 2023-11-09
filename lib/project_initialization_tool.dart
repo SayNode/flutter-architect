@@ -1,14 +1,18 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
-import 'package:dcli/dcli.dart';
-import 'package:project_initialization_tool/commands/setup_basic_project.dart';
+import 'package:project_initialization_tool/commands/new.dart';
 
 void main(List<String> arguments) {
-  final runner = CommandRunner('Dart cli', 'Dart cli');
-  runner.addCommand(MakeCommand());
+  exitCode = 0; //presume success
 
-  try {
-    runner.run(arguments);
-  } catch (error) {
-    print(red('error $error'));
-  }
+  final CommandRunner commandRunner =
+      CommandRunner('wsm', 'Code Generator for Flutter Projects.')
+        ..addCommand(Creator());
+
+  commandRunner.run(arguments).catchError((error) {
+    if (error is! UsageException) throw error;
+    print(error);
+    exit(64); // Exit code 64 indicates a usage error.
+  });
 }

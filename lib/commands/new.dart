@@ -2,18 +2,18 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
-class MakeCommand extends Command {
+class Creator extends Command {
   @override
-  String get name => 'factory';
+  String get name => 'new';
 
   @override
-  String get description => 'create factory';
+  String get description => 'create new project';
 
-  MakeCommand() {
+  Creator() {
     argParser.addOption(
       'name',
       abbr: 'f',
-      help: 'help for factory command',
+      help: 'help for new command',
       mandatory: true,
     );
   }
