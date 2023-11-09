@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/new/files/main.dart'
     as main_file;
+import 'package:project_initialization_tool/commands/util.dart';
 
 class Creator extends Command {
   //TODO: make path configurable
@@ -28,11 +29,11 @@ class Creator extends Command {
   @override
   Future<void> run() async {
     projectName = argResults?['name'];
-    Process.run('flutter', ['create', '$basePath/$projectName', '-e'],
+    await Process.run('flutter', ['create', '$basePath/$projectName', '-e'],
         runInShell: true);
 
     createCommonFolderStructure();
-    rewriteMain();
+    await addDependencyToPubspec('get', path.join(basePath, projectName));
   }
 
   void createCommonFolderStructure() {

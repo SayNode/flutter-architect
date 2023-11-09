@@ -17,7 +17,6 @@ String content(String projectName) {
       projectName +
       '\',\n' +
       '      initialRoute: \'\/\',\n' +
-      '      routes: ROUTES,\n' +
       '      theme: ThemeData(),\n' +
       '    );\n' +
       '  }\n' +
