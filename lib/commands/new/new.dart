@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:project_initialization_tool/commands/new/files/main.dart'
+    as main_file;
 
 class Creator extends Command {
   //TODO: make path configurable
   String basePath = 'build';
+  late final String projectName;
 
   @override
   String get name => 'new';
@@ -24,16 +27,19 @@ class Creator extends Command {
 
   @override
   Future<void> run() async {
-    final String projectName = argResults?['name'];
+    projectName = argResults?['name'];
+    Process.run('flutter', ['create', '$basePath/$projectName', '-e'],
+        runInShell: true);
 
-    createCommonFolderStructure(projectName);
+    createCommonFolderStructure();
+    rewriteMain();
   }
 
-  void createCommonFolderStructure(String projectName) {
+  void createCommonFolderStructure() {
     Directory(basePath).createSync();
     print('- $basePath/ ✔');
 
-    Directory(projectName).createSync();
+    Directory(path.join(basePath, projectName)).createSync();
     print('- $projectName/ ✔');
 
     String directory = path.join(
@@ -48,8 +54,8 @@ class Creator extends Command {
     print('- $directory/ ✔');
 
     // Asset
-    Directory(path.join(directory, 'asset')).createSync();
-    print('- $directory/asset ✔');
+    Directory(path.join(basePath, projectName, 'asset')).createSync();
+    print('- $projectName/asset ✔');
 
     // Module
     Directory(path.join(directory, 'module')).createSync();
@@ -70,5 +76,19 @@ class Creator extends Command {
     // Util
     Directory(path.join(directory, 'util')).createSync();
     print('- $directory/util ✔');
+  }
+
+  /// Create the main.dart file
+  void rewriteMain() {
+    File(
+      path.join(
+        basePath,
+        projectName,
+        'lib',
+        'main.dart',
+      ),
+    ).writeAsString(main_file.content(projectName)).then((File file) {
+      print('-- /lib/main.dart ✔');
+    });
   }
 }
