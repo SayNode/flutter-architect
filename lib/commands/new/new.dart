@@ -7,8 +7,6 @@ import 'package:project_initialization_tool/commands/new/files/main.dart'
 import 'package:project_initialization_tool/commands/util.dart';
 
 class Creator extends Command {
-  //TODO: make path configurable
-  String basePath = 'build';
   late final String projectName;
 
   @override
@@ -29,23 +27,22 @@ class Creator extends Command {
   @override
   Future<void> run() async {
     projectName = argResults?['name'];
-    await Process.run('flutter', ['create', '$basePath/$projectName', '-e'],
+    await Process.run('flutter', ['create', projectName, '-e'],
         runInShell: true);
 
     createCommonFolderStructure();
-    await addDependencyToPubspec('get', path.join(basePath, projectName));
+    await addDependencyToPubspec('get', path.join(projectName));
     rewriteMain();
+
+    await File(path.join(projectName, 'added_boilerplate.txt'))
+        .writeAsString('');
   }
 
   void createCommonFolderStructure() {
-    Directory(basePath).createSync();
-    print('- $basePath/ ✔');
-
-    Directory(path.join(basePath, projectName)).createSync();
+    Directory(path.join(projectName)).createSync();
     print('- $projectName/ ✔');
 
     String directory = path.join(
-      basePath,
       projectName,
       'lib',
     );
@@ -54,7 +51,7 @@ class Creator extends Command {
     print('- $directory/ ✔');
 
     // Asset
-    Directory(path.join(basePath, projectName, 'asset')).createSync();
+    Directory(path.join(projectName, 'asset')).createSync();
     print('- $projectName/asset ✔');
 
     // model
@@ -92,7 +89,6 @@ class Creator extends Command {
   void rewriteMain() {
     File(
       path.join(
-        basePath,
         projectName,
         'lib',
         'main.dart',

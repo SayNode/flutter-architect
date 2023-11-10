@@ -20,10 +20,31 @@ class InternationalizationGenerator extends Command {
 
   @override
   void run() async {
-    await addInternationalization();
+    checkIfAllreadyRun().then((value) async {
+      await addInternationalization();
+    });
+  }
+
+  Future<void> checkIfAllreadyRun() async {
+    await File('added_boilerplate.txt')
+        .readAsLines()
+        .then((List<String> lines) {
+      for (var line in lines) {
+        if (line.contains('internationalization')) {
+          print('internationalization already added');
+          exit(0);
+        }
+      }
+    });
+  }
+
+  Future<void> addAllreadyRun() async {
+    await File('added_boilerplate.txt')
+        .writeAsString('internationalization\n', mode: FileMode.append);
   }
 
   addInternationalization() async {
+    await addAllreadyRun();
     await _rewriteMain();
     await _addLanguageModel();
     await _addMessageFile();
