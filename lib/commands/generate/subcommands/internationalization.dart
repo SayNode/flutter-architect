@@ -6,6 +6,8 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as language_model;
 import 'package:project_initialization_tool/commands/generate/subcommands/files/localization_controller.dart'
     as localization_controller;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/message.dart'
+    as message;
 import 'package:project_initialization_tool/commands/util.dart';
 
 class InternationalizationGenerator extends Command {
@@ -24,7 +26,9 @@ class InternationalizationGenerator extends Command {
   addInternationalization() async {
     await _rewriteMain();
     await _addLanguageModel();
+    await _addMessageFile();
     await _addLocalizationController();
+    await _addLanguageJson();
     await formatCode();
   }
 
@@ -33,8 +37,18 @@ class InternationalizationGenerator extends Command {
         .writeAsString(language_model.content());
   }
 
+  Future<void> _addLanguageJson() async {
+    Directory(path.join('asset', 'locale')).createSync();
+    File(path.join('asset', 'locale', 'en.json')).writeAsString('[]');
+  }
+
+  Future<void> _addMessageFile() async {
+    File(path.join('lib', 'model', 'message.dart'))
+        .writeAsString(message.content());
+  }
+
   Future<void> _addLocalizationController() async {
-    File(path.join('lib', 'service', 'localization_controler.dart'))
+    File(path.join('lib', 'service', 'localization_controller.dart'))
         .writeAsString(localization_controller.content());
   }
 
@@ -44,6 +58,7 @@ class InternationalizationGenerator extends Command {
       String mainContent = '';
 
       mainContent += "import 'service/localization_controller.dart';\n";
+      mainContent += "import 'model/message.dart';\n";
       for (String line in lines) {
         if (line.contains('//Start MaterialApp')) {
           mainContent +=
@@ -52,6 +67,12 @@ class InternationalizationGenerator extends Command {
         mainContent += '$line\n';
         if (line.contains('//End MaterialApp')) {
           mainContent += '});\n';
+        }
+
+        if (line.contains('GetMaterialApp(')) {
+          mainContent += 'locale: localizationController.locale,\n';
+          mainContent +=
+              'translations: Messages(languages: localizationController.translations),\n';
         }
         if (line.contains('main(')) {
           mainContent +=
