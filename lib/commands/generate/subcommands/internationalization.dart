@@ -60,7 +60,7 @@ class InternationalizationGenerator extends Command {
 
   Future<void> _addLanguageJson() async {
     Directory(path.join('asset', 'locale')).createSync();
-    File(path.join('asset', 'locale', 'en.json')).writeAsString('[]');
+    File(path.join('asset', 'locale', 'en.json')).writeAsString('{}');
   }
 
   Future<void> _addMessageFile() async {

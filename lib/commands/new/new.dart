@@ -33,9 +33,35 @@ class Creator extends Command {
     createCommonFolderStructure();
     await addDependencyToPubspec('get', path.join(projectName));
     rewriteMain();
+    addAssetsToPubspec();
 
     await File(path.join(projectName, 'added_boilerplate.txt'))
         .writeAsString('');
+  }
+
+  /// Add assets folder to pubspec.yaml
+  void addAssetsToPubspec() {
+    String pubPath = path.join(projectName, 'pubspec.yaml');
+    File(pubPath).readAsLines().then((List<String> lines) {
+      String pubspec = '';
+
+      for (String line in lines) {
+        pubspec += '$line\n';
+
+        if (line.contains('flutter:') &&
+            pubspec.contains('dev_dependencies:\n')) {
+          pubspec += '  assets:\n';
+          pubspec += '    - asset/\n';
+          pubspec += '\n';
+        }
+      }
+
+      File(pubPath).writeAsString(pubspec).then((file) {
+        print('- Assets added to pubspec.yaml ✔');
+      });
+
+      print('# add assets to pubspec CREATED');
+    });
   }
 
   void createCommonFolderStructure() {
