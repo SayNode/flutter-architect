@@ -4,6 +4,8 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/new/files/main.dart'
     as main_file;
+import 'package:project_initialization_tool/commands/new/files/splash_page.dart'
+    as splash_page;
 import 'package:project_initialization_tool/commands/util.dart';
 
 class Creator extends Command {
@@ -32,6 +34,7 @@ class Creator extends Command {
 
     createCommonFolderStructure();
     await addDependencyToPubspec('get', path.join(projectName));
+    _createSplashPage();
     rewriteMain();
     addAssetsToPubspec();
 
@@ -107,6 +110,19 @@ class Creator extends Command {
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
     print('- $directory/widget ✔');
+  }
+
+  _createSplashPage() {
+    File(
+      path.join(
+        projectName,
+        'lib',
+        'page',
+        'splash_page.dart',
+      ),
+    ).writeAsString(splash_page.content()).then((File file) {
+      print('-- /lib/page/splash_page.dart ✔');
+    });
   }
 
   helperGenerator() {}

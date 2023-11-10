@@ -3,6 +3,7 @@
 String content(String projectName) {
   return 'import \'package:flutter\/material.dart\';\n'
           'import \'package:get\/get.dart\';\n'
+          'import \'page\/splash_page.dart\';\n'
           '\n'
           'void main() async {\n'
           'runApp(const MyApp());}'
@@ -21,6 +22,12 @@ String content(String projectName) {
       projectName +
       '\',\n' +
       '      initialRoute: \'\/\',\n' +
+      'getPages: [' +
+      'GetPage(' +
+      "name: '/'," +
+      "page: () => const SplashPage()," +
+      ")," +
+      "]," +
       '      theme: ThemeData(),\n' +
       '    );\n' +
       '    //End MaterialApp\n' +
