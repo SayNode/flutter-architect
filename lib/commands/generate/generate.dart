@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/internationalization.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/them.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
 
 class Generator extends Command {
   //-- Singleton
