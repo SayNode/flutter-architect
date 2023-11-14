@@ -215,7 +215,9 @@ class GenerateTheme extends Command {
     try {
       List<String> ids = [];
       for (var style in styles) {
-        ids.add(style['node_id']);
+        if (style['style_type'] == 'FILL') {
+          ids.add(style['node_id']);
+        }
       }
       final headers = {
         'X-FIGMA-TOKEN': figmaToken,
