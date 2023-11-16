@@ -1,3 +1,47 @@
 String content() {
-  return "import 'package:flutter_secure_storage/flutter_secure_storage.dart'; \nimport 'package:get/get.dart'; \n \nclass SecureStorageService extends GetxService { \n  final storage = const FlutterSecureStorage(); \n \n  Future<String> read(String key) async { \n    containsKey(key).then((value) async { \n      if (value) { \n        String? storedValue = await storage.read(key: key); \n        if (storedValue != null) { \n          return storedValue; \n        } else { \n          throw SecureStorageException('Key \$key is null'); \n        } \n      } else { \n        throw SecureStorageException('Key \$key not found'); \n      } \n    }); \n    throw SecureStorageException('Critical Error. This should never happen'); \n  } \n \n  Future<void> write(String key, String value) async { \n    await storage.write(key: key, value: value); \n  } \n \n  Future<void> delete(String key) async { \n    await storage.delete(key: key); \n  } \n \n  Future<void> deleteAll() async { \n    await storage.deleteAll(); \n  } \n \n  Future<bool> containsKey(String key) async { \n    return await storage.containsKey(key: key); \n  } \n} \n \nclass SecureStorageException implements Exception { \n  final String message; \n \n  SecureStorageException(this.message); \n} \n";
+  return """
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
+
+class SecureStorageService extends GetxService {
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+
+  Future<String> read(String key) async {
+    await containsKey(key).then((bool value) async {
+      if (value) {
+        final String? storedValue = await storage.read(key: key);
+        if (storedValue != null) {
+          return storedValue;
+        } else {
+          throw SecureStorageException('Key \$key is null');
+        }
+      } else {
+        throw SecureStorageException('Key \$key not found');
+      }
+    });
+    throw SecureStorageException('Critical Error. This should never happen');
+  }
+
+  Future<void> write(String key, String value) async {
+    await storage.write(key: key, value: value);
+  }
+
+  Future<void> delete(String key) async {
+    await storage.delete(key: key);
+  }
+
+  Future<void> deleteAll() async {
+    await storage.deleteAll();
+  }
+
+  Future<bool> containsKey(String key) async {
+    return storage.containsKey(key: key);
+  }
+}
+
+class SecureStorageException implements Exception {
+  SecureStorageException(this.message);
+  final String message;
+}
+""";
 }

@@ -4,6 +4,5 @@ TODO:
 - force flag for commands to re-generate files
 - crashalytics
 - add CODEWONERS file
-- add linting workflow
 - custom analysis_options
 

@@ -1,3 +1,114 @@
 String content() {
-  return "import 'package:get/get.dart'; \nimport 'package:shared_preferences/shared_preferences.dart'; \n \nclass StorageService extends GetxService { \n  late SharedPreferences _prefs; \n \n  Future<void> init() async { \n    _prefs = await SharedPreferences.getInstance(); \n  } \n \n  Future<void> setString(String key, String value) async { \n    await _prefs.setString(key, value); \n  } \n \n  Future<void> setBool(String key, bool value) async { \n    await _prefs.setBool(key, value); \n  } \n \n  Future<void> setInt(String key, int value) async { \n    await _prefs.setInt(key, value); \n  } \n \n  Future<void> setDouble(String key, double value) async { \n    await _prefs.setDouble(key, value); \n  } \n \n  Future<void> setStringList(String key, List<String> value) async { \n    await _prefs.setStringList(key, value); \n  } \n \n  String getString(String key) { \n    if (!_prefs.containsKey(key)) { \n      throw StorageException('Key \$key not found'); \n    } \n    if (_prefs.getString(key) == null) { \n      throw StorageException('Key \$key is null'); \n    } \n    return _prefs.getString(key)!; \n  } \n \n  bool getBool(String key) { \n    if (!_prefs.containsKey(key)) { \n      throw StorageException('Key \$key not found'); \n    } \n    if (_prefs.getBool(key) == null) { \n      throw StorageException('Key \$key is null'); \n    } \n    return _prefs.getBool(key)!; \n  } \n \n  int getInt(String key) { \n    if (!_prefs.containsKey(key)) { \n      throw StorageException('Key \$key not found'); \n    } \n    if (_prefs.getInt(key) == null) { \n      throw StorageException('Key \$key is null'); \n    } \n    return _prefs.getInt(key)!; \n  } \n \n  double getDouble(String key) { \n    if (!_prefs.containsKey(key)) { \n      throw StorageException('Key \$key not found'); \n    } \n    if (_prefs.getDouble(key) == null) { \n      throw StorageException('Key \$key is null'); \n    } \n    return _prefs.getDouble(key)!; \n  } \n \n  List<String> getStringList(String key) { \n    if (!_prefs.containsKey(key)) { \n      throw StorageException('Key \$key not found'); \n    } \n    if (_prefs.getStringList(key) == null) { \n      throw StorageException('Key \$key is null'); \n    } \n    return _prefs.getStringList(key)!; \n  } \n \n  Future<void> remove(String key) async { \n    await _prefs.remove(key); \n  } \n \n  Future<void> clear() async { \n    await _prefs.clear(); \n  } \n \n  bool containsKey(String key) { \n    return _prefs.containsKey(key); \n  } \n \n  Set<String> getKeys() { \n    return _prefs.getKeys(); \n  } \n \n  Future<void> reload() async { \n    await _prefs.reload(); \n  } \n} \n \nclass StorageException implements Exception { \n  final String message; \n \n  StorageException(this.message); \n \n  @override \n  String toString() { \n    return 'StorageException: \$message'; \n  } \n} \n";
+  return """
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class StorageService extends GetxService {
+  late SharedPreferences _prefs;
+
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> setString(String key, String value) async {
+    await _prefs.setString(key, value);
+  }
+
+  Future<void> setBool(String key, {required bool value}) async {
+    await _prefs.setBool(key, value);
+  }
+
+  Future<void> setInt(String key, int value) async {
+    await _prefs.setInt(key, value);
+  }
+
+  Future<void> setDouble(String key, double value) async {
+    await _prefs.setDouble(key, value);
+  }
+
+  Future<void> setStringList(String key, List<String> value) async {
+    await _prefs.setStringList(key, value);
+  }
+
+  String getString(String key) {
+    if (!_prefs.containsKey(key)) {
+      throw StorageException('Key \$key not found');
+    }
+    if (_prefs.getString(key) == null) {
+      throw StorageException('Key \$key is null');
+    }
+    return _prefs.getString(key)!;
+  }
+
+  bool getBool(String key) {
+    if (!_prefs.containsKey(key)) {
+      throw StorageException('Key \$key not found');
+    }
+    if (_prefs.getBool(key) == null) {
+      throw StorageException('Key \$key is null');
+    }
+    return _prefs.getBool(key)!;
+  }
+
+  int getInt(String key) {
+    if (!_prefs.containsKey(key)) {
+      throw StorageException('Key \$key not found');
+    }
+    if (_prefs.getInt(key) == null) {
+      throw StorageException('Key \$key is null');
+    }
+    return _prefs.getInt(key)!;
+  }
+
+  double getDouble(String key) {
+    if (!_prefs.containsKey(key)) {
+      throw StorageException('Key \$key not found');
+    }
+    if (_prefs.getDouble(key) == null) {
+      throw StorageException('Key \$key is null');
+    }
+    return _prefs.getDouble(key)!;
+  }
+
+  List<String> getStringList(String key) {
+    if (!_prefs.containsKey(key)) {
+      throw StorageException('Key \$key not found');
+    }
+    if (_prefs.getStringList(key) == null) {
+      throw StorageException('Key \$key is null');
+    }
+    return _prefs.getStringList(key)!;
+  }
+
+  Future<void> remove(String key) async {
+    await _prefs.remove(key);
+  }
+
+  Future<void> clear() async {
+    await _prefs.clear();
+  }
+
+  bool containsKey(String key) {
+    return _prefs.containsKey(key);
+  }
+
+  Set<String> getKeys() {
+    return _prefs.getKeys();
+  }
+
+  Future<void> reload() async {
+    await _prefs.reload();
+  }
+}
+
+class StorageException implements Exception {
+  StorageException(this.message);
+  final String message;
+
+  @override
+  String toString() {
+    return 'StorageException: \$message';
+  }
+}
+""";
 }

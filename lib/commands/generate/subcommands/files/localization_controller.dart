@@ -1,3 +1,47 @@
 String content() {
-  return "import 'dart:convert'; \nimport 'package:flutter/material.dart'; \nimport 'package:flutter/services.dart'; \nimport 'package:get/get.dart'; \nimport '../model/language_model.dart'; \nclass LocalizationController extends GetxController implements GetxService { \nMap<String, Map<String, String>> translations = {}; \nLocale get locale => _locale; \nfinal _supportedLanguageList = <LanguageModel>[ \nLanguageModel( \nimageUrl: '🇺🇸', \nlanguageName: 'English', \nlanguageCode: 'en', \ncountryCode: 'US', \n), \n]; \nfinal Locale _locale = const Locale( \n'en', \n'US', \n); \nFuture<void> init() async { \nawait _loadLanguages(); \n} \n_loadLanguages() async { \nfor (LanguageModel languageModel in _supportedLanguageList) { \nString jsonStringValues = await rootBundle \n.loadString('asset/locale/\${languageModel.languageCode}.json'); \nMap<String, dynamic> mappedJson = jsonDecode(jsonStringValues); \nMap<String, String> json = {}; \nmappedJson.forEach((key, value) { \njson[key] = value.toString(); \n}); \ntranslations[ \n'\${languageModel.languageCode}_\${languageModel.countryCode}'] = json; \n} \n} \n}";
+  return """
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+
+import '../model/language_model.dart';
+
+class LocalizationController extends GetxController implements GetxService {
+  Map<String, Map<String, String>> translations =
+      <String, Map<String, String>>{};
+  Locale get locale => _locale;
+  final List<LanguageModel> _supportedLanguageList = <LanguageModel>[
+    LanguageModel(
+      imageUrl: '🇺🇸',
+      languageName: 'English',
+      languageCode: 'en',
+      countryCode: 'US',
+    ),
+  ];
+  final Locale _locale = const Locale(
+    'en',
+    'US',
+  );
+  Future<void> init() async {
+    await _loadLanguages();
+  }
+
+  Future<void> _loadLanguages() async {
+    for (final LanguageModel languageModel in _supportedLanguageList) {
+      final String jsonStringValues = await rootBundle
+          .loadString('asset/locale/\${languageModel.languageCode}.json');
+      final Map<String, dynamic> mappedJson =
+          jsonDecode(jsonStringValues) as Map<String, dynamic>;
+      final Map<String, String> json = <String, String>{};
+      mappedJson.forEach((String key, dynamic value) {
+        json[key] = value.toString();
+      });
+      translations[
+          '\${languageModel.languageCode}_\${languageModel.countryCode}'] = json;
+    }
+  }
+}
+""";
 }
