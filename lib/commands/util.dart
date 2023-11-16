@@ -27,3 +27,19 @@ Future<void> formatCode() async {
     stdout.write(result.stdout);
   }
 }
+
+Future<void> addAllreadyRun(String command) async {
+  await File('added_boilerplate.txt')
+      .writeAsString('$command\n', mode: FileMode.append);
+}
+
+Future<void> checkIfAllreadyRun(String command) async {
+  await File('added_boilerplate.txt').readAsLines().then((List<String> lines) {
+    for (var line in lines) {
+      if (line.contains(command)) {
+        print('$command already added');
+        exit(0);
+      }
+    }
+  });
+}

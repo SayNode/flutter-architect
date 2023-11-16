@@ -39,7 +39,7 @@ class GenerateTheme extends Command {
         await _modifyColorFile(colorList);
         await _modifyThemeFile(colorList);
       } else {
-        await addAllreadyRun();
+        await addAllreadyRun("theme");
         await _addColorFile(colorList);
         await _addThemeFile(colorList);
       }
@@ -174,17 +174,11 @@ class GenerateTheme extends Command {
         print('line: $line');
         print(line.contains('theme'));
         if (line.contains('theme')) {
-          print('here');
           return true;
         }
       }
       return false;
     });
-  }
-
-  Future<void> addAllreadyRun() async {
-    await File('added_boilerplate.txt')
-        .writeAsString('theme\n', mode: FileMode.append);
   }
 
   getFigmaStyles() async {

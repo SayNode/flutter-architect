@@ -31,7 +31,7 @@ class GenerateTypographie extends Command {
     var styles = await getFigmaStyles();
 
     checkIfAllreadyRun().then((value) async {
-      await addAllreadyRun();
+      await addAllreadyRun('typographie');
       var textStyles = await getTextStyles(styles);
       await addTypographieFile(textStyles);
     });
@@ -47,7 +47,6 @@ class GenerateTypographie extends Command {
         print('line: $line');
         print(line.contains('theme'));
         if (line.contains('theme')) {
-          print('here');
           return true;
         }
       }
@@ -99,11 +98,6 @@ class GenerateTypographie extends Command {
       });
     }
     return textStyles;
-  }
-
-  Future<void> addAllreadyRun() async {
-    await File('added_boilerplate.txt')
-        .writeAsString('theme\n', mode: FileMode.append);
   }
 
   getFigmaStyles() async {

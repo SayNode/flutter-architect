@@ -52,22 +52,4 @@ class GenerateStorageService extends Command {
     File(path.join('lib', 'service', 'secure_storage_service.dart'))
         .writeAsString(secure_storage.content());
   }
-
-  Future<void> addAllreadyRun(String service) async {
-    await File('added_boilerplate.txt')
-        .writeAsString('$service\n', mode: FileMode.append);
-  }
-
-  Future<void> checkIfAllreadyRun(String service) async {
-    await File('added_boilerplate.txt')
-        .readAsLines()
-        .then((List<String> lines) {
-      for (var line in lines) {
-        if (line.contains(service)) {
-          print('$service already added');
-          exit(0);
-        }
-      }
-    });
-  }
 }

@@ -19,31 +19,13 @@ class LocalizationGenerator extends Command {
 
   @override
   void run() async {
-    checkIfAllreadyRun().then((value) async {
+    checkIfAllreadyRun('localization').then((value) async {
       await addlocalization();
     });
   }
 
-  Future<void> checkIfAllreadyRun() async {
-    await File('added_boilerplate.txt')
-        .readAsLines()
-        .then((List<String> lines) {
-      for (var line in lines) {
-        if (line.contains('localization')) {
-          print('localization already added');
-          exit(0);
-        }
-      }
-    });
-  }
-
-  Future<void> addAllreadyRun() async {
-    await File('added_boilerplate.txt')
-        .writeAsString('localization\n', mode: FileMode.append);
-  }
-
   addlocalization() async {
-    await addAllreadyRun();
+    await addAllreadyRun("localization");
     await _rewriteMain();
     await _addLanguageModel();
     await _addMessageFile();
