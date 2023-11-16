@@ -1,4 +1,5 @@
 import 'package:args/command_runner.dart';
+import 'package:project_initialization_tool/commands/util.dart';
 
 class CrashalyticsGenerator extends Command {
   @override
@@ -8,9 +9,13 @@ class CrashalyticsGenerator extends Command {
   String get name => 'crashalytics';
 
   @override
-  void run() {
-    addCrashalyticsToMain();
+  void run() async {
+    await spinnerLoading(_run);
   }
 
-  addCrashalyticsToMain() {}
+  _run() async {
+    await addCrashalyticsToMain();
+  }
+
+  addCrashalyticsToMain() async {}
 }

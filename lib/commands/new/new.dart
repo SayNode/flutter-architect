@@ -28,6 +28,10 @@ class Creator extends Command {
 
   @override
   Future<void> run() async {
+    spinnerLoading(_run);
+  }
+
+  _run() async {
     projectName = argResults?['name'];
     await Process.run('flutter', ['create', projectName, '-e'],
         runInShell: true);
@@ -37,9 +41,23 @@ class Creator extends Command {
     _createSplashPage();
     rewriteMain();
     addAssetsToPubspec();
-
+    await rewriteAnalysisOptions();
     await File(path.join(projectName, 'added_boilerplate.txt'))
         .writeAsString('');
+  }
+
+  Future<void> rewriteAnalysisOptions() async {
+    File(
+      path.join(
+        projectName,
+        'analysis_options.yaml',
+      ),
+    )
+        .writeAsString(
+            "include: package:flutter_lints/flutter.yaml \n \nlinter: \n  rules: \n    - always_declare_return_types \n   \nanalyzer: \n  errors: \n    todo: ignore")
+        .then((File file) {
+      print('-- /analysis_options.yaml ✔');
+    });
   }
 
   /// Add assets folder to pubspec.yaml

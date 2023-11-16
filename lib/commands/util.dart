@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 /// Add dependencies to pubspec.yaml
@@ -42,4 +43,15 @@ Future<void> checkIfAllreadyRun(String command) async {
       }
     }
   });
+}
+
+spinnerLoading(Function function) async {
+  var P = ["\\", "|", "/", "-"];
+  var x = 0;
+  var timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+    stdout.write("\r${P[x++]}");
+    x &= 3;
+  });
+  await function();
+  timer.cancel();
 }

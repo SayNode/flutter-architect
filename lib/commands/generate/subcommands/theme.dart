@@ -31,6 +31,10 @@ class GenerateTheme extends Command {
     stdout.writeln('Enter your Figma personal access token:');
     figmaToken = stdin.readLineSync() ?? '';
     _setThemeName();
+    spinnerLoading(_run);
+  }
+
+  _run() async {
     var styles = await getFigmaStyles();
     List colorList = await getColorsFromStyles(styles);
     checkIfAllreadyRun().then((value) async {

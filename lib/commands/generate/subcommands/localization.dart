@@ -20,7 +20,7 @@ class LocalizationGenerator extends Command {
   @override
   void run() async {
     checkIfAllreadyRun('localization').then((value) async {
-      await addlocalization();
+      await spinnerLoading(addlocalization);
     });
   }
 

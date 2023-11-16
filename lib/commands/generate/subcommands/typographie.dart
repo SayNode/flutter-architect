@@ -24,6 +24,10 @@ class GenerateTypographie extends Command {
 
   @override
   void run() async {
+    spinnerLoading(_run);
+  }
+
+  _run() async {
     stdout.writeln('Enter the file key of your Figma file:');
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');

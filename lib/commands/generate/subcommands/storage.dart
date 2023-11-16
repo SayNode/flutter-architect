@@ -25,6 +25,10 @@ class GenerateStorageService extends Command {
 
   @override
   void run() async {
+    spinnerLoading(_run);
+  }
+
+  _run() async {
     if (argResults?['secure'] == true) {
       checkIfAllreadyRun("secure_storage").then((value) async {
         print('Creating secure storage service...');
