@@ -29,6 +29,20 @@ Future<void> formatCode() async {
   }
 }
 
+Future<void> dartFixCode() async {
+  var result = await Process.run(
+    'dart',
+    ['fix', '--apply'],
+    runInShell: true,
+  );
+  if (result.stderr != null) {
+    stderr.write(result.stderr);
+  }
+  if (result.stdout != null) {
+    stdout.write(result.stdout);
+  }
+}
+
 Future<void> addAllreadyRun(String command) async {
   await File('added_boilerplate.txt')
       .writeAsString('$command\n', mode: FileMode.append);

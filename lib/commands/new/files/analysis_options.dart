@@ -76,7 +76,6 @@ linter:
     - dangling_library_doc_comments
     - depend_on_referenced_packages
     - deprecated_consistency
-    - directives_ordering
     - empty_catches
     - empty_constructor_bodies
     - empty_statements

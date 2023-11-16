@@ -41,6 +41,7 @@ class GenerateTypographie extends Command {
     });
 
     await formatCode();
+    await dartFixCode();
   }
 
   Future<bool> checkIfAllreadyRun() async {

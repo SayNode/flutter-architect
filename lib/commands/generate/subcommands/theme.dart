@@ -50,6 +50,7 @@ class GenerateTheme extends Command {
     });
 
     await formatCode();
+    await dartFixCode();
   }
 
   bool isCamelCase(String s) {

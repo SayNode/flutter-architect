@@ -32,6 +32,7 @@ class LocalizationGenerator extends Command {
     await _addLocalizationController();
     await _addLanguageJson();
     await formatCode();
+    await dartFixCode();
   }
 
   Future<void> _addLanguageModel() async {
