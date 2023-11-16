@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/internationalization.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/typographie.dart';
@@ -12,7 +12,7 @@ class Generator extends Command {
     // Add Sub Commands here
     addSubcommand(GenerateTheme());
     addSubcommand(GenerateStorageService());
-    addSubcommand(InternationalizationGenerator());
+    addSubcommand(LocalizationGenerator());
     addSubcommand(GenerateTypographie());
     // Add parser options or flag here
   }

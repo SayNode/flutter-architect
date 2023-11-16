@@ -10,18 +10,17 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as message;
 import 'package:project_initialization_tool/commands/util.dart';
 
-class InternationalizationGenerator extends Command {
+class LocalizationGenerator extends Command {
   @override
-  String get description =>
-      'Create internationalization files and boilerplate code;.';
+  String get description => 'Create localization files and boilerplate code;.';
 
   @override
-  String get name => 'internationalization';
+  String get name => 'localization';
 
   @override
   void run() async {
     checkIfAllreadyRun().then((value) async {
-      await addInternationalization();
+      await addlocalization();
     });
   }
 
@@ -30,8 +29,8 @@ class InternationalizationGenerator extends Command {
         .readAsLines()
         .then((List<String> lines) {
       for (var line in lines) {
-        if (line.contains('internationalization')) {
-          print('internationalization already added');
+        if (line.contains('localization')) {
+          print('localization already added');
           exit(0);
         }
       }
@@ -40,10 +39,10 @@ class InternationalizationGenerator extends Command {
 
   Future<void> addAllreadyRun() async {
     await File('added_boilerplate.txt')
-        .writeAsString('internationalization\n', mode: FileMode.append);
+        .writeAsString('localization\n', mode: FileMode.append);
   }
 
-  addInternationalization() async {
+  addlocalization() async {
     await addAllreadyRun();
     await _rewriteMain();
     await _addLanguageModel();
@@ -102,8 +101,7 @@ class InternationalizationGenerator extends Command {
       }
 
       File(mainPath).writeAsString(mainContent).then((file) {
-        print(
-            '- internationalization added to main added to mainContent.yaml ✔');
+        print('- localization added to main added to mainContent.yaml ✔');
       });
     });
   }
