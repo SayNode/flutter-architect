@@ -1,1 +1,3 @@
-
+String content() {
+  return "import 'package:flutter_secure_storage/flutter_secure_storage.dart'; \nimport 'package:get/get.dart'; \n \nclass SecureStorageService extends GetxService { \n  final storage = const FlutterSecureStorage(); \n \n  Future<String?> read(String key) async { \n    return await storage.read(key: key); \n  } \n \n  Future<void> write(String key, String value) async { \n    await storage.write(key: key, value: value); \n  } \n \n  Future<void> delete(String key) async { \n    await storage.delete(key: key); \n  } \n \n  Future<void> deleteAll() async { \n    await storage.deleteAll(); \n  } \n} \n";
+}
