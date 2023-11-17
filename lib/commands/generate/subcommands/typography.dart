@@ -6,21 +6,21 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/util.dart';
 
-class GenerateTypographie extends Command {
+class GenerateTypography extends Command {
   late final String figmaFileKey;
   late final String figmaToken;
 
   //-- Singleton
-  GenerateTypographie() {
+  GenerateTypography() {
     // Add parser options or flag here
   }
 
   @override
   String get description =>
-      'Create typographie files and boilerplate code from Figma styles.';
+      'Create typography files and boilerplate code from Figma styles.';
 
   @override
-  String get name => 'typographie';
+  String get name => 'typography';
 
   @override
   void run() async {
@@ -35,13 +35,12 @@ class GenerateTypographie extends Command {
     var styles = await getFigmaStyles();
 
     checkIfAllreadyRun().then((value) async {
-      await addAllreadyRun('typographie');
+      await addAllreadyRun('typography');
       var textStyles = await getTextStyles(styles);
-      await addTypographieFile(textStyles);
+      await addTypographyFile(textStyles);
+      await dartFixCode();
+      await formatCode();
     });
-
-    await formatCode();
-    await dartFixCode();
   }
 
   Future<bool> checkIfAllreadyRun() async {
@@ -59,7 +58,7 @@ class GenerateTypographie extends Command {
     });
   }
 
-  addTypographieFile(List textStyleList) async {
+  addTypographyFile(List textStyleList) async {
     await addDependencyToPubspec("google_fonts", null);
     String content =
         "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass LegacyMainConstants { \nfinal Color color; \nLegacyMainConstants(this.color); \n//List of textstyles\n";
@@ -69,7 +68,7 @@ class GenerateTypographie extends Command {
     }
     content +=
         'factory LegacyMainConstants.fromColor(Color color) { \nreturn LegacyMainConstants(color); \n} \n}';
-    File(path.join('lib', 'theme', 'typographie.dart')).writeAsString(content);
+    File(path.join('lib', 'theme', 'typography.dart')).writeAsString(content);
   }
 
   getTextStyles(List styles) async {

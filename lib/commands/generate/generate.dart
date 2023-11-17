@@ -4,7 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/typographie.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
 
 class Generator extends Command {
   //-- Singleton
@@ -13,7 +13,7 @@ class Generator extends Command {
     addSubcommand(GenerateTheme());
     addSubcommand(GenerateStorageService());
     addSubcommand(LocalizationGenerator());
-    addSubcommand(GenerateTypographie());
+    addSubcommand(GenerateTypography());
     // Add parser options or flag here
   }
 
