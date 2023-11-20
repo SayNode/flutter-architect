@@ -4,5 +4,8 @@ TODO:
 - force flag for commands to re-generate files
 - crashalytics
 - add CODEWONERS file
-- custom analysis_options
+
+Theme:
+- init theme and storage in main
+- add theme in GetMaterialApp
 
