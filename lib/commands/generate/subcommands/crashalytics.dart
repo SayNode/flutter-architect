@@ -10,12 +10,32 @@ class CrashalyticsGenerator extends Command {
 
   @override
   void run() async {
-    await spinnerLoading(_run);
+    checkIfAllreadyRun('localization').then((value) async {
+      await spinnerLoading(addCrashalyticsTasks);
+    });
   }
 
-  _run() async {
-    await addCrashalyticsToMain();
+  addCrashalyticsTasks() async {
+    initFirebaseForProject();
   }
 
-  addCrashalyticsToMain() async {}
+  initFirebaseForProject() async {
+    // check if firebase is istalled
+    bool isfi = await isFirebaseCLIInstalled();
+    print(isfi ? 'Firebase CLI is installed' : 'Firebase CLI is not installed');
+    if (!isfi) {
+      print('Installing Firebase CLI');
+      await installFirebaseCLI();
+      //TODO: add flutterfire to path
+    }
+    // check if firebase user is logged in
+    await firebaseCLILogin();
+    activateFirebaseCLI();
+
+    // install mandatory dependancy
+    await installFirebaseDependancy();
+
+    // run flutterfire
+    await flutterfireRun();
+  }
 }
