@@ -49,6 +49,7 @@ class GenerateTheme extends Command {
       if (value) {
         await _modifyColorFile(colorList);
         await _modifyThemeFile(colorList);
+        await _modifyThemeServiceFile(themeName);
       } else {
         await addAllreadyRun("theme");
         await _addColorFile(colorList);
@@ -79,6 +80,36 @@ class GenerateTheme extends Command {
     themeName = tempThemeName;
     colorName = '${themeName[0].toUpperCase()}${themeName.substring(1)}Color';
     stdout.writeln('Success!');
+  }
+
+  _modifyThemeServiceFile(String name) {
+    String content = '''
+      case '$name':
+        return ThemeData(
+          extensions: const <ThemeExtension<CustomTheme>>[
+            CustomTheme.$name,
+          ],
+        );
+        ''';
+    File(path.join('lib', 'service', 'theme_service.dart'))
+        .readAsLines()
+        .then((List<String> lines) {
+      String colorFileContent = '';
+
+      for (String line in lines) {
+        colorFileContent += '$line\n';
+
+        if (line.contains("//List of themes")) {
+          colorFileContent += content;
+        }
+      }
+
+      File(path.join('lib', 'service', 'theme_service.dart'))
+          .writeAsString(colorFileContent)
+          .then((file) {
+        print('- theme added to theme_service.dart ✔');
+      });
+    });
   }
 
   _addThemeServiceFile(String name) {
