@@ -4,7 +4,11 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/theme_service.dart'
+    as theme_service;
 import 'package:project_initialization_tool/commands/util.dart';
+
+import 'storage.dart';
 
 class GenerateTheme extends Command {
   late final String figmaFileKey;
@@ -35,6 +39,9 @@ class GenerateTheme extends Command {
   }
 
   _run() async {
+    var a = GenerateStorageService();
+    a.runShared();
+
     var styles = await getFigmaStyles();
     List colorList = await getColorsFromStyles(styles);
     checkIfAllreadyRun().then((value) async {
@@ -46,6 +53,7 @@ class GenerateTheme extends Command {
         await addAllreadyRun("theme");
         await _addColorFile(colorList);
         await _addThemeFile(colorList);
+        await _addThemeServiceFile(themeName);
       }
     });
 
@@ -71,6 +79,11 @@ class GenerateTheme extends Command {
     themeName = tempThemeName;
     colorName = '${themeName[0].toUpperCase()}${themeName.substring(1)}Color';
     stdout.writeln('Success!');
+  }
+
+  _addThemeServiceFile(String name) {
+    File(path.join('lib', 'service', 'theme_service.dart'))
+        .writeAsString(theme_service.content(name));
   }
 
   Future<void> _addColorFile(List colorList) async {

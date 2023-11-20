@@ -30,21 +30,29 @@ class GenerateStorageService extends Command {
 
   _run() async {
     if (argResults?['secure'] == true) {
-      checkIfAllreadyRun("secure_storage").then((value) async {
-        print('Creating secure storage service...');
-        addDependencyToPubspec('flutter_secure_storage', null);
-        await addAllreadyRun('secure_storage');
-        await _addSecureStorageService();
-      });
+      await runSecure();
     }
     if (argResults?['shared'] == true) {
-      checkIfAllreadyRun("shared_storage").then((value) async {
-        print('Creating shared storage service...');
-        addDependencyToPubspec('shared_preferences', null);
-        await addAllreadyRun('shared_storage');
-        await _addStorageService();
-      });
+      await runShared();
     }
+  }
+
+  runSecure() async {
+    checkIfAllreadyRun("secure_storage").then((value) async {
+      print('Creating secure storage service...');
+      addDependencyToPubspec('flutter_secure_storage', null);
+      await addAllreadyRun('secure_storage');
+      await _addSecureStorageService();
+    });
+  }
+
+  runShared() async {
+    checkIfAllreadyRun("shared_storage").then((value) async {
+      print('Creating shared storage service...');
+      addDependencyToPubspec('shared_preferences', null);
+      await addAllreadyRun('shared_storage');
+      await _addStorageService();
+    });
   }
 
   _addStorageService() async {

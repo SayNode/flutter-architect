@@ -13,6 +13,19 @@ Use GitBash to run the following commands:
 dart compile exe lib/project_initialization_tool.dart -o generator.exe
 alias generator="./generator.exe"
     
-    ```
+```
 
 
+*How to setup the tool permanently*
+
+On mac and linux add the following to your .bashrc file
+
+```bash
+    alias generator="*absolute path to exe*"
+```
+
+On windows edit the aliases file in C:\Program Files\Git\etc\profile.d\aliases.sh
+
+```bash
+    alias generator="*absolute path to exe*"
+```
