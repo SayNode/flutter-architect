@@ -39,8 +39,12 @@ class GenerateTheme extends Command {
   }
 
   _run() async {
-    var a = GenerateStorageService();
-    a.runShared();
+    checkIfAllreadyRunWithReturn("shared_storage").then((value) async {
+      if (!value) {
+        var storageService = GenerateStorageService();
+        storageService.runShared();
+      }
+    });
 
     var styles = await getFigmaStyles();
     List colorList = await getColorsFromStyles(styles);
@@ -304,7 +308,7 @@ class GenerateTheme extends Command {
         data['nodes'][node]['document']['fills'].forEach((fill) {
           if (fill['type'] == 'SOLID') {
             colors.add({
-              'name': data['nodes'][node]['document']['name'],
+              'name': lowerCamelCase(data['nodes'][node]['document']['name']),
               'r': (255 * fill['color']['r']).toInt(),
               'g': (255 * fill['color']['g']).toInt(),
               'b': (255 * fill['color']['b']).toInt(),

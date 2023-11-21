@@ -59,12 +59,13 @@ class GenerateTypography extends Command {
   }
 
   addTypographyFile(List textStyleList) async {
+    print(textStyleList);
     await addDependencyToPubspec("google_fonts", null);
     String content =
         "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass LegacyMainConstants { \nfinal Color color; \nLegacyMainConstants(this.color); \n//List of textstyles\n";
     for (var textStyle in textStyleList) {
       content +=
-          "TextStyle get kCaption => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
+          "TextStyle get ${textStyle['name']} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
     }
     content +=
         'factory LegacyMainConstants.fromColor(Color color) { \nreturn LegacyMainConstants(color); \n} \n}';
@@ -98,7 +99,7 @@ class GenerateTypography extends Command {
         'fontFamily': styleMap['fontFamily'],
         'fontSize': styleMap['fontSize'],
         'fontWeight': styleMap['fontWeight'],
-        'name': data['nodes'][node]['document']['name']
+        'name': lowerCamelCase(data['nodes'][node]['document']['name'])
       });
     }
     return textStyles;

@@ -54,18 +54,4 @@ class GenerateWalletService extends Command {
     File(path.join('lib', 'model', 'wallet_model.dart'))
         .writeAsString(wallet_model.content());
   }
-
-  Future<bool> checkIfAllreadyRunWithReturn(String command) async {
-    return await File('added_boilerplate.txt')
-        .readAsLines()
-        .then((List<String> lines) {
-      for (var line in lines) {
-        print('line: $line');
-        if (line.contains(command)) {
-          return true;
-        }
-      }
-      return false;
-    });
-  }
 }
