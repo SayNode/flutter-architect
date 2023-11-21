@@ -55,6 +55,7 @@ class GenerateTheme extends Command {
         await _addColorFile(colorList);
         await _addThemeFile(colorList);
         await _addThemeServiceFile(themeName);
+        await _modifyMain();
       }
     });
 
@@ -151,6 +152,26 @@ class GenerateTheme extends Command {
           .writeAsString(colorFileContent)
           .then((file) {
         print('- Colors added to Color.dart ✔');
+      });
+    });
+  }
+
+  _modifyMain() async {
+    String mainPath = path.join('lib', 'main.dart');
+    File(mainPath).readAsLines().then((List<String> lines) {
+      String mainContent = '';
+
+      mainContent += "import 'service/theme_service.dart';\n";
+
+      for (String line in lines) {
+        mainContent += '$line\n';
+        if (line.contains('await storage.init();')) {
+          mainContent += "Get.put<ThemeService>(ThemeService());\n";
+        }
+      }
+
+      File(mainPath).writeAsString(mainContent).then((file) {
+        print('- Inject ThemeService in Storage ✔');
       });
     });
   }
