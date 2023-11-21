@@ -6,6 +6,8 @@ import 'package:project_initialization_tool/commands/generate/subcommands/storag
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
 
+import 'subcommands/wallet.dart';
+
 class Generator extends Command {
   //-- Singleton
   Generator._privateConstructor() {
@@ -14,6 +16,7 @@ class Generator extends Command {
     addSubcommand(GenerateStorageService());
     addSubcommand(LocalizationGenerator());
     addSubcommand(GenerateTypography());
+    addSubcommand(GenerateWalletService());
     // Add parser options or flag here
   }
 
