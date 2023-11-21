@@ -20,33 +20,73 @@ class Creator extends Command {
   String get description => 'create new project';
 
   Creator() {
+    argParser.addFlag('ios');
+    argParser.addFlag('android');
+    argParser.addFlag('web');
+    argParser.addFlag('macos');
+    argParser.addFlag('windows');
+    argParser.addFlag('linux');
     argParser.addOption(
       'name',
       abbr: 'n',
-      help: '--name is mandatory(name of the project))',
+      help:
+          '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
       mandatory: true,
     );
   }
 
   @override
   Future<void> run() async {
-    spinnerLoading(_run);
+    await spinnerLoading(_run);
   }
 
-  _run() async {
+  Future<void> _run() async {
+    if (!argResults?['ios'] &&
+        !argResults?['android'] &&
+        !argResults?['web'] &&
+        !argResults?['macos'] &&
+        !argResults?['windows'] &&
+        !argResults?['linux']) {
+      print(
+          'At least one platform must be selected. Use --help for more information.');
+      exit(0);
+    }
     projectName = argResults?['name'];
     await Process.run('flutter', ['create', projectName, '-e'],
         runInShell: true);
 
-    createCommonFolderStructure();
     await addDependencyToPubspec('get', path.join(projectName));
+    createCommonFolderStructure();
     _createSplashPage();
     rewriteMain();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
+
     await File(path.join(projectName, 'added_boilerplate.txt'))
         .writeAsString('');
     await addWorkflow();
+    await deleteUnusedFolders();
+  }
+
+  deleteUnusedFolders() {
+    if (argResults?['ios'] == false) {
+      Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+    }
+    if (argResults?['android'] == false) {
+      Directory(path.join(projectName, 'android')).deleteSync(recursive: true);
+    }
+    if (argResults?['macos'] == false) {
+      Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+    }
+    if (argResults?['windows'] == false) {
+      Directory(path.join(projectName, 'windows')).deleteSync(recursive: true);
+    }
+    if (argResults?['web'] == false) {
+      Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+    }
+    if (argResults?['linux'] == false) {
+      Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+    }
   }
 
   Future<void> addWorkflow() async {
