@@ -2,8 +2,8 @@ import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/util.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/files/error_page.dart'
     as error_page;
-import 'package:project_initialization_tool/commands/generate/subcommands/files/network_controller.dart'
-    as network_controller;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/error_controller.dart'
+    as error_controller;
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -37,10 +37,13 @@ class CrashalyticsGenerator extends Command {
 
     checkIfAllreadyRun("crashalytics").then((value) async {
       print('Creating crashalitics configuration in main.dart...');
-      addDependencyToPubspec('firebase_core', null);
-      addDependencyToPubspec('firebase_crashalitics', null);
-      addDependencyToPubspec('connectivity_plus', null);
-      addDependencyToPubspec('package_info_plus', null);
+      await addDependencyToPubspec('firebase_core', null);
+      await addDependencyToPubspec('firebase_crashlytics', null);
+      await addDependencyToPubspec('connectivity_plus', null);
+      await addDependencyToPubspec('package_info_plus', null);
+      await addDependencyToPubspec('flutter_svg', null);
+      Directory(path.join('lib', 'page', 'error')).createSync();
+      Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
       _addErrorPage(projectName);
       _addNetworkController();
       _modifyMain();
@@ -55,21 +58,29 @@ class CrashalyticsGenerator extends Command {
 
   _modifyMain() async {
     String mainPath = path.join('lib', 'main.dart');
+    int counter = 0;
     File(mainPath).readAsLines().then((List<String> lines) {
       String mainContent = '';
-      mainContent += "import 'package:firebase_core/firebase_core.dart'\n";
+      mainContent += "import 'dart:async';\n";
+      mainContent += "import 'dart:io';\n";
+      mainContent += "import 'package:firebase_core/firebase_core.dart';\n";
+      mainContent += "import 'page/error/error_page.dart';\n";
       mainContent +=
-          "import 'package:firebase_core/firebase_crashlytics.dart'\n";
+          "import 'package:firebase_crashlytics/firebase_crashlytics.dart';\n";
       for (String line in lines) {
         mainContent += '$line\n';
         if (line.contains('void main() async {')) {
           mainContent += crashaliticsCodeForMain();
+        }
+        if (counter == lines.length - 1) {
+          mainContent += handleError();
         }
       }
 
       File(mainPath).writeAsString(mainContent).then((file) {
         print('- inject StorageService in memory and initialize it ✔');
       });
+      counter++;
     });
   }
 
@@ -81,7 +92,7 @@ class CrashalyticsGenerator extends Command {
   _addNetworkController() async {
     File(path.join(
             'lib', 'page', 'error', 'controller', 'network_controller.dart'))
-        .writeAsString(network_controller.content());
+        .writeAsString(error_controller.content());
   }
 
   crashaliticsCodeForMain() {
