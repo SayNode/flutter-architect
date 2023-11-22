@@ -4,6 +4,12 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as error_page;
 import 'package:project_initialization_tool/commands/generate/subcommands/files/error_controller.dart'
     as error_controller;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/util.dart'
+    as util;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/network_service.dart'
+    as network_service;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/lost_connection_page.dart'
+    as lost_connection_page;
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -22,37 +28,48 @@ class CrashalyticsGenerator extends Command {
   }
 
   addCrashalyticsTasks() async {
-    print(
-        "This script will add the code required to catch errors and send them to crashalytics");
-    print(
-        "However, to use this feature, you need to first configure firebase and crashalytics for this project");
-    print("You can do this with the following commands:");
-    print("`chmod +x ./firebase_configuration.sh`");
-    print("`./firebase_configuration.sh`");
-    print(
-        "if that does work you can follow the official guide for flutter at https://firebase.google.com/docs/crashlytics/get-started?platform=flutter");
+    printColor(
+        "This script will add the code required to catch errors and send them to crashalytics",
+        ColorText.yellow);
+    printColor(
+        "However, to use this feature, you need to first configure firebase and crashalytics for this project",
+        ColorText.yellow);
+    printColor(
+        "You can do this with the following commands:", ColorText.yellow);
+    printColor("chmod +x ./firebase_configuration.sh", ColorText.magenta);
+    printColor("./firebase_configuration.sh", ColorText.magenta);
+    printColor(
+        "if that does work you can follow the official guide for flutter at https://firebase.google.com/docs/crashlytics/get-started?platform=flutter",
+        ColorText.yellow);
 
     String projectName = await getProjectName();
     print("current project name $projectName");
 
     checkIfAllreadyRun("crashalytics").then((value) async {
       print('Creating crashalitics configuration in main.dart...');
-      await addDependencyToPubspec('firebase_core', null);
-      await addDependencyToPubspec('firebase_crashlytics', null);
-      await addDependencyToPubspec('connectivity_plus', null);
-      await addDependencyToPubspec('package_info_plus', null);
-      await addDependencyToPubspec('flutter_svg', null);
+      await addDependencyToPubspecSync('firebase_core', null);
+      await addDependencyToPubspecSync('firebase_crashlytics', null);
+      await addDependencyToPubspecSync('connectivity_plus', null);
+      await addDependencyToPubspecSync('package_info_plus', null);
+      await addDependencyToPubspecSync('flutter_svg', null);
+      Directory(path.join('lib', 'util')).createSync();
       Directory(path.join('lib', 'page', 'error')).createSync();
+      Directory(path.join('lib', 'page', 'lost_connection')).createSync();
       Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
       _addErrorPage(projectName);
-      _addNetworkController();
+      _addErrorController();
+      _addUtil();
+      _addNetworkService();
+      _addLostConnectionPage();
       _modifyMain();
       await addAllreadyRun('crashalytics');
-      print("Finished Addng crashalytics");
-      print(
-          "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus");
-      print(
-          "remember to run `chmod +x ./firebase_configuration.sh` and `./firebase_configuration.sh` to configure firebase and crashalytics for this project");
+      printColor("Finished Addng crashalytics", ColorText.green);
+      printColor(
+          "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus, flutter_svg",
+          ColorText.green);
+      printColor("REMEMBER TO RUN", ColorText.green);
+      printColor("chmod +x ./firebase_configuration.sh", ColorText.magenta);
+      printColor("./firebase_configuration.sh", ColorText.magenta);
     });
   }
 
@@ -68,11 +85,13 @@ class CrashalyticsGenerator extends Command {
       mainContent +=
           "import 'package:firebase_crashlytics/firebase_crashlytics.dart';\n";
       for (String line in lines) {
+        counter++;
         mainContent += '$line\n';
         if (line.contains('void main() async {')) {
           mainContent += crashaliticsCodeForMain();
         }
-        if (counter == lines.length - 1) {
+        if (line.contains('bool isFirstRun = false;')) {
+          mainContent += restartWidget();
           mainContent += handleError();
         }
       }
@@ -80,7 +99,6 @@ class CrashalyticsGenerator extends Command {
       File(mainPath).writeAsString(mainContent).then((file) {
         print('- inject StorageService in memory and initialize it ✔');
       });
-      counter++;
     });
   }
 
@@ -89,90 +107,163 @@ class CrashalyticsGenerator extends Command {
         .writeAsString(error_page.content(projectName));
   }
 
-  _addNetworkController() async {
+  _addErrorController() async {
     File(path.join(
-            'lib', 'page', 'error', 'controller', 'network_controller.dart'))
+            'lib', 'page', 'error', 'controller', 'error_controller.dart'))
         .writeAsString(error_controller.content());
   }
 
-  crashaliticsCodeForMain() {
-    return """"
-            runZonedGuarded<Future<void>>(
-              () async {
-                WidgetsFlutterBinding.ensureInitialized();
-                if (Firebase.apps.isEmpty) {
-                  await Firebase.initializeApp(
-                    options: DefaultFirebaseOptions.currentPlatform,
-                  );
-                }
-                FlutterError.onError = (FlutterErrorDetails errorDetails) {
-                  debugPrint('Error catched by main zone');
-                  debugPrint(errorDetails.exception.toString());
-                  debugPrint('-----');
-                  debugPrint(errorDetails.stack.toString());
-                  FirebaseCrashlytics.instance.recordError(
-                      errorDetails.exception, errorDetails.stack,
-                      fatal: true);
-                  if (errorDetails.exception is HttpException &&
-                      errorDetails.stack.toString().contains("Connection closed")) {
-                    return;
-                  }
-                  Get.to(() => ErrorPage(errorMessage: errorDetails.exception.toString()));
-                };
-                (error, stack) async {
-                debugPrint('Error catched by main zone');
+  _addUtil() async {
+    File(path.join('lib', 'util', 'util.dart')).writeAsString(util.content());
+  }
 
-                // Ignore these errors
-                if (error is HttpException && error.toString().contains("Connection")) {
-                  await handleError(error, stack, information: ["Connection error"]);
-                  return;
-                } else {
-                  await handleError(error, stack, fatal: true);
-                }
-              },
-            );
+  _addNetworkService() async {
+    File(path.join('lib', 'service', 'network_service.dart'))
+        .writeAsString(network_service.content());
+  }
+
+  _addLostConnectionPage() async {
+    File(path.join(
+            'lib', 'page', 'lost_connection', 'lost_connection_page.dart'))
+        .writeAsString(lost_connection_page.content());
+  }
+
+  crashaliticsCodeForMain() {
+    return """
+  FlutterError.onError = (FlutterErrorDetails details) async {
+    handleError(details.exception, details.stack, fatal: true);
+  };
+
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform);
+    }
+
+    // ignore: unused_local_variable
+    FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+    await GetStorage.init('theme');
+    //await networkService.init();
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    isFirstRun = await IsFirstRun.isFirstRun();
+    String? routeName = await Get.put(MessagingService()).getInitialRouteName();
+    StorageService storageService = Get.put(StorageService());
+    await storageService.init();
+    runApp(MyApp(
+      routeName: routeName,
+    ));
+  }, (error, stack) async {
+    debugPrint('Error caught by main zone');
+    debugPrint(error.toString());
+    debugPrint(stack.toString());
+
+    await handleError(error, stack, fatal: true);
+  });
     """;
   }
 
   handleError() {
     return """
-    Future<void> handleError(error, StackTrace? stack,
-    {bool fatal = false, Iterable<Object> information = const []}) async {
-        var currentController = Get.rootController;
+Future<void> handleError(error, StackTrace? stack,
+    {bool fatal = false,
+    Iterable<Object> information = const [],
+    bool async = false}) async {
+  // Failed host lookup
+  if (error.toString().contains("Failed host lookup")) {
+    Get.put(NetworkService()).onInternetLostPage.value = true;
+    Get.to(() => const LostConnectionPage());
+    if (error.toString().contains("No host specified in URI file:///")) {
+      return;
+    }
 
-        String previousRoute = currentController.routing.previous;
-        String userId = "";
+    // Check if the application is running on dev mode
+    bool devMode = bool.tryParse(const String.fromEnvironment(
+          'DEV_MODE',
+        )) ??
+        false;
 
-        // if (!constants.devMode) { // TODO activate when the proper constants are in place
-        if (true) {
-          if (fatal) {
-            // If you see fatal on the crashlytics, it was registered here
-            await FirebaseCrashlytics.instance.recordError(error, stack,
-                fatal: true,
-                information: [
-                  "Current Route: \${Get.currentRoute}",
-                  "Previous Route:  \${previousRoute}",
-                  "User Id: \${Get.put(UserStateService()).user.value.id.toString()}"
-                ]..addAll(information));
+    var currentController = Get.rootController;
 
-            if (getMaterialAppCalled) {
-              Get.to(() => ErrorPage(errorMessage: error.toString()));
-            } else {
-              // Try to exit app:
-              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-            }
-          } else {
-            // If you see non fatal on the crashlytics, it was registered here
-            await FirebaseCrashlytics.instance.recordError(error, stack,
-                reason: 'a non-fatal error, this will be ignored',
-                information: [
-                  "Current Route: \${Get.currentRoute}",
-                  "Previous Route:  \${previousRoute}"
-                      // "User Id: "
-                ]..addAll(information));
-          }
+    String previousRoute = currentController.routing.previous;
+
+    if (Get.put(UserStateService()).user.value.id != -1) {
+      FirebaseCrashlytics.instance.setUserIdentifier(
+          Get.put(UserStateService()).user.value.id.toString());
+    }
+
+    if (!devMode) {
+      if (fatal) {
+        // If you see fatal on the crashlytics, it was registered here
+        await FirebaseCrashlytics.instance
+            .recordError(error, stack, fatal: true, information: [
+          "Current Route: \${Get.currentRoute}",
+          "Previous Route:  \$previousRoute",
+          "Asynchronous: \$async",
+          "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+          ...information
+        ]);
+
+        if (getMaterialAppCalled) {
+          Get.to(() => const ErrorPage());
+        } else {
+          // Try to exit app:
+          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
         }
+      } else {
+        // If you see non fatal on the crashlytics, it was registered here
+        await FirebaseCrashlytics.instance.recordError(error, stack,
+            reason: 'a non-fatal error, this will be ignored',
+            information: [
+              "Current Route: \${Get.currentRoute}",
+              "Previous Route:  \$previousRoute",
+              "Asynchronous: \$async",
+              "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+              ...information
+            ]);
       }
+    }
+  }
+}
+    """;
+  }
+
+  restartWidget() {
+    return """
+class RestartWidget extends StatefulWidget {
+  const RestartWidget({super.key, required this.child});
+
+  final Widget child;
+
+  static Future<void> restartApp(BuildContext context) async {
+    await context.findAncestorStateOfType<_RestartWidgetState>()!.restartApp();
+  }
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  Future<void> restartApp() async {
+    await Get.deleteAll(force: false); //deleting all controllers
+    setState(() {
+      key = UniqueKey();
+    });
+    Get.reset();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
+  }
+}
     """;
   }
 }

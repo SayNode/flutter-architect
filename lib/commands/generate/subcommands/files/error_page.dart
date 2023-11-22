@@ -9,12 +9,13 @@ content(String projectName) {
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:$projectName/pages/error/controller/error_controller.dart';
+import 'package:$projectName/page/error/controller/error_controller.dart';
+
 
 import '../../services/theme_service.dart';
 import '../../theme/constants.dart';
 import '../../theme/custom_themes.dart';
-import '../../utils/utils.dart';
+import '../../util/util.dart';
 
 class ErrorPage extends GetView<ErrorController> {
   const ErrorPage({super.key});
@@ -44,13 +45,13 @@ class ErrorPage extends GetView<ErrorController> {
               SizedBox(height: getRelativeHeight(28)),
               Text(
                 "Oops...".tr,
-                style: Colors.white //TODO Add theme color for background,
+                style: TextStyle(color: Colors.black), //TODO Add theme color for background,
               ),
               SizedBox(height: getRelativeHeight(21)),
               Text(
                 "Sorry, we're having an issue but it should be fixed shortly. Please contact us at [email address] if you keep having problems."
                     .tr,
-                style: Colors.black //TODO Add theme color for text,
+                style: TextStyle(color: Colors.black), //TODO Add theme color for text,
                 textAlign: TextAlign.center,
               ),
               SizedBox(
@@ -58,7 +59,7 @@ class ErrorPage extends GetView<ErrorController> {
               ),
               Text(
                 "Please, try to restart the app.".tr,
-                style: Colors.black //TODO Add theme color for background,
+                style: TextStyle(color: Colors.black), //TODO Add theme color for background,
                 textAlign: TextAlign.center,
               ),
             ],
