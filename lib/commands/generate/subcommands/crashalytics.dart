@@ -2,6 +2,8 @@ import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/util.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/files/error_page.dart'
     as error_page;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/network_controller.dart'
+    as network_controller;
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -29,16 +31,26 @@ class CrashalyticsGenerator extends Command {
     print("`./firebase_configuration.sh`");
     print(
         "if that does work you can follow the official guide for flutter at https://firebase.google.com/docs/crashlytics/get-started?platform=flutter");
-    // TODO add code to add crashalytics to the project
+
+    String projectName = await getProjectName();
+    print("current project name $projectName");
+
     checkIfAllreadyRun("crashalytics").then((value) async {
       print('Creating crashalitics configuration in main.dart...');
       addDependencyToPubspec('firebase_core', null);
       addDependencyToPubspec('firebase_crashalitics', null);
-      _addErrorPage();
+      addDependencyToPubspec('connectivity_plus', null);
+      addDependencyToPubspec('package_info_plus', null);
+      _addErrorPage(projectName);
+      _addNetworkController();
       _modifyMain();
       await addAllreadyRun('crashalytics');
+      print("Finished Addng crashalytics");
+      print(
+          "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus");
+      print(
+          "remember to run `chmod +x ./firebase_configuration.sh` and `./firebase_configuration.sh` to configure firebase and crashalytics for this project");
     });
-    // TODO add simple dialog for errors
   }
 
   _modifyMain() async {
@@ -61,9 +73,15 @@ class CrashalyticsGenerator extends Command {
     });
   }
 
-  _addErrorPage() async {
+  _addErrorPage(String projectName) async {
     File(path.join('lib', 'page', 'error', 'error_page.dart'))
-        .writeAsString(error_page.content());
+        .writeAsString(error_page.content(projectName));
+  }
+
+  _addNetworkController() async {
+    File(path.join(
+            'lib', 'page', 'error', 'controller', 'network_controller.dart'))
+        .writeAsString(network_controller.content());
   }
 
   crashaliticsCodeForMain() {

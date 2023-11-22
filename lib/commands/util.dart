@@ -59,6 +59,19 @@ Future<void> checkIfAllreadyRun(String command) async {
   });
 }
 
+Future<String> getProjectName() async {
+  String name = '';
+  await File('pubspec.yaml').readAsLines().then((List<String> lines) {
+    for (var line in lines) {
+      if (line.contains('name:')) {
+        name = line.split(':')[1].trim();
+        break;
+      }
+    }
+  });
+  return name;
+}
+
 spinnerLoading(Function function) async {
   var P = ["\\", "|", "/", "-"];
   var x = 0;
