@@ -10,6 +10,8 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as network_service;
 import 'package:project_initialization_tool/commands/generate/subcommands/files/lost_connection_page.dart'
     as lost_connection_page;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/firebase_configuration.dart'
+    as firebase_configuration;
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -52,6 +54,9 @@ class CrashalyticsGenerator extends Command {
       await addDependencyToPubspecSync('connectivity_plus', null);
       await addDependencyToPubspecSync('package_info_plus', null);
       await addDependencyToPubspecSync('flutter_svg', null);
+      await addDependencyToPubspecSync('is_first_run', null);
+      await addDependencyToPubspecSync('url_launcher', null);
+      await addDependencyToPubspecSync('flutter_network_connectivity', null);
       Directory(path.join('lib', 'util')).createSync();
       Directory(path.join('lib', 'page', 'error')).createSync();
       Directory(path.join('lib', 'page', 'lost_connection')).createSync();
@@ -59,13 +64,14 @@ class CrashalyticsGenerator extends Command {
       _addErrorPage(projectName);
       _addErrorController();
       _addUtil();
-      _addNetworkService();
+      _addNetworkService(projectName);
       _addLostConnectionPage();
+      _addFirebaseConfigurationScript();
       _modifyMain();
       await addAllreadyRun('crashalytics');
-      printColor("Finished Addng crashalytics", ColorText.green);
+      printColor("Finished Adding crashalytics", ColorText.green);
       printColor(
-          "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus, flutter_svg",
+          "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus, flutter_svg, is_first_run",
           ColorText.green);
       printColor("REMEMBER TO RUN", ColorText.green);
       printColor("chmod +x ./firebase_configuration.sh", ColorText.magenta);
@@ -80,15 +86,33 @@ class CrashalyticsGenerator extends Command {
       String mainContent = '';
       mainContent += "import 'dart:async';\n";
       mainContent += "import 'dart:io';\n";
+      mainContent +=
+          "import 'page/lost_connection/lost_connection_page.dart';\n";
+      mainContent += "import 'firebase_options.dart';\n";
+      mainContent += "import 'service/network_service.dart';\n";
+      mainContent += "import 'package:is_first_run/is_first_run.dart';\n";
       mainContent += "import 'package:firebase_core/firebase_core.dart';\n";
       mainContent += "import 'page/error/error_page.dart';\n";
+      mainContent += "import 'package:flutter/services.dart';\n";
+      mainContent += "import 'package:testc/util/util.dart';\n";
       mainContent +=
           "import 'package:firebase_crashlytics/firebase_crashlytics.dart';\n";
+
+      bool removedOldMyApp = false;
+
       for (String line in lines) {
         counter++;
         mainContent += '$line\n';
+
         if (line.contains('void main() async {')) {
           mainContent += crashaliticsCodeForMain();
+        }
+        if (line.contains('runApp(const MyApp());') && !removedOldMyApp) {
+          line = "";
+          removedOldMyApp = true;
+        }
+        if (line.contains('Widget build(BuildContext context) {')) {
+          mainContent += "getMaterialAppCalled = true;";
         }
         if (line.contains('bool isFirstRun = false;')) {
           mainContent += restartWidget();
@@ -117,15 +141,20 @@ class CrashalyticsGenerator extends Command {
     File(path.join('lib', 'util', 'util.dart')).writeAsString(util.content());
   }
 
-  _addNetworkService() async {
+  _addNetworkService(String projectName) async {
     File(path.join('lib', 'service', 'network_service.dart'))
-        .writeAsString(network_service.content());
+        .writeAsString(network_service.content(projectName));
   }
 
   _addLostConnectionPage() async {
     File(path.join(
             'lib', 'page', 'lost_connection', 'lost_connection_page.dart'))
         .writeAsString(lost_connection_page.content());
+  }
+
+  _addFirebaseConfigurationScript() async {
+    File(path.join('firebase_configuration.sh'))
+        .writeAsString(firebase_configuration.content());
   }
 
   crashaliticsCodeForMain() {
@@ -143,17 +172,11 @@ class CrashalyticsGenerator extends Command {
     }
 
     // ignore: unused_local_variable
-    FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-    await GetStorage.init('theme');
+    // await GetStorage.init('theme');
     //await networkService.init();
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     isFirstRun = await IsFirstRun.isFirstRun();
-    String? routeName = await Get.put(MessagingService()).getInitialRouteName();
-    StorageService storageService = Get.put(StorageService());
-    await storageService.init();
-    runApp(MyApp(
-      routeName: routeName,
-    ));
+    runApp(const MyApp());
   }, (error, stack) async {
     debugPrint('Error caught by main zone');
     debugPrint(error.toString());
@@ -188,10 +211,10 @@ Future<void> handleError(error, StackTrace? stack,
 
     String previousRoute = currentController.routing.previous;
 
-    if (Get.put(UserStateService()).user.value.id != -1) {
-      FirebaseCrashlytics.instance.setUserIdentifier(
-          Get.put(UserStateService()).user.value.id.toString());
-    }
+    // if (Get.put(UserStateService()).user.value.id != -1) {
+    //   FirebaseCrashlytics.instance.setUserIdentifier(
+    //       Get.put(UserStateService()).user.value.id.toString());
+    // }
 
     if (!devMode) {
       if (fatal) {
@@ -201,7 +224,7 @@ Future<void> handleError(error, StackTrace? stack,
           "Current Route: \${Get.currentRoute}",
           "Previous Route:  \$previousRoute",
           "Asynchronous: \$async",
-          "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+          // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
           ...information
         ]);
 
@@ -209,7 +232,7 @@ Future<void> handleError(error, StackTrace? stack,
           Get.to(() => const ErrorPage());
         } else {
           // Try to exit app:
-          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
         }
       } else {
         // If you see non fatal on the crashlytics, it was registered here
@@ -219,7 +242,7 @@ Future<void> handleError(error, StackTrace? stack,
               "Current Route: \${Get.currentRoute}",
               "Previous Route:  \$previousRoute",
               "Asynchronous: \$async",
-              "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+              // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
               ...information
             ]);
       }

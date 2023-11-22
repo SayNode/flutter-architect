@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../util/constants.dart';
+import '../../util/util.dart';
 
 class LostConnectionPage extends StatelessWidget {
   const LostConnectionPage({super.key});

@@ -1,10 +1,10 @@
-content() {
+content(String projectName) {
   return """
 import 'package:flutter/material.dart';
 import 'package:flutter_network_connectivity/flutter_network_connectivity.dart';
 import 'package:get/get.dart';
 
-import 'package:legacy_main_app/pages/lost_connection/lost_connection_page.dart';
+import 'package:$projectName/page/lost_connection/lost_connection_page.dart';
 
 class NetworkService extends GetxService {
   RxBool isConnectedToInternet = true.obs;
