@@ -16,26 +16,17 @@ class CrashalyticsGenerator extends Command {
   }
 
   addCrashalyticsTasks() async {
-    initFirebaseForProject();
-  }
+    print(
+        "This script will add the code required to catch errors and send them to crashalytics");
+    print(
+        "However, to use this feature, you need to first configure firebase and crashalytics for this project");
+    print("You can do this with the following commands:");
+    print("`chmod +x ./firebase_configuration.sh`");
+    print("`./firebase_configuration.sh`");
+    print(
+        "if that does work you can follow the official guide for flutter at https://firebase.google.com/docs/crashlytics/get-started?platform=flutter");
+    // TODO add code to add crashalytics to the project
 
-  initFirebaseForProject() async {
-    // check if firebase is istalled
-    bool isfi = await isFirebaseCLIInstalled();
-    print(isfi ? 'Firebase CLI is installed' : 'Firebase CLI is not installed');
-    if (!isfi) {
-      print('Installing Firebase CLI');
-      await installFirebaseCLI();
-      //TODO: add flutterfire to path
-    }
-    // check if firebase user is logged in
-    await firebaseCLILogin();
-    activateFirebaseCLI();
-
-    // install mandatory dependancy
-    await installFirebaseDependancy();
-
-    // run flutterfire
-    await flutterfireRun();
+    // TODO add simple dialog for errors
   }
 }
