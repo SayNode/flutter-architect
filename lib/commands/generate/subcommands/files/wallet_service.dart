@@ -83,6 +83,14 @@ class WalletService extends GetxService {
     _storage.setString('wallet', json.encode(wallet.toJson()));
   }
 
+    String getPrivateKey(String password) {
+    final Uint8List privateKey = Keystore.decrypt(
+      json.encode(keystore),
+      password,
+    );
+    return bytesToHex(privateKey);
+  }
+
   void deleteWallet() {
     _wallet = null;
     _storage.remove('wallet');
