@@ -68,7 +68,7 @@ class WalletService extends GetxService {
     _storage.setString('wallet', json.encode(wallet.toJson()));
   }
 
-  ///Create a new wallet from a given password and seed words and store it locally.
+  ///Create a new wallet from a given password and PrivateKey and store it locally.
   void createWalletFromPrivateKey(String password, String privateKey) {
     final Uint8List privateKeyInBytes = hexToBytes(privateKey);
     final String address = Address.publicKeyToAddressString(
