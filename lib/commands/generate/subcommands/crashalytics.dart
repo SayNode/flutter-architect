@@ -1,19 +1,20 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
-import 'package:project_initialization_tool/commands/util.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/files/error_page.dart'
-    as error_page;
+import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/generate/subcommands/files/error_controller.dart'
     as error_controller;
-import 'package:project_initialization_tool/commands/generate/subcommands/files/util.dart'
-    as util;
-import 'package:project_initialization_tool/commands/generate/subcommands/files/network_service.dart'
-    as network_service;
-import 'package:project_initialization_tool/commands/generate/subcommands/files/lost_connection_page.dart'
-    as lost_connection_page;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/error_page.dart'
+    as error_page;
 import 'package:project_initialization_tool/commands/generate/subcommands/files/firebase_configuration.dart'
     as firebase_configuration;
-import 'dart:io';
-import 'package:path/path.dart' as path;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/lost_connection_page.dart'
+    as lost_connection_page;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/network_service.dart'
+    as network_service;
+import 'package:project_initialization_tool/commands/generate/subcommands/files/util.dart'
+    as util;
+import 'package:project_initialization_tool/commands/util.dart';
 
 class CrashalyticsGenerator extends Command {
   @override
