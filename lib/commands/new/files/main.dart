@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 
 import 'page/splash_page.dart';
 
+bool isFirstRun = false;
+
 void main() async {
   runApp(const MyApp());
 }

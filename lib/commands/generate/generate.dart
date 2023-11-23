@@ -5,6 +5,7 @@ import 'package:project_initialization_tool/commands/generate/subcommands/locali
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics.dart';
 
 import 'subcommands/wallet.dart';
 
@@ -17,6 +18,7 @@ class Generator extends Command {
     addSubcommand(LocalizationGenerator());
     addSubcommand(GenerateTypography());
     addSubcommand(GenerateWalletService());
+    addSubcommand(CrashalyticsGenerator());
     // Add parser options or flag here
   }
 

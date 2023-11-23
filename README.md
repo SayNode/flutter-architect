@@ -15,6 +15,11 @@ alias generator="./generator.exe"
     
 ```
 
+or with full path
+
+```bash
+alias generator="/Users/saynode/Documents/GitHub/flutter-architect/generator.exe"
+```
 
 *How to setup the tool permanently*
 
