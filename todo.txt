@@ -9,3 +9,4 @@ Theme:
 - init theme and storage in main
 - add theme in GetMaterialApp
 
+- fix secure storage not being added if you allready have shared and you try to add both and viceversa

@@ -8,7 +8,7 @@ import 'package:thor_devkit_dart/crypto/address.dart';
 import 'package:thor_devkit_dart/crypto/keystore.dart';
 import 'package:thor_devkit_dart/crypto/mnemonic.dart';
 import 'package:thor_devkit_dart/crypto/secp256k1.dart';
-import 'package:thor_devkit_dart/util.dart';
+import 'package:thor_devkit_dart/utils.dart';
 
 import '../model/wallet_model.dart';
 import 'storage_service.dart';
