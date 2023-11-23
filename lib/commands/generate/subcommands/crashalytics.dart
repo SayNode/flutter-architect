@@ -25,7 +25,7 @@ class CrashalyticsGenerator extends Command {
 
   @override
   void run() async {
-    checkIfAllreadyRun('localization').then((value) async {
+    checkIfAllreadyRun('crashalytics').then((value) async {
       await spinnerLoading(addCrashalyticsTasks);
     });
   }
