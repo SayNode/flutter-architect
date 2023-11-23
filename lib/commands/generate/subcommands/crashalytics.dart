@@ -82,7 +82,6 @@ class CrashalyticsGenerator extends Command {
 
   _modifyMain() async {
     String mainPath = path.join('lib', 'main.dart');
-    int counter = 0;
     File(mainPath).readAsLines().then((List<String> lines) {
       String mainContent = '';
       mainContent += "import 'dart:async';\n";
@@ -102,7 +101,6 @@ class CrashalyticsGenerator extends Command {
       bool removedOldMyApp = false;
 
       for (String line in lines) {
-        counter++;
         mainContent += '$line\n';
 
         if (line.contains('void main() async {')) {
