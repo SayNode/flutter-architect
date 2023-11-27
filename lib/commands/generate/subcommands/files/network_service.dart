@@ -1,5 +1,6 @@
 content(String projectName) {
   return """
+// ignore_for_file: inference_failure_on_function_return_type, inference_failure_on_function_invocation
 import 'package:flutter/material.dart';
 import 'package:flutter_network_connectivity/flutter_network_connectivity.dart';
 import 'package:get/get.dart';

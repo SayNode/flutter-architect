@@ -4,17 +4,15 @@ content(String projectName) {
 /// Flutter Architect is a tool that generates boilerplate code for your Flutter projects.
 /// Flutter Architect was created @SayNode Operations AG by Yann Marti and Francesco Romeo
 /// https://saynode.ch
-/// 
+///
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:$projectName/page/error/controller/error_controller.dart';
+import '../../theme/theme.dart';
+import 'controller/error_controller.dart';
 
-
-import '../../services/theme_service.dart';
-import '../../theme/constants.dart';
-import '../../theme/custom_themes.dart';
 import '../../util/util.dart';
 
 class ErrorPage extends GetView<ErrorController> {
@@ -22,55 +20,55 @@ class ErrorPage extends GetView<ErrorController> {
 
   @override
   Widget build(BuildContext context) {
-    ProjectThemeName ProjectThemeName = Get.put(ThemeService()).ProjectThemeName;
     Get.put(ErrorController());
 
     return Scaffold(
       body: Center(
         child: Container(
-          width: getRelativeWidth(350),
+          width: getRelativeWidth(350), //TODO Add correct number from design
           padding: EdgeInsets.only(
-              top: getRelativeHeight(29),
-              bottom: getRelativeHeight(25),
-              right: getRelativeWidth(31.5),
-              left: getRelativeWidth(31.5)),
+              top: getRelativeHeight(29), //TODO Add correct number from design
+              bottom: getRelativeHeight(25), //TODO Add correct number from design
+              right: getRelativeWidth(31.5), //TODO Add correct number from design
+              left: getRelativeWidth(31.5),), //TODO Add correct number from design
           decoration: BoxDecoration(
             color: const Color(0xff1c1d21),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20), //TODO Add correct number from design
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset("assets/icons/warning_icon.svg"),
-              SizedBox(height: getRelativeHeight(28)),
+            children: <Widget>[
+              SvgPicture.asset('assets/icons/warning_icon.svg'),
+              SizedBox(height: getRelativeHeight(28)), //TODO Add correct number from design
               Text(
-                "Oops...".tr,
-                style: TextStyle(color: Colors.black), //TODO Add theme color for background,
+                'Oops...'.tr,
+                style: const TextStyle(
+                    color: Colors.black,), //TODO Add correct theme color
               ),
-              SizedBox(height: getRelativeHeight(21)),
+              SizedBox(height: getRelativeHeight(21)), //TODO Add correct number from design
               Text(
                 "Sorry, we're having an issue but it should be fixed shortly. Please contact us at [email address] if you keep having problems."
                     .tr,
-                style: TextStyle(color: Colors.black), //TODO Add theme color for text,
+                style: const TextStyle(
+                    color: Colors.black,), //TODO Add correct theme color
                 textAlign: TextAlign.center,
               ),
               SizedBox(
-                height: getRelativeHeight(21),
+                height: getRelativeHeight(21), //TODO Add correct number from design
               ),
               Text(
-                "Please, try to restart the app.".tr,
-                style: TextStyle(color: Colors.black), //TODO Add theme color for background,
+                'Please, try to restart the app.'.tr,
+                style: const TextStyle(
+                    color: Colors.black,), //TODO Add correct theme color
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
       ),
-      backgroundColor: ProjectThemeName.gameOfLifeNeutralBackgroundColor,
+      backgroundColor: CustomTheme.dark.electric,//TODO Add correct theme color
     );
   }
 }
-
-
   """;
 }

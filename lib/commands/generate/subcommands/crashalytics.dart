@@ -85,7 +85,6 @@ class CrashalyticsGenerator extends Command {
     File(mainPath).readAsLines().then((List<String> lines) {
       String mainContent = '';
       mainContent += "import 'dart:async';\n";
-      mainContent += "import 'dart:io';\n";
       mainContent +=
           "import 'page/lost_connection/lost_connection_page.dart';\n";
       mainContent += "import 'firebase_options.dart';\n";
@@ -94,7 +93,7 @@ class CrashalyticsGenerator extends Command {
       mainContent += "import 'package:firebase_core/firebase_core.dart';\n";
       mainContent += "import 'page/error/error_page.dart';\n";
       mainContent += "import 'package:flutter/services.dart';\n";
-      mainContent += "import 'package:testc/util/util.dart';\n";
+      mainContent += "import 'util/util.dart';\n";
       mainContent +=
           "import 'package:firebase_crashlytics/firebase_crashlytics.dart';\n";
 
@@ -159,24 +158,24 @@ class CrashalyticsGenerator extends Command {
   crashaliticsCodeForMain() {
     return """
   FlutterError.onError = (FlutterErrorDetails details) async {
-    handleError(details.exception, details.stack, fatal: true);
+    await handleError(details.exception, details.stack, fatal: true);
   };
 
-  runZonedGuarded<Future<void>>(() async {
+  await runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform);
+          options: DefaultFirebaseOptions.currentPlatform,);
     }
 
     // ignore: unused_local_variable
     // await GetStorage.init('theme');
     //await networkService.init();
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[DeviceOrientation.portraitUp]);
     isFirstRun = await IsFirstRun.isFirstRun();
     runApp(const MyApp());
-  }, (error, stack) async {
+  }, (Object error, StackTrace stack) async {
     debugPrint('Error caught by main zone');
     debugPrint(error.toString());
     debugPrint(stack.toString());
@@ -188,27 +187,28 @@ class CrashalyticsGenerator extends Command {
 
   handleError() {
     return """
-Future<void> handleError(error, StackTrace? stack,
+Future<void> handleError(Object error, StackTrace? stack,
     {bool fatal = false,
-    Iterable<Object> information = const [],
-    bool async = false}) async {
+    Iterable<Object> information = const <Object>[],
+    bool async = false,}) async {
   // Failed host lookup
-  if (error.toString().contains("Failed host lookup")) {
+  if (error.toString().contains('Failed host lookup')) {
     Get.put(NetworkService()).onInternetLostPage.value = true;
-    Get.to(() => const LostConnectionPage());
-    if (error.toString().contains("No host specified in URI file:///")) {
+    // ignore: inference_failure_on_function_invocation
+    await Get.to(() => const LostConnectionPage());
+    if (error.toString().contains('No host specified in URI file:///')) {
       return;
     }
 
     // Check if the application is running on dev mode
-    bool devMode = bool.tryParse(const String.fromEnvironment(
+    final bool devMode = bool.tryParse(const String.fromEnvironment(
           'DEV_MODE',
-        )) ??
+        ),) ??
         false;
 
-    var currentController = Get.rootController;
+    final GetMaterialController currentController = Get.rootController;
 
-    String previousRoute = currentController.routing.previous;
+    final String previousRoute = currentController.routing.previous;
 
     // if (Get.put(UserStateService()).user.value.id != -1) {
     //   FirebaseCrashlytics.instance.setUserIdentifier(
@@ -219,16 +219,17 @@ Future<void> handleError(error, StackTrace? stack,
       if (fatal) {
         // If you see fatal on the crashlytics, it was registered here
         await FirebaseCrashlytics.instance
-            .recordError(error, stack, fatal: true, information: [
-          "Current Route: \${Get.currentRoute}",
-          "Previous Route:  \$previousRoute",
-          "Asynchronous: \$async",
+            .recordError(error, stack, fatal: true, information: <Object>[
+          'Current Route: \${Get.currentRoute}',
+          'Previous Route:  \$previousRoute',
+          'Asynchronous: \$async',
           // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
-          ...information
-        ]);
+          ...information,
+        ],);
 
         if (getMaterialAppCalled) {
-          Get.to(() => const ErrorPage());
+          // ignore: inference_failure_on_function_invocation
+          await Get.to(() => const ErrorPage());
         } else {
           // Try to exit app:
           // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
@@ -237,13 +238,13 @@ Future<void> handleError(error, StackTrace? stack,
         // If you see non fatal on the crashlytics, it was registered here
         await FirebaseCrashlytics.instance.recordError(error, stack,
             reason: 'a non-fatal error, this will be ignored',
-            information: [
-              "Current Route: \${Get.currentRoute}",
-              "Previous Route:  \$previousRoute",
-              "Asynchronous: \$async",
+            information: <Object>[
+              'Current Route: \${Get.currentRoute}',
+              'Previous Route:  \$previousRoute',
+              'Asynchronous: \$async',
               // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
-              ...information
-            ]);
+              ...information,
+            ],);
       }
     }
   }
@@ -254,7 +255,7 @@ Future<void> handleError(error, StackTrace? stack,
   restartWidget() {
     return """
 class RestartWidget extends StatefulWidget {
-  const RestartWidget({super.key, required this.child});
+  const RestartWidget({required this.child, super.key});
 
   final Widget child;
 
@@ -271,7 +272,7 @@ class _RestartWidgetState extends State<RestartWidget> {
   Key key = UniqueKey();
 
   Future<void> restartApp() async {
-    await Get.deleteAll(force: false); //deleting all controllers
+    await Get.deleteAll(); //deleting all controllers
     setState(() {
       key = UniqueKey();
     });

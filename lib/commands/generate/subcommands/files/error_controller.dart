@@ -4,20 +4,20 @@ content() {
 /// Flutter Architect is a tool that generates boilerplate code for your Flutter projects.
 /// Flutter Architect was created @SayNode Operations AG by Yann Marti and Francesco Romeo
 /// https://saynode.ch
-/// 
+///
+library;
 
 import 'package:get/get.dart';
-
-import '../../../main.dart';
 
 class ErrorController extends GetxController {
   final RxBool restarting = false.obs;
 
-  restartApp(context) async {
-    restarting.value = true;
-    await RestartWidget.restartApp(context);
-    restarting.value = false;
-  }
+  // restartApp(BuildContext context) async {
+  //   restarting.value = true;
+  //   await RestartWidget.restartApp(context);
+  //   restarting.value = false;
+  // }
 }
+
   """;
 }
