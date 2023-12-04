@@ -62,13 +62,13 @@ class GenerateTypography extends Command {
     print(textStyleList);
     await addDependencyToPubspec("google_fonts", null);
     String content =
-        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass LegacyMainConstants { \nfinal Color color; \nLegacyMainConstants(this.color); \n//List of textstyles\n";
+        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass Typography { \nfinal Color color; \nTypography(this.color); \n//List of textstyles\n";
     for (var textStyle in textStyleList) {
       content +=
           "TextStyle get ${textStyle['name']} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
     }
     content +=
-        'factory LegacyMainConstants.fromColor(Color color) { \nreturn LegacyMainConstants(color); \n} \n}';
+        'factory Typography.fromColor(Color color) { \nreturn Typography(color); \n} \n}';
     File(path.join('lib', 'theme', 'typography.dart')).writeAsString(content);
   }
 
