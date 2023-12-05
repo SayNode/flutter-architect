@@ -25,7 +25,7 @@ class CrashalyticsGenerator extends Command {
 
   @override
   void run() async {
-    checkIfAllreadyRun('crashalytics').then((value) async {
+    checkIfAlreadyRun('crashalytics').then((value) async {
       await spinnerLoading(addCrashalyticsTasks);
     });
   }
@@ -48,16 +48,16 @@ class CrashalyticsGenerator extends Command {
     String projectName = await getProjectName();
     print("current project name $projectName");
 
-    checkIfAllreadyRun("crashalytics").then((value) async {
+    checkIfAlreadyRun("crashalytics").then((value) async {
       print('Creating crashalitics configuration in main.dart...');
-      await addDependencyToPubspecSync('firebase_core', null);
-      await addDependencyToPubspecSync('firebase_crashlytics', null);
-      await addDependencyToPubspecSync('connectivity_plus', null);
-      await addDependencyToPubspecSync('package_info_plus', null);
-      await addDependencyToPubspecSync('flutter_svg', null);
-      await addDependencyToPubspecSync('is_first_run', null);
-      await addDependencyToPubspecSync('url_launcher', null);
-      await addDependencyToPubspecSync('flutter_network_connectivity', null);
+      addDependencyToPubspecSync('firebase_core', null);
+      addDependencyToPubspecSync('firebase_crashlytics', null);
+      addDependencyToPubspecSync('connectivity_plus', null);
+      addDependencyToPubspecSync('package_info_plus', null);
+      addDependencyToPubspecSync('flutter_svg', null);
+      addDependencyToPubspecSync('is_first_run', null);
+      addDependencyToPubspecSync('url_launcher', null);
+      addDependencyToPubspecSync('flutter_network_connectivity', null);
       Directory(path.join('lib', 'util')).createSync();
       Directory(path.join('lib', 'page', 'error')).createSync();
       Directory(path.join('lib', 'page', 'lost_connection')).createSync();
@@ -69,7 +69,7 @@ class CrashalyticsGenerator extends Command {
       _addLostConnectionPage();
       _addFirebaseConfigurationScript();
       _modifyMain();
-      await addAllreadyRun('crashalytics');
+      await addAlreadyRun('crashalytics');
       printColor("Finished Adding crashalytics", ColorText.green);
       printColor(
           "Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus, flutter_svg, is_first_run",
@@ -84,18 +84,18 @@ class CrashalyticsGenerator extends Command {
     String mainPath = path.join('lib', 'main.dart');
     File(mainPath).readAsLines().then((List<String> lines) {
       String mainContent = '';
-      mainContent += "import 'dart:async';\n";
-      mainContent +=
-          "import 'page/lost_connection/lost_connection_page.dart';\n";
-      mainContent += "import 'firebase_options.dart';\n";
-      mainContent += "import 'service/network_service.dart';\n";
-      mainContent += "import 'package:is_first_run/is_first_run.dart';\n";
-      mainContent += "import 'package:firebase_core/firebase_core.dart';\n";
-      mainContent += "import 'page/error/error_page.dart';\n";
-      mainContent += "import 'package:flutter/services.dart';\n";
-      mainContent += "import 'util/util.dart';\n";
-      mainContent +=
-          "import 'package:firebase_crashlytics/firebase_crashlytics.dart';\n";
+      mainContent += """
+      import 'dart:async';
+      import 'page/lost_connection/lost_connection_page.dart';
+      import 'firebase_options.dart';
+      import 'service/network_service.dart';
+      import 'package:is_first_run/is_first_run.dart';
+      import 'package:firebase_core/firebase_core.dart';
+      import 'page/error/error_page.dart';
+      import 'package:flutter/services.dart';
+      import 'util/util.dart';
+      import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+      """;
 
       bool removedOldMyApp = false;
 

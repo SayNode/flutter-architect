@@ -13,6 +13,8 @@ class GenerateTypography extends Command {
   //-- Singleton
   GenerateTypography() {
     // Add parser options or flag here
+    argParser.addFlag('force',
+        defaultsTo: false, help: 'Force replace in case it already exists.');
   }
 
   @override
@@ -27,20 +29,34 @@ class GenerateTypography extends Command {
     spinnerLoading(_run);
   }
 
-  _run() async {
+  Future<void> _run() async {
     stdout.writeln('Enter the file key of your Figma file:');
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');
     figmaToken = stdin.readLineSync() ?? '';
-    var styles = await getFigmaStyles();
+    var styles = await _getFigmaStyles();
 
-    checkIfAllreadyRun().then((value) async {
-      await addAllreadyRun('typography');
-      var textStyles = await getTextStyles(styles);
-      await addTypographyFile(textStyles);
-      await dartFixCode();
-      await formatCode();
-    });
+    bool value = await checkIfAlreadyRunWithReturn('localization');
+    bool force = argResults?['force'] ?? false;
+    if (value && force) {
+      print('Replacing localization...');
+      await _removeTypographyFile();
+      var textStyles = await _getTextStyles(styles);
+      removeDependencyFromPubspecSync("google_fonts", null);
+      addDependencyToPubspecSync("google_fonts", null);
+      await _addTypographyFile(textStyles);
+    } else if (!value) {
+      print('Creating localization...');
+      await addAlreadyRun('typography');
+      var textStyles = await _getTextStyles(styles);
+      await addDependencyToPubspec("google_fonts", null);
+      await _addTypographyFile(textStyles);
+    } else {
+      print('Typography service already exists.');
+      exit(0);
+    }
+    await formatCode();
+    await dartFixCode();
   }
 
   Future<bool> checkIfAllreadyRun() async {
@@ -58,9 +74,12 @@ class GenerateTypography extends Command {
     });
   }
 
-  addTypographyFile(List textStyleList) async {
+  Future<void> _removeTypographyFile() async {
+    await File(path.join('lib', 'theme', 'typography.dart')).delete();
+  }
+
+  Future<void> _addTypographyFile(List textStyleList) async {
     print(textStyleList);
-    await addDependencyToPubspec("google_fonts", null);
     String content =
         "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n";
     for (var textStyle in textStyleList) {
@@ -72,7 +91,7 @@ class GenerateTypography extends Command {
     File(path.join('lib', 'theme', 'typography.dart')).writeAsString(content);
   }
 
-  getTextStyles(List styles) async {
+  Future<dynamic> _getTextStyles(List styles) async {
     List<String> ids = [];
     for (var style in styles) {
       if (style['style_type'] == 'TEXT') {
@@ -105,7 +124,7 @@ class GenerateTypography extends Command {
     return textStyles;
   }
 
-  getFigmaStyles() async {
+  Future<dynamic> _getFigmaStyles() async {
     try {
       final headers = {
         'X-FIGMA-TOKEN': figmaToken,

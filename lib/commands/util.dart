@@ -16,9 +16,37 @@ Future<ProcessResult> addDependencyToPubspec(
 }
 
 /// Add dependencies to pubspec.yaml
-Future<ProcessResult> addDependencyToPubspecSync(
-    String dependency, String? workingDirectory) async {
+ProcessResult addDependencyToPubspecSync(
+    String dependency, String? workingDirectory) {
   var result = Process.runSync('flutter', ['pub', 'add', dependency],
+      runInShell: true, workingDirectory: workingDirectory);
+  if (result.stderr != null) {
+    stderr.write(result.stderr);
+  }
+  if (result.stdout != null) {
+    stdout.write(result.stdout);
+  }
+  return result;
+}
+
+/// Remove dependencies from pubspec.yaml
+Future<ProcessResult> removeDependencyFromPubspec(
+    String dependency, String? workingDirectory) async {
+  var result = await Process.run('flutter', ['pub', 'remove', dependency],
+      runInShell: true, workingDirectory: workingDirectory);
+  if (result.stderr != null) {
+    stderr.write(result.stderr);
+  }
+  if (result.stdout != null) {
+    stdout.write(result.stdout);
+  }
+  return result;
+}
+
+/// Remove dependencies from pubspec.yaml
+ProcessResult removeDependencyFromPubspecSync(
+    String dependency, String? workingDirectory) {
+  var result = Process.runSync('flutter', ['pub', 'remove', dependency],
       runInShell: true, workingDirectory: workingDirectory);
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -58,12 +86,12 @@ Future<void> dartFixCode() async {
   }
 }
 
-Future<void> addAllreadyRun(String command) async {
+Future<void> addAlreadyRun(String command) async {
   await File('added_boilerplate.txt')
       .writeAsString('$command\n', mode: FileMode.append);
 }
 
-Future<void> checkIfAllreadyRun(String command) async {
+Future<void> checkIfAlreadyRun(String command) async {
   await File('added_boilerplate.txt').readAsLines().then((List<String> lines) {
     for (var line in lines) {
       if (line.contains(command)) {
@@ -113,7 +141,7 @@ String lowerCamelCase(String s) {
   return result;
 }
 
-Future<bool> checkIfAllreadyRunWithReturn(String command) async {
+Future<bool> checkIfAlreadyRunWithReturn(String command) async {
   return await File('added_boilerplate.txt')
       .readAsLines()
       .then((List<String> lines) {

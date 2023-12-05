@@ -1,0 +1,3 @@
+localization
+shared_storage
+wallet

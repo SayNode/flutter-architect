@@ -70,22 +70,36 @@ class Creator extends Command {
 
   deleteUnusedFolders() {
     if (argResults?['ios'] == false) {
-      Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'ios')).existsSync()) {
+        Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['android'] == false) {
-      Directory(path.join(projectName, 'android')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'android')).existsSync()) {
+        Directory(path.join(projectName, 'android'))
+            .deleteSync(recursive: true);
+      }
     }
     if (argResults?['macos'] == false) {
-      Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'macos')).existsSync()) {
+        Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['windows'] == false) {
-      Directory(path.join(projectName, 'windows')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'windows')).existsSync()) {
+        Directory(path.join(projectName, 'windows'))
+            .deleteSync(recursive: true);
+      }
     }
     if (argResults?['web'] == false) {
-      Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'web')).existsSync()) {
+        Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['linux'] == false) {
-      Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'linux')).existsSync()) {
+        Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+      }
     }
   }
 

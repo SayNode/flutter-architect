@@ -34,7 +34,7 @@ class Generator extends Command {
   void run() {
     runner?.runCommand(argResults!).catchError((error) {
       if (error is! UsageException) throw error;
-      print(error);
+      print('Error $error');
       exit(64); // Exit code 64 indicates a usage error.
     });
   }

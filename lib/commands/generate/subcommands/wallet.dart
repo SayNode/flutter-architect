@@ -14,6 +14,8 @@ class GenerateWalletService extends Command {
   //-- Singleton
   GenerateWalletService() {
     // Add parser options or flag here
+    argParser.addFlag('force',
+        defaultsTo: false, help: 'Force replace in case it already exists.');
   }
 
   @override
@@ -29,28 +31,52 @@ class GenerateWalletService extends Command {
   }
 
   _run() async {
-    checkIfAllreadyRunWithReturn("shared_storage").then((value) async {
-      if (!value) {
-        var storageService = GenerateStorageService();
-        storageService.runShared();
-      }
-    });
+    bool storageIsSetUp = await checkIfAlreadyRunWithReturn("shared_storage");
 
-    checkIfAllreadyRun("wallet").then((value) async {
-      print('Creating wallet service...');
-      addDependencyToPubspec('thor_devkit_dart', null);
-      await addAllreadyRun('wallet');
+    // Check for required storage
+    if (!storageIsSetUp) {
+      var storageService = GenerateStorageService();
+      await storageService.runShared();
+    }
+
+    bool value = await checkIfAlreadyRunWithReturn('wallet');
+    bool force = argResults?['force'] ?? false;
+    if (value && force) {
+      print('Replacing wallet service...');
+      removeDependencyFromPubspecSync('thor_devkit_dart', null);
+      await _removeWalletService();
+      await _removeWalletModel();
+      addDependencyToPubspecSync('thor_devkit_dart', null);
       await _addWalletService();
       await _addWalletModel();
-    });
+    } else if (!value) {
+      print('Creating wallet service...');
+      await addDependencyToPubspec('thor_devkit_dart', null);
+      await addAlreadyRun('wallet');
+      await _addWalletService();
+      await _addWalletModel();
+    } else {
+      print('Wallet service already exists.');
+      exit(0);
+    }
+    await formatCode();
+    await dartFixCode();
   }
 
-  _addWalletService() async {
+  Future<void> _removeWalletService() async {
+    await File(path.join('lib', 'service', 'wallet_service.dart')).delete();
+  }
+
+  Future<void> _removeWalletModel() async {
+    await File(path.join('lib', 'model', 'wallet_model.dart')).delete();
+  }
+
+  Future<void> _addWalletService() async {
     File(path.join('lib', 'service', 'wallet_service.dart'))
         .writeAsString(wallet_service.content());
   }
 
-  _addWalletModel() async {
+  Future<void> _addWalletModel() async {
     File(path.join('lib', 'model', 'wallet_model.dart'))
         .writeAsString(wallet_model.content());
   }

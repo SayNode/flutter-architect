@@ -14,6 +14,8 @@ class GenerateStorageService extends Command {
     // Add parser options or flag here
     argParser.addFlag('secure', help: 'Create secure storage service.');
     argParser.addFlag('shared', help: 'Create shared storage service.');
+    argParser.addFlag('force',
+        defaultsTo: false, help: 'Force replace in case it already exists.');
   }
 
   @override
@@ -24,11 +26,11 @@ class GenerateStorageService extends Command {
   String get name => 'storage';
 
   @override
-  void run() async {
-    spinnerLoading(_run);
+  Future<void> run() async {
+    await spinnerLoading(_run);
   }
 
-  _run() async {
+  Future<void> _run() async {
     if (argResults?['secure'] == true) {
       await runSecure();
     }
@@ -37,50 +39,102 @@ class GenerateStorageService extends Command {
     }
   }
 
-  runSecure() async {
-    checkIfAllreadyRun("secure_storage").then((value) async {
-      print('Creating secure storage service...');
-      addDependencyToPubspec('flutter_secure_storage', null);
-      await addAllreadyRun('secure_storage');
+  Future<void> runSecure() async {
+    bool value = await checkIfAlreadyRunWithReturn("secure_storage");
+    bool force = argResults?['force'] ?? false;
+    if (value && force) {
+      print('Replacing secure storage service...');
+      removeDependencyFromPubspecSync('flutter_secure_storage', null);
+      addDependencyToPubspecSync('flutter_secure_storage', null);
+      await _removeSecureStorageService();
       await _addSecureStorageService();
-    });
+    } else if (!value) {
+      print('Creating secure storage service...');
+      await addDependencyToPubspec('flutter_secure_storage', null);
+      await addAlreadyRun('secure_storage');
+      await _addSecureStorageService();
+    } else {
+      print('Secure storage service already exists.');
+      exit(0);
+    }
   }
 
-  runShared() async {
-    checkIfAllreadyRun("shared_storage").then((value) async {
-      print('Creating shared storage service...');
-      addDependencyToPubspec('shared_preferences', null);
-      await addAllreadyRun('shared_storage');
-      await _addStorageService();
+  Future<void> runShared() async {
+    bool value = await checkIfAlreadyRunWithReturn("shared_storage");
+    bool force = argResults?['force'] ?? false;
+    if (value && force) {
+      print('Replacing shared storage service...');
+      removeDependencyFromPubspecSync('shared_preferences', null);
+      addDependencyToPubspecSync('shared_preferences', null);
+      await _removeSharedStorageService();
+      await _removeMainLines();
+      await _addSharedStorageService();
       await _modifyMain();
-    });
+    } else if (!value) {
+      print('Creating shared storage service...');
+      await addDependencyToPubspec('shared_preferences', null);
+      await addAlreadyRun('shared_storage');
+      await _addSharedStorageService();
+      await _modifyMain();
+    } else {
+      print('Shared storage service already exists.');
+      exit(0);
+    }
+    await formatCode();
+    await dartFixCode();
   }
 
-  _modifyMain() async {
+  // Remove the Storage-related lines from main.
+  Future<void> _removeMainLines() async {
     String mainPath = path.join('lib', 'main.dart');
-    File(mainPath).readAsLines().then((List<String> lines) {
-      String mainContent = '';
-      mainContent += "import 'service/storage_service.dart';\n";
-      for (String line in lines) {
-        mainContent += '$line\n';
-        if (line.contains('void main() async {')) {
-          mainContent +=
-              "final StorageService storage = Get.put<StorageService>(StorageService());\nawait storage.init();\n";
-        }
-      }
+    List<String> lines = await File(mainPath).readAsLines();
+    String mainContent = '';
 
-      File(mainPath).writeAsString(mainContent).then((file) {
-        print('- inject StorageService in memory and initialize it ✔');
-      });
+    for (String line in lines) {
+      if (!line.contains("import 'service/storage_service.dart';") &&
+          !line.contains(
+              'final StorageService storage = Get.put<StorageService>(StorageService());') &&
+          !line.contains("await storage.init();")) {
+        mainContent += '$line\n';
+      }
+    }
+    await File(mainPath).writeAsString(mainContent).then((file) {
+      print('- Remove StorageService from main ✔');
     });
   }
 
-  _addStorageService() async {
+  Future<void> _modifyMain() async {
+    String mainPath = path.join('lib', 'main.dart');
+    List<String> lines = await File(mainPath).readAsLines();
+    String mainContent = '';
+    mainContent += "import 'service/storage_service.dart';\n";
+    for (String line in lines) {
+      mainContent += '$line\n';
+      if (line.contains('void main() async {')) {
+        mainContent +=
+            "final StorageService storage = Get.put<StorageService>(StorageService());\nawait storage.init();\n";
+      }
+    }
+    await File(mainPath).writeAsString(mainContent).then((file) {
+      print('- inject StorageService in memory and initialize it ✔');
+    });
+  }
+
+  Future<void> _removeSharedStorageService() async {
+    await File(path.join('lib', 'service', 'storage_service.dart')).delete();
+  }
+
+  Future<void> _removeSecureStorageService() async {
+    await File(path.join('lib', 'service', 'secure_storage_service.dart'))
+        .delete();
+  }
+
+  Future<void> _addSharedStorageService() async {
     File(path.join('lib', 'service', 'storage_service.dart'))
         .writeAsString(shared_storage.content());
   }
 
-  _addSecureStorageService() async {
+  Future<void> _addSecureStorageService() async {
     File(path.join('lib', 'service', 'secure_storage_service.dart'))
         .writeAsString(secure_storage.content());
   }
