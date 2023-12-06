@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/all.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
@@ -13,19 +14,20 @@ class Generator extends Command {
   //-- Singleton
   Generator._privateConstructor() {
     // Add Sub Commands here
-    addSubcommand(GenerateTheme());
+    addSubcommand(GenerateThemeService());
     addSubcommand(GenerateStorageService());
-    addSubcommand(LocalizationGenerator());
-    addSubcommand(GenerateTypography());
+    addSubcommand(GenerateLocalizationService());
+    addSubcommand(GenerateTypographyService());
     addSubcommand(GenerateWalletService());
-    addSubcommand(CrashalyticsGenerator());
+    addSubcommand(GenerateCrashalyticsService());
+    addSubcommand(AllGenerator());
     // Add parser options or flag here
   }
 
   static final Generator instance = Generator._privateConstructor();
 
   @override
-  String get description => 'Generate a boilerplate code for the project.';
+  String get description => 'Generate a boilerplate code for the project;';
 
   @override
   String get name => 'generate';

@@ -16,16 +16,22 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as util;
 import 'package:project_initialization_tool/commands/util.dart';
 
-class CrashalyticsGenerator extends Command {
+class GenerateCrashalyticsService extends Command {
   @override
   String get description => 'Create crashalytics files and boilerplate code;';
 
   @override
   String get name => 'crashalytics';
 
+  GenerateCrashalyticsService() {
+    // Add parser options or flag here
+    argParser.addFlag('force',
+        defaultsTo: false, help: 'Force replace in case it already exists.');
+  }
+
   @override
-  void run() async {
-    checkIfAlreadyRun('crashalytics').then((value) async {
+  Future<void> run() async {
+    await checkIfAlreadyRun('crashalytics').then((value) async {
       await spinnerLoading(addCrashalyticsTasks);
     });
   }

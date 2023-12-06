@@ -10,21 +10,21 @@ import 'package:project_initialization_tool/commands/generate/subcommands/files/
     as message;
 import 'package:project_initialization_tool/commands/util.dart';
 
-class LocalizationGenerator extends Command {
+class GenerateLocalizationService extends Command {
   @override
   String get description => 'Create localization files and boilerplate code;.';
 
   @override
   String get name => 'localization';
 
-  LocalizationGenerator() {
+  GenerateLocalizationService() {
     // Add parser options or flag here
     argParser.addFlag('force',
         defaultsTo: false, help: 'Force replace in case it already exists.');
   }
 
   @override
-  void run() async {
+  Future<void> run() async {
     await spinnerLoading(_run);
   }
 

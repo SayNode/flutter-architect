@@ -26,8 +26,8 @@ class GenerateWalletService extends Command {
   String get name => 'wallet';
 
   @override
-  void run() async {
-    spinnerLoading(_run);
+  Future<void> run() async {
+    await spinnerLoading(_run);
   }
 
   _run() async {

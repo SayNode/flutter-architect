@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/util.dart';
 
-class GenerateTypography extends Command {
+class GenerateTypographyService extends Command {
   late final String figmaFileKey;
   late final String figmaToken;
 
   //-- Singleton
-  GenerateTypography() {
+  GenerateTypographyService() {
     // Add parser options or flag here
     argParser.addFlag('force',
         defaultsTo: false, help: 'Force replace in case it already exists.');
@@ -25,8 +25,8 @@ class GenerateTypography extends Command {
   String get name => 'typography';
 
   @override
-  void run() async {
-    spinnerLoading(_run);
+  Future<void> run() async {
+    await spinnerLoading(_run);
   }
 
   Future<void> _run() async {

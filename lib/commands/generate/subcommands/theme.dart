@@ -10,14 +10,14 @@ import 'package:project_initialization_tool/commands/util.dart';
 
 import 'storage.dart';
 
-class GenerateTheme extends Command {
+class GenerateThemeService extends Command {
   late final String figmaFileKey;
   late final String figmaToken;
   late String themeName;
   late String colorName;
 
   //-- Singleton
-  GenerateTheme() {
+  GenerateThemeService() {
     // Add parser options or flag here
     argParser.addFlag('force',
         defaultsTo: false, help: 'Force replace in case it already exists.');
@@ -31,7 +31,7 @@ class GenerateTheme extends Command {
   String get name => 'theme';
 
   @override
-  void run() async {
+  Future<void> run() async {
     stdout.writeln('Enter the file key of your Figma file:');
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');

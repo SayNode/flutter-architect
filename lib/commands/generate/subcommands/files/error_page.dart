@@ -66,7 +66,7 @@ class ErrorPage extends GetView<ErrorController> {
           ),
         ),
       ),
-      backgroundColor: CustomTheme.dark.electric,//TODO Add correct theme color
+      backgroundColor: Colors.white,//TODO Add correct theme color
     );
   }
 }
