@@ -108,7 +108,7 @@ class GenerateCrashalyticsService extends Command {
       for (String line in lines) {
         mainContent += '$line\n';
 
-        if (line.contains('void main() async {')) {
+        if (line.contains('WidgetsFlutterBinding.ensureInitialized();')) {
           mainContent += crashaliticsCodeForMain();
         }
         if (line.contains('runApp(const MyApp());') && !removedOldMyApp) {

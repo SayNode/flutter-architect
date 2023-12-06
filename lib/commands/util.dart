@@ -57,6 +57,26 @@ ProcessResult removeDependencyFromPubspecSync(
   return result;
 }
 
+/// Run flutter_native_splash command
+ProcessResult runNativeSplash(String? workingDirectory) {
+  var result = Process.runSync(
+      'dart',
+      [
+        'run',
+        'flutter_native_splash:create',
+        '--path=flutter_native_splash.yaml',
+      ],
+      runInShell: true,
+      workingDirectory: workingDirectory);
+  if (result.stderr != null) {
+    stderr.write(result.stderr);
+  }
+  if (result.stdout != null) {
+    stdout.write(result.stdout);
+  }
+  return result;
+}
+
 ///Format dart code
 Future<void> formatCode() async {
   var result = await Process.run(

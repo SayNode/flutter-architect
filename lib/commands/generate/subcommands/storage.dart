@@ -110,7 +110,7 @@ class GenerateStorageService extends Command {
     mainContent += "import 'service/storage_service.dart';\n";
     for (String line in lines) {
       mainContent += '$line\n';
-      if (line.contains('void main() async {')) {
+      if (line.contains('WidgetsFlutterBinding.ensureInitialized();')) {
         mainContent +=
             "final StorageService storage = Get.put<StorageService>(StorageService());\nawait storage.init();\n";
       }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/all.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/splash.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
@@ -20,6 +21,7 @@ class Generator extends Command {
     addSubcommand(GenerateTypographyService());
     addSubcommand(GenerateWalletService());
     addSubcommand(GenerateCrashalyticsService());
+    addSubcommand(GenerateSplashService());
     addSubcommand(AllGenerator());
     // Add parser options or flag here
   }
