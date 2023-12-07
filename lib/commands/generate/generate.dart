@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/all.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/splash.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/localization/localization.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/splash.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/theme/theme.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/typography/typography.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/crashalytics.dart';
 
-import 'subcommands/wallet.dart';
+import 'subcommands/wallet/wallet.dart';
 
 class Generator extends Command {
   //-- Singleton

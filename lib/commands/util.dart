@@ -1,10 +1,40 @@
 import 'dart:async';
 import 'dart:io';
 
+/// Logic for building a component.
+Future<void> componentBuilder({
+  required bool force,
+  required bool alreadyBuilt,
+  required bool removeOnly,
+  Future<dynamic> Function()? add,
+  Future<dynamic> Function()? remove,
+  Future<dynamic> Function()? rejectAdd,
+  Future<dynamic> Function()? rejectRemove,
+}) async {
+  if (removeOnly) {
+    if (alreadyBuilt) {
+      await remove?.call();
+    } else {
+      await rejectRemove?.call();
+    }
+  } else {
+    if (!alreadyBuilt) {
+      await add?.call();
+    } else {
+      if (force) {
+        await remove?.call();
+        await add?.call();
+      } else {
+        await rejectAdd?.call();
+      }
+    }
+  }
+}
+
 /// Add dependencies to pubspec.yaml
-Future<ProcessResult> addDependencyToPubspec(
-    String dependency, String? workingDirectory) async {
-  var result = await Process.run('flutter', ['pub', 'add', dependency],
+Future<ProcessResult> addDependenciesToPubspec(
+    List<String> dependencies, String? workingDirectory) async {
+  var result = await Process.run('flutter', ['pub', 'add', ...dependencies],
       runInShell: true, workingDirectory: workingDirectory);
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -16,9 +46,9 @@ Future<ProcessResult> addDependencyToPubspec(
 }
 
 /// Add dependencies to pubspec.yaml
-ProcessResult addDependencyToPubspecSync(
-    String dependency, String? workingDirectory) {
-  var result = Process.runSync('flutter', ['pub', 'add', dependency],
+ProcessResult addDependenciesToPubspecSync(
+    List<String> dependencies, String? workingDirectory) {
+  var result = Process.runSync('flutter', ['pub', 'add', ...dependencies],
       runInShell: true, workingDirectory: workingDirectory);
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -30,9 +60,9 @@ ProcessResult addDependencyToPubspecSync(
 }
 
 /// Remove dependencies from pubspec.yaml
-Future<ProcessResult> removeDependencyFromPubspec(
-    String dependency, String? workingDirectory) async {
-  var result = await Process.run('flutter', ['pub', 'remove', dependency],
+Future<ProcessResult> removeDependenciesFromPubspec(
+    List<String> dependencies, String? workingDirectory) async {
+  var result = await Process.run('flutter', ['pub', 'remove', ...dependencies],
       runInShell: true, workingDirectory: workingDirectory);
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -44,9 +74,9 @@ Future<ProcessResult> removeDependencyFromPubspec(
 }
 
 /// Remove dependencies from pubspec.yaml
-ProcessResult removeDependencyFromPubspecSync(
-    String dependency, String? workingDirectory) {
-  var result = Process.runSync('flutter', ['pub', 'remove', dependency],
+ProcessResult removeDependenciesFromPubspecSync(
+    List<String> dependencies, String? workingDirectory) {
+  var result = Process.runSync('flutter', ['pub', 'remove', ...dependencies],
       runInShell: true, workingDirectory: workingDirectory);
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -77,9 +107,9 @@ ProcessResult runNativeSplash(String? workingDirectory) {
   return result;
 }
 
-///Format dart code
-Future<void> formatCode() async {
-  var result = await Process.run(
+/// Run dart format
+void formatCode() {
+  var result = Process.runSync(
     'dart',
     ['format', '.'],
     runInShell: true,
@@ -92,8 +122,9 @@ Future<void> formatCode() async {
   }
 }
 
-Future<void> dartFixCode() async {
-  var result = await Process.run(
+// Run dart fix
+void dartFixCode() {
+  var result = Process.runSync(
     'dart',
     ['fix', '--apply'],
     runInShell: true,
@@ -106,20 +137,184 @@ Future<void> dartFixCode() async {
   }
 }
 
+/// Mark [command] as already ran.
 Future<void> addAlreadyRun(String command) async {
   await File('added_boilerplate.txt')
       .writeAsString('$command\n', mode: FileMode.append);
 }
 
+/// Remove [command] as already ran.
+Future<void> removeAlreadyRun(String command) async {
+  await deleteLinesFromFile(
+    'added_boilerplate.txt',
+    [command],
+  );
+}
+
+/// Remove lines that start with [command] as already ran.
+Future<void> removeAlreadyRunStartingWith(String command) async {
+  await deleteLinesStartingWithFromFile(
+    'added_boilerplate.txt',
+    command,
+  );
+}
+
+/// Check if [command] already run for this project
+/// Exits if [command] already run
 Future<void> checkIfAlreadyRun(String command) async {
   await File('added_boilerplate.txt').readAsLines().then((List<String> lines) {
     for (var line in lines) {
       if (line.contains(command)) {
-        print('$command already added');
+        //print('$command already added');
         exit(0);
       }
     }
   });
+}
+
+/// Check if [command] already run for this project
+/// Returns true if [command] already run, otheriwse false
+Future<bool> checkIfAlreadyRunWithReturn(String command) async {
+  return await File('added_boilerplate.txt')
+      .readAsLines()
+      .then((List<String> lines) {
+    for (var line in lines) {
+      //print('line: $line');
+      if (line.contains(command)) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
+/// Delete [lines] from [file].
+Future<void> deleteLinesFromFile(String file, List<String> lines) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+  for (var line in fileLines) {
+    if (!lines.contains(line.trim())) {
+      newFileLines.add(line);
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Delete lines from [file] that start with [startsWith].
+Future<void> deleteLinesStartingWithFromFile(
+    String file, String startsWith) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+  for (var line in fileLines) {
+    if (!line.trim().startsWith(startsWith)) {
+      newFileLines.add(line);
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Delete lines from [file], from [line1] to [line2].
+Future<void> deleteLineRangeFromFile(
+    String file, String line1, String line2) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+  var delete = false;
+  for (var line in fileLines) {
+    if (line.trim().contains(line1)) {
+      delete = true;
+    }
+    if (!delete) {
+      newFileLines.add(line);
+    }
+    if (line.trim().contains(line2)) {
+      delete = false;
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Delete string [text] from file in path [file].
+Future<void> deleteTextFromFile(String file, String text) async {
+  List<String> lines = text.split('\n');
+
+  await deleteLinesAfterFromFile(
+    file,
+    lines.first,
+    lines.length - 1,
+    includeFirst: true,
+  );
+}
+
+/// Delete [amount] lines from file in path [file], after line [line].
+Future<void> deleteLinesAfterFromFile(String file, String line, int amount,
+    {bool includeFirst = false}) async {
+  print('deleteLinesAfterFromFile: $line, $amount');
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+  for (int i = 0; i < fileLines.length; i++) {
+    String fileLine = fileLines[i];
+    if (fileLine.trim().contains(line.trim())) {
+      i += amount;
+      if (!includeFirst) {
+        newFileLines.add(fileLine);
+      }
+    } else {
+      newFileLines.add(fileLine);
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Replace [line] with [newLine] in [file].
+Future<void> replaceLineInFile(String file, String line, String newLine) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+  for (var l in fileLines) {
+    if (l.trim().contains(line)) {
+      newFileLines.add(newLine);
+    } else {
+      newFileLines.add(l);
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Add lines in value of [lines] after line in key of [lines], in file [file].
+Future<void> addLinesAfterLineInFile(
+    String file, Map<String, List<String>> lines,
+    {List<String> leading = const [], List<String> trailing = const []}) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+
+  newFileLines.addAll(leading);
+
+  for (String line in fileLines) {
+    newFileLines.add(line);
+    newFileLines.addAll(lines[line.trim()] ?? []);
+  }
+
+  newFileLines.addAll(trailing);
+
+  await File(file).writeAsString(newFileLines.join('\n'));
+}
+
+/// Add lines in value of [lines] before line in key of [lines], in file [file].
+Future<void> addLinesBeforeLineInFile(
+    String file, Map<String, List<String>> lines,
+    {List<String> leading = const [], List<String> trailing = const []}) async {
+  var fileLines = await File(file).readAsLines();
+  var newFileLines = <String>[];
+
+  newFileLines.addAll(leading);
+
+  for (String line in fileLines) {
+    newFileLines.addAll(lines[line.trim()] ?? []);
+    newFileLines.add(line);
+  }
+
+  newFileLines.addAll(trailing);
+
+  await File(file).writeAsString(newFileLines.join('\n'));
 }
 
 Future<String> getProjectName() async {
@@ -159,20 +354,6 @@ String lowerCamelCase(String s) {
     result += capitalizeFirstLetter(words[i]);
   }
   return result;
-}
-
-Future<bool> checkIfAlreadyRunWithReturn(String command) async {
-  return await File('added_boilerplate.txt')
-      .readAsLines()
-      .then((List<String> lines) {
-    for (var line in lines) {
-      print('line: $line');
-      if (line.contains(command)) {
-        return true;
-      }
-    }
-    return false;
-  });
 }
 
 // Black:   \x1B[30m

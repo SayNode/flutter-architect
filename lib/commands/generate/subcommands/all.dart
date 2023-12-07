@@ -1,17 +1,17 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/localization.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/storage.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/theme.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/typography.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/wallet.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/crashalytics.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/localization/localization.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/theme/theme.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/typography/typography.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/wallet/wallet.dart';
 import 'package:project_initialization_tool/commands/util.dart';
 
 class AllGenerator extends Command {
   @override
-  String get description => 'Add every component to this project.';
+  String get description => 'Add every component to this project;';
 
   @override
   String get name => 'all';

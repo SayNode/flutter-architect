@@ -55,7 +55,7 @@ class Creator extends Command {
     await Process.run('flutter', ['create', projectName, '-e'],
         runInShell: true);
 
-    await addDependencyToPubspec('get', path.join(projectName));
+    await addDependenciesToPubspec(['get'], path.join(projectName));
     createCommonFolderStructure();
     _createSplashPage();
     rewriteMain();
