@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/all.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/localization/localization.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/splash.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
@@ -22,6 +23,7 @@ class Generator extends Command {
     addSubcommand(GenerateWalletService());
     addSubcommand(GenerateCrashalyticsService());
     addSubcommand(GenerateSplashService());
+    addSubcommand(GenerateAPIService());
     addSubcommand(AllGenerator());
     // Add parser options or flag here
   }
