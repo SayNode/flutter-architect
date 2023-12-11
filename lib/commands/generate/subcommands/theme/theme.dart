@@ -139,7 +139,7 @@ class GenerateThemeService extends Command {
   // Remove the Theme-related lines from main.
   Future<void> _removeMainChanges() async {
     String mainPath = path.join('lib', 'main.dart');
-    await deleteLinesFromFile(
+    await removeLinesFromFile(
       mainPath,
       [
         'Get.put<ThemeService>(ThemeService());',

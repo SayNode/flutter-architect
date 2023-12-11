@@ -193,12 +193,12 @@ class GenerateCrashalyticsService extends Command {
 
   Future<void> _removeMainChanges() async {
     String mainPath = path.join('lib', 'main.dart');
-    await deleteTextFromFile(mainPath, imports.content());
-    await deleteTextFromFile(mainPath, wrapper.contentBefore());
-    await deleteTextFromFile(mainPath, wrapper.contentAfter());
-    await deleteTextFromFile(mainPath, material_app_flag.content());
-    await deleteTextFromFile(mainPath, restart_widget.content());
-    await deleteTextFromFile(mainPath, handle_error.content());
+    await removeTextFromFile(mainPath, imports.content());
+    await removeTextFromFile(mainPath, wrapper.contentBefore());
+    await removeTextFromFile(mainPath, wrapper.contentAfter());
+    await removeTextFromFile(mainPath, material_app_flag.content());
+    await removeTextFromFile(mainPath, restart_widget.content());
+    await removeTextFromFile(mainPath, handle_error.content());
   }
 
   Future<void> _addErrorPage(String projectName) async {

@@ -18,7 +18,7 @@ import 'package:project_initialization_tool/commands/util.dart';
 class GenerateAPIService extends Command {
   @override
   String get description =>
-      'Create API and Auth service related files and boilerplate code;';
+      'Create API and Auth Service related files and boilerplate code;';
 
   @override
   String get name => 'api';
@@ -29,10 +29,6 @@ class GenerateAPIService extends Command {
         defaultsTo: false, help: 'Force replace in case it already exists.');
     argParser.addFlag('remove',
         defaultsTo: false, help: 'Remove in case it already exists.');
-    argParser.addFlag('google',
-        defaultsTo: false, help: 'Include Google Auth in Auth Service.');
-    argParser.addFlag('apple',
-        defaultsTo: false, help: 'Include Apple Auth in Auth Service.');
   }
 
   @override
@@ -52,8 +48,6 @@ class GenerateAPIService extends Command {
     bool alreadyBuilt = await checkIfAlreadyRunWithReturn("api");
     bool force = argResults?['force'] ?? false;
     bool remove = argResults?['remove'] ?? false;
-    bool google = argResults?['google'] ?? false;
-    bool apple = argResults?['apple'] ?? false;
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
@@ -61,47 +55,23 @@ class GenerateAPIService extends Command {
       add: () async {
         print('Creating API Service...');
         await addAlreadyRun("api");
-        List<String> dependencies = ['http'];
-        if (google) {
-          dependencies.add('google_sign_in');
-        }
-        if (apple) {
-          dependencies.add('sign_in_with_apple');
-        }
-        addDependenciesToPubspecSync(dependencies, null);
+        addDependenciesToPubspecSync(['http'], null);
         String projectName = await getProjectName();
         await _addUserModel();
         await _addUserStateService();
         await _addConstants(projectName);
         await _addAPIService(projectName);
         await _addAuthService(projectName);
-        formatCode();
-        dartFixCode();
-        if (google) {
-          printGoogleInstructions();
-        }
-        if (apple) {
-          printAppleInstructions();
-        }
       },
       remove: () async {
         print('Removing API Service...');
         await removeAlreadyRun("api");
-        removeDependenciesFromPubspecSync(
-          [
-            'http',
-            'google_sign_in',
-            'sign_in_with_apple',
-          ],
-          null,
-        );
+        removeDependenciesFromPubspecSync(['http'], null);
         await _removeAuthService();
         await _removeAPIService();
         await _removeConstants();
         await _removeUserStateService();
         await _removeUserModel();
-        formatCode();
-        dartFixCode();
       },
       rejectAdd: () async {
         print("Can't add API Service as it's already configured.");
@@ -110,20 +80,8 @@ class GenerateAPIService extends Command {
         print("Can't remove API Service as it's not yet configured.");
       },
     );
-  }
-
-  void printGoogleInstructions() {
-    printColor(
-      '! Make sure you follow the steps in https://pub.dev/packages/google_sign_in to complete the Google Sign In configuration',
-      ColorText.green,
-    );
-  }
-
-  void printAppleInstructions() {
-    printColor(
-      '! Make sure you follow the steps in https://pub.dev/packages/sign_in_with_apple to complete the Apple Sign In configuration',
-      ColorText.green,
-    );
+    formatCode();
+    dartFixCode();
   }
 
   Future<void> _removeConstants() async {
@@ -147,27 +105,27 @@ class GenerateAPIService extends Command {
   }
 
   Future<void> _addConstants(String projectName) async {
-    File(path.join('lib', 'util', 'constants.dart'))
+    await File(path.join('lib', 'util', 'constants.dart'))
         .writeAsString(constants.content(projectName));
   }
 
   Future<void> _addAPIService(String projectName) async {
-    File(path.join('lib', 'service', 'api_service.dart'))
+    await File(path.join('lib', 'service', 'api_service.dart'))
         .writeAsString(api_service.content(projectName));
   }
 
   Future<void> _addAuthService(String projectName) async {
-    File(path.join('lib', 'service', 'auth_service.dart'))
+    await File(path.join('lib', 'service', 'auth_service.dart'))
         .writeAsString(auth_service.content(projectName));
   }
 
   Future<void> _addUserModel() async {
-    File(path.join('lib', 'model', 'user.dart'))
+    await File(path.join('lib', 'model', 'user.dart'))
         .writeAsString(user_model.content());
   }
 
   Future<void> _addUserStateService() async {
-    File(path.join('lib', 'service', 'user_state_service.dart'))
+    await File(path.join('lib', 'service', 'user_state_service.dart'))
         .writeAsString(user_state_service.content());
   }
 }

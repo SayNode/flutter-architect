@@ -96,7 +96,7 @@ class GenerateSplashService extends Command {
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
     String mainPath = path.join('lib', 'main.dart');
-    await deleteLinesFromFile(mainPath, [
+    await removeLinesFromFile(mainPath, [
       "await Future.delayed(const Duration(seconds: 2));",
       "FlutterNativeSplash.remove();",
       "FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);",

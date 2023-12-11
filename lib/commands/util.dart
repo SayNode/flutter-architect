@@ -145,7 +145,7 @@ Future<void> addAlreadyRun(String command) async {
 
 /// Remove [command] as already ran.
 Future<void> removeAlreadyRun(String command) async {
-  await deleteLinesFromFile(
+  await removeLinesFromFile(
     'added_boilerplate.txt',
     [command],
   );
@@ -153,7 +153,7 @@ Future<void> removeAlreadyRun(String command) async {
 
 /// Remove lines that start with [command] as already ran.
 Future<void> removeAlreadyRunStartingWith(String command) async {
-  await deleteLinesStartingWithFromFile(
+  await removeLinesStartingWithFromFile(
     'added_boilerplate.txt',
     command,
   );
@@ -189,7 +189,7 @@ Future<bool> checkIfAlreadyRunWithReturn(String command) async {
 }
 
 /// Delete [lines] from [file].
-Future<void> deleteLinesFromFile(String file, List<String> lines) async {
+Future<void> removeLinesFromFile(String file, List<String> lines) async {
   var fileLines = await File(file).readAsLines();
   var newFileLines = <String>[];
   for (var line in fileLines) {
@@ -201,7 +201,7 @@ Future<void> deleteLinesFromFile(String file, List<String> lines) async {
 }
 
 /// Delete lines from [file] that start with [startsWith].
-Future<void> deleteLinesStartingWithFromFile(
+Future<void> removeLinesStartingWithFromFile(
     String file, String startsWith) async {
   var fileLines = await File(file).readAsLines();
   var newFileLines = <String>[];
@@ -214,7 +214,7 @@ Future<void> deleteLinesStartingWithFromFile(
 }
 
 /// Delete lines from [file], from [line1] to [line2].
-Future<void> deleteLineRangeFromFile(
+Future<void> removeLineRangeFromFile(
     String file, String line1, String line2) async {
   var fileLines = await File(file).readAsLines();
   var newFileLines = <String>[];
@@ -234,10 +234,10 @@ Future<void> deleteLineRangeFromFile(
 }
 
 /// Delete string [text] from file in path [file].
-Future<void> deleteTextFromFile(String file, String text) async {
+Future<void> removeTextFromFile(String file, String text) async {
   List<String> lines = text.split('\n');
 
-  await deleteLinesAfterFromFile(
+  await removeLinesAfterFromFile(
     file,
     lines.first,
     lines.length - 1,
@@ -246,7 +246,7 @@ Future<void> deleteTextFromFile(String file, String text) async {
 }
 
 /// Delete [amount] lines from file in path [file], after line [line].
-Future<void> deleteLinesAfterFromFile(String file, String line, int amount,
+Future<void> removeLinesAfterFromFile(String file, String line, int amount,
     {bool includeFirst = false}) async {
   print('deleteLinesAfterFromFile: $line, $amount');
   var fileLines = await File(file).readAsLines();

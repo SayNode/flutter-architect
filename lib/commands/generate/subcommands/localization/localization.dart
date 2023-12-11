@@ -88,7 +88,7 @@ class GenerateLocalizationService extends Command {
   Future<void> _removeMainChanges() async {
     String mainPath = path.join('lib', 'main.dart');
 
-    await deleteLinesFromFile(
+    await removeLinesFromFile(
       mainPath,
       [
         "import 'service/localization_controller.dart';",
@@ -104,7 +104,7 @@ class GenerateLocalizationService extends Command {
       ],
     );
 
-    await deleteLinesAfterFromFile(
+    await removeLinesAfterFromFile(
       mainPath,
       '//End MaterialApp',
       2,

@@ -109,7 +109,7 @@ class GenerateStorageService extends Command {
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
     String mainPath = path.join('lib', 'main.dart');
-    await deleteLinesFromFile(mainPath, [
+    await removeLinesFromFile(mainPath, [
       "import 'service/storage_service.dart';",
       'final StorageService storage = Get.put<StorageService>(StorageService());',
       "await storage.init();",

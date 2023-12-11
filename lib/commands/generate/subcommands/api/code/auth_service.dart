@@ -6,13 +6,14 @@ content(String projectName) {
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 import '../model/user.dart';
 import 'api_service.dart';
-import '../service/storage_service.dart';
+import 'storage_service.dart';
 import 'user_state_service.dart';
-import 'package:http/http.dart' as http;
 
 enum ProviderTypes {
   none,
@@ -22,8 +23,9 @@ enum ProviderTypes {
 }
 
 class AuthResponse {
-  AuthResponse(this.message, this.success);
-  final String message;
+  AuthResponse(this.info, this.success);
+
+  final Map<String, dynamic> info;
   final bool success;
 }
 
@@ -32,12 +34,20 @@ class AuthService extends GetxService {
   StorageService storageService = Get.put(StorageService());
   UserStateService userStateService = Get.put(UserStateService());
   APIService apiService = Get.put(APIService());
-
+  
   String verificationToken = '';
   String verificationUid = '';
 
-  String parseError(http.Response response) {
+  void init() {
+    debugPrint('AuthService - initializing...');
+  }
+
+  String unexpectedError(http.Response response) {
     return '[Status Code : \${response.statusCode}] \${response.body}';
+  }
+
+  Map<String, dynamic> parseErrorMap(http.Response response) {
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   // Log the user in. This function is not responsible for any navigation.
@@ -69,11 +79,17 @@ class AuthService extends GetxService {
             'AuthService - user logged in: \${userStateService.user.value.email}',
           );
 
+          // Disconnect other providers
+          await _disconnectProviders();
+
           await storageService.setString('email', email);
           await storageService.setString('password', password);
           await storageService.setInt('provider', ProviderTypes.email.index);
 
-          return AuthResponse('Successfully logged in.', true);
+          return AuthResponse(
+            <String, dynamic>{'success': 'Successfully logged in.'},
+            true,
+          );
         } catch (error) {
           // Request parsing went wrong:
           throw Exception('AuthService - error while parsing the user: \$error');
@@ -81,9 +97,9 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${parseError(response)}',
+          'AuthService - \${response.statusCode} \${response.body}',
         );
-        return AuthResponse(parseError(response), false);
+        return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
@@ -101,14 +117,19 @@ class AuthService extends GetxService {
       if (response.statusCode == 200) {
         authenticationToken = '';
         userStateService.clear();
+        // Disconnect other providers
+        await _disconnectProviders();
         await storageService.setString('email', '');
         await storageService.setString('password', '');
         await storageService.setInt('provider', ProviderTypes.none.index);
-        return AuthResponse('Successful logout.', true);
+        return AuthResponse(
+          <String, dynamic>{'success': 'Successful logout.'},
+          true,
+        );
       } else {
         // Unexpected status code:
         throw Exception(
-          'AuthService - error while logging out the user \${parseError(response)}',
+          'AuthService - error while logging out the user \${unexpectedError(response)}',
         );
       }
     } catch (e) {
@@ -151,12 +172,18 @@ class AuthService extends GetxService {
             'AuthService - user registered in: \${userStateService.user.value.email}',
           );
 
+          // Disconnect other providers
+          await _disconnectProviders();
+
           await storageService.setString('email', email);
           await storageService.setString('password', password);
           await storageService.setBool('biometrics', value: biometrics);
           await storageService.setInt('provider', ProviderTypes.email.index);
 
-          return AuthResponse('Successfully signed up.', true);
+          return AuthResponse(
+            <String, dynamic>{'success': 'Successfully signed up.'},
+            true,
+          );
         } catch (error) {
           // Request parsing went wrong:
           throw Exception('AuthService - error while parsing the user: \$error');
@@ -164,9 +191,9 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${parseError(response)}',
+          'AuthService - \${unexpectedError(response)}',
         );
-        return AuthResponse(parseError(response), false);
+        return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
@@ -188,13 +215,16 @@ class AuthService extends GetxService {
 
       if (response.statusCode == 200) {
         debugPrint('AuthService - Reset Code Sent');
-        return AuthResponse('Reset code sent.', true);
+        return AuthResponse(
+          <String, dynamic>{'success': 'Reset code sent.'},
+          true,
+        );
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${parseError(response)}',
+          'AuthService - \${unexpectedError(response)}',
         );
-        return AuthResponse(parseError(response), false);
+        return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
@@ -225,16 +255,22 @@ class AuthService extends GetxService {
           debugPrint(
             'AuthService - verification Token and UID: \$verificationUid \$verificationToken',
           );
-          return AuthResponse('Verification code is valid.', true);
+          return AuthResponse(
+            <String, dynamic>{'success': 'Verification code is valid.'},
+            true,
+          );
         } catch (error) {
-          return AuthResponse(error.toString(), false);
+          return AuthResponse(
+            <String, dynamic>{'error': error.toString()},
+            false,
+          );
         }
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${parseError(response)}',
+          'AuthService - \${unexpectedError(response)}',
         );
-        return AuthResponse(parseError(response), false);
+        return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
@@ -261,13 +297,16 @@ class AuthService extends GetxService {
       );
 
       if (response.statusCode == 200) {
-        return AuthResponse('Password changed.', true);
+        return AuthResponse(
+          <String, dynamic>{'success': 'Password changed.'},
+          true,
+        );
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${parseError(response)}',
+          'AuthService - \${unexpectedError(response)}',
         );
-        return AuthResponse(parseError(response), false);
+        return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
@@ -295,5 +334,10 @@ class AuthService extends GetxService {
       );
     }
   }
-}""";
+
+  Future<void> _disconnectProviders() async {
+    debugPrint('AuthService - disconnecting providers');
+  }
+}
+""";
 }
