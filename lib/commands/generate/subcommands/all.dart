@@ -12,14 +12,14 @@ import 'package:project_initialization_tool/commands/generate/subcommands/typogr
 import 'package:project_initialization_tool/commands/generate/subcommands/wallet/wallet.dart';
 import 'package:project_initialization_tool/commands/util.dart';
 
-class AllGenerator extends Command {
+class AllGeneratorService extends Command {
   @override
   String get description => 'Add every component to this project;';
 
   @override
   String get name => 'all';
 
-  AllGenerator() {
+  AllGeneratorService() {
     // Add parser options or flag here
     argParser.addFlag('force',
         defaultsTo: false, help: 'Force replace in case it already exists.');
