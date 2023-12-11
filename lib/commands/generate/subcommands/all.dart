@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/crashalytics.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/localization/localization.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/splash.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/signin/signin.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/theme/theme.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/typography/typography.dart';
@@ -41,5 +44,12 @@ class AllGenerator extends Command {
     await walletService.run();
     var crashlyticsService = GenerateCrashalyticsService();
     await crashlyticsService.run();
+    var splashService = GenerateSplashService();
+    await splashService.run();
+    var apiService = GenerateAPIService();
+    await apiService.run();
+    var signinService = GenerateSigninService();
+    await signinService.runGoogle();
+    await signinService.runApple();
   }
 }

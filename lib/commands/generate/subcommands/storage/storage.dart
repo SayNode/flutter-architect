@@ -34,11 +34,16 @@ class GenerateStorageService extends Command {
   }
 
   Future<void> _run() async {
-    if (argResults?['secure'] == true) {
-      await runSecure();
-    }
-    if (argResults?['shared'] == true) {
-      await runShared();
+    if (argResults?['secure'] || argResults?['shared']) {
+      if (argResults?['secure'] == true) {
+        await runSecure();
+      }
+      if (argResults?['shared'] == true) {
+        await runShared();
+      }
+    } else {
+      print(
+          'Please specify which storage service you want to create. Use --help for more info.');
     }
   }
 

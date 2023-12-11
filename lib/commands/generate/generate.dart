@@ -17,10 +17,10 @@ class Generator extends Command {
   //-- Singleton
   Generator._privateConstructor() {
     // Add Sub Commands here
-    addSubcommand(GenerateThemeService());
     addSubcommand(GenerateStorageService());
-    addSubcommand(GenerateLocalizationService());
+    addSubcommand(GenerateThemeService());
     addSubcommand(GenerateTypographyService());
+    addSubcommand(GenerateLocalizationService());
     addSubcommand(GenerateWalletService());
     addSubcommand(GenerateCrashalyticsService());
     addSubcommand(GenerateSplashService());

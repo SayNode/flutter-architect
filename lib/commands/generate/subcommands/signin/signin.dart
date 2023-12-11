@@ -34,19 +34,24 @@ class GenerateSigninService extends Command {
   }
 
   Future<void> _run() async {
-    // Check if API Service has already been set up. Signin requires API Service.
-    // If not, run GenerateAPIService.run().
-    bool value = await checkIfAlreadyRunWithReturn("api");
-    if (!value) {
-      var apiService = GenerateAPIService();
-      await apiService.run();
-    }
+    if (argResults?['google'] || argResults?['apple']) {
+      // Check if API Service has already been set up. Signin requires API Service.
+      // If not, run GenerateAPIService.run().
+      bool value = await checkIfAlreadyRunWithReturn("api");
+      if (!value) {
+        var apiService = GenerateAPIService();
+        await apiService.run();
+      }
 
-    if (argResults?['google'] == true) {
-      await runGoogle();
-    }
-    if (argResults?['apple'] == true) {
-      await runApple();
+      if (argResults?['google'] == true) {
+        await runGoogle();
+      }
+      if (argResults?['apple'] == true) {
+        await runApple();
+      }
+    } else {
+      print(
+          'Please specify which signin service you want to create. Use --help for more info.');
     }
   }
 
