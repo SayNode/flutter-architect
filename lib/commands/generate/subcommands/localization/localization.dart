@@ -112,8 +112,8 @@ class GenerateLocalizationService extends Command {
   }
 
   Future<void> _addLanguageModel() async {
-    File(path.join('lib', 'model', 'language_model.dart'))
-        .writeAsString(language_model.content());
+    await writeFileWithPrefix(path.join('lib', 'model', 'language_model.dart'),
+        language_model.content());
   }
 
   Future<void> _addLanguageJson() async {
@@ -122,13 +122,14 @@ class GenerateLocalizationService extends Command {
   }
 
   Future<void> _addMessageFile() async {
-    File(path.join('lib', 'model', 'message.dart'))
-        .writeAsString(message.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'model', 'message.dart'), message.content());
   }
 
   Future<void> _addLocalizationController() async {
-    File(path.join('lib', 'service', 'localization_controller.dart'))
-        .writeAsString(localization_controller.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'localization_controller.dart'),
+        localization_controller.content());
   }
 
   Future<void> _addMainChanges() async {

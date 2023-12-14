@@ -83,7 +83,8 @@ class GenerateTypographyService extends Command {
     }
     content +=
         'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}';
-    File(path.join('lib', 'theme', 'typography.dart')).writeAsString(content);
+    await writeFileWithPrefix(
+        path.join('lib', 'theme', 'typography.dart'), content);
   }
 
   Future<dynamic> _getTextStyles(List styles) async {

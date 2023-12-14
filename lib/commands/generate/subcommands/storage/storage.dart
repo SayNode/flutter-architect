@@ -145,12 +145,14 @@ class GenerateStorageService extends Command {
   }
 
   Future<void> _addSharedStorageService() async {
-    File(path.join('lib', 'service', 'storage_service.dart'))
-        .writeAsString(shared_storage.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'storage_service.dart'),
+        shared_storage.content());
   }
 
   Future<void> _addSecureStorageService() async {
-    File(path.join('lib', 'service', 'secure_storage_service.dart'))
-        .writeAsString(secure_storage.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'secure_storage_service.dart'),
+        secure_storage.content());
   }
 }

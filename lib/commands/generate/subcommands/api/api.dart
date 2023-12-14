@@ -105,27 +105,28 @@ class GenerateAPIService extends Command {
   }
 
   Future<void> _addConstants(String projectName) async {
-    await File(path.join('lib', 'util', 'constants.dart'))
-        .writeAsString(constants.content(projectName));
+    await writeFileWithPrefix(path.join('lib', 'util', 'constants.dart'),
+        constants.content(projectName));
   }
 
   Future<void> _addAPIService(String projectName) async {
-    await File(path.join('lib', 'service', 'api_service.dart'))
-        .writeAsString(api_service.content(projectName));
+    await writeFileWithPrefix(path.join('lib', 'service', 'api_service.dart'),
+        api_service.content(projectName));
   }
 
   Future<void> _addAuthService(String projectName) async {
-    await File(path.join('lib', 'service', 'auth_service.dart'))
-        .writeAsString(auth_service.content(projectName));
+    await writeFileWithPrefix(path.join('lib', 'service', 'auth_service.dart'),
+        auth_service.content(projectName));
   }
 
   Future<void> _addUserModel() async {
-    await File(path.join('lib', 'model', 'user.dart'))
-        .writeAsString(user_model.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'model', 'user.dart'), user_model.content());
   }
 
   Future<void> _addUserStateService() async {
-    await File(path.join('lib', 'service', 'user_state_service.dart'))
-        .writeAsString(user_state_service.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'user_state_service.dart'),
+        user_state_service.content());
   }
 }

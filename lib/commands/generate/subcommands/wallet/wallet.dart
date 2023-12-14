@@ -84,12 +84,13 @@ class GenerateWalletService extends Command {
   }
 
   Future<void> _addWalletService() async {
-    File(path.join('lib', 'service', 'wallet_service.dart'))
-        .writeAsString(wallet_service.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'wallet_service.dart'),
+        wallet_service.content());
   }
 
   Future<void> _addWalletModel() async {
-    File(path.join('lib', 'model', 'wallet_model.dart'))
-        .writeAsString(wallet_model.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'model', 'wallet_model.dart'), wallet_model.content());
   }
 }

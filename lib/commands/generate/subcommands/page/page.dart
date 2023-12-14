@@ -89,27 +89,27 @@ class GeneratePageService extends Command {
         .toLowerCase();
   }
 
-  void _createController(String pascalCase, String snakeCase) {
-    File(
-      path.join(
-        'lib',
-        'page',
-        snakeCase,
-        'controller',
-        '${snakeCase}_controller.dart',
-      ),
-    ).writeAsStringSync(controller.content(pascalCase, snakeCase));
+  Future<void> _createController(String pascalCase, String snakeCase) async {
+    await writeFileWithPrefix(
+        path.join(
+          'lib',
+          'page',
+          snakeCase,
+          'controller',
+          '${snakeCase}_controller.dart',
+        ),
+        controller.content(pascalCase, snakeCase));
   }
 
-  void _createPage(String pascalCase, String snakeCase) {
-    File(
-      path.join(
-        'lib',
-        'page',
-        snakeCase,
-        '${snakeCase}_page.dart',
-      ),
-    ).writeAsStringSync(page.content(pascalCase, snakeCase));
+  Future<void> _createPage(String pascalCase, String snakeCase) async {
+    await writeFileWithPrefix(
+        path.join(
+          'lib',
+          'page',
+          snakeCase,
+          '${snakeCase}_page.dart',
+        ),
+        page.content(pascalCase, snakeCase));
   }
 
   Future<void> _handleTheme(pascalCase, snakeCase) async {

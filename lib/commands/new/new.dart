@@ -58,7 +58,7 @@ class Creator extends Command {
     await addDependenciesToPubspec(['get'], path.join(projectName));
     createCommonFolderStructure();
     _createSplashPage();
-    rewriteMain();
+    _rewriteMain();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
 
@@ -192,15 +192,16 @@ class Creator extends Command {
     print('- $directory/widget ✔');
   }
 
-  _createSplashPage() {
-    File(
-      path.join(
-        projectName,
-        'lib',
-        'page',
-        'splash_page.dart',
-      ),
-    ).writeAsString(splash_page.content()).then((File file) {
+  void _createSplashPage() {
+    writeFileWithPrefix(
+            path.join(
+              projectName,
+              'lib',
+              'page',
+              'splash_page.dart',
+            ),
+            splash_page.content())
+        .then((File file) {
       print('-- /lib/page/splash_page.dart ✔');
     });
   }
@@ -208,14 +209,15 @@ class Creator extends Command {
   helperGenerator() {}
 
   /// Create the main.dart file
-  void rewriteMain() {
-    File(
-      path.join(
-        projectName,
-        'lib',
-        'main.dart',
-      ),
-    ).writeAsString(main_file.content(projectName)).then((File file) {
+  void _rewriteMain() {
+    writeFileWithPrefix(
+            path.join(
+              projectName,
+              'lib',
+              'main.dart',
+            ),
+            main_file.content(projectName))
+        .then((File file) {
       print('-- /lib/main.dart ✔');
     });
   }

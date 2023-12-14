@@ -202,30 +202,34 @@ class GenerateCrashalyticsService extends Command {
   }
 
   Future<void> _addErrorPage(String projectName) async {
-    await File(path.join('lib', 'page', 'error', 'error_page.dart'))
-        .writeAsString(error_page.content(projectName));
+    await writeFileWithPrefix(
+        path.join('lib', 'page', 'error', 'error_page.dart'),
+        error_page.content(projectName));
   }
 
   Future<void> _addErrorController() async {
-    await File(path.join(
-            'lib', 'page', 'error', 'controller', 'error_controller.dart'))
-        .writeAsString(error_controller.content());
+    await writeFileWithPrefix(
+        path.join(
+            'lib', 'page', 'error', 'controller', 'error_controller.dart'),
+        error_controller.content());
   }
 
   Future<void> _addUtil() async {
-    await File(path.join('lib', 'util', 'util.dart'))
-        .writeAsString(util.content());
+    await writeFileWithPrefix(
+        path.join('lib', 'util', 'util.dart'), util.content());
   }
 
   Future<void> _addNetworkService(String projectName) async {
-    await File(path.join('lib', 'service', 'network_service.dart'))
-        .writeAsString(network_service.content(projectName));
+    await writeFileWithPrefix(
+        path.join('lib', 'service', 'network_service.dart'),
+        network_service.content(projectName));
   }
 
   Future<void> _addLostConnectionPage() async {
-    await File(path.join(
-            'lib', 'page', 'lost_connection', 'lost_connection_page.dart'))
-        .writeAsString(lost_connection_page.content());
+    await writeFileWithPrefix(
+        path.join(
+            'lib', 'page', 'lost_connection', 'lost_connection_page.dart'),
+        lost_connection_page.content());
   }
 
   Future<void> _addFirebaseConfigurationScript() async {

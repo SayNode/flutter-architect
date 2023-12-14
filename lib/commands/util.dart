@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:project_initialization_tool/commands/new/files/prefix.dart'
+    as prefix;
 
 /// Logic for building a component.
 Future<void> componentBuilder({
@@ -328,6 +330,12 @@ Future<String> getProjectName() async {
     }
   });
   return name;
+}
+
+String get getPrefix => prefix.content();
+
+Future<File> writeFileWithPrefix(String path, String content) async {
+  return await File(path).writeAsString(prefix.content() + content);
 }
 
 spinnerLoading(Function function) async {

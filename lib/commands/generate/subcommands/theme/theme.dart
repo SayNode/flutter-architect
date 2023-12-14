@@ -161,7 +161,7 @@ class GenerateThemeService extends Command {
           "static const Color ${color['name']} = Color.fromRGBO(${color['r']}, ${color['g']}, ${color['b']}, ${color['a']});\n\n";
     }
     content += '}';
-    await File(path.join('lib', 'theme', 'color.dart')).writeAsString(content);
+    await writeFileWithPrefix(path.join('lib', 'theme', 'color.dart'), content);
   }
 
   Future<void> _addThemeFile(List colorList) async {
@@ -195,12 +195,12 @@ class GenerateThemeService extends Command {
     content +=
         "@override \nThemeExtension<CustomTheme> lerp( \ncovariant ThemeExtension<CustomTheme>? other, double t) { \n// TODO: implement lerp \nthrow UnimplementedError(); \n} \n}";
 
-    await File(path.join('lib', 'theme', 'theme.dart')).writeAsString(content);
+    await writeFileWithPrefix(path.join('lib', 'theme', 'theme.dart'), content);
   }
 
   Future<void> _addThemeServiceFile(String name) async {
-    await File(path.join('lib', 'service', 'theme_service.dart'))
-        .writeAsString(theme_service.content(name));
+    await writeFileWithPrefix(path.join('lib', 'service', 'theme_service.dart'),
+        theme_service.content(name));
   }
 
   Future<void> _modifyColorFile(List colorList) async {
