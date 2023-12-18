@@ -10,3 +10,6 @@ Theme:
 - add theme in GetMaterialApp
 
 - fix secure storage not being added if you allready have shared and you try to add both and viceversa
+
+ Storage:
+ -- add warning in console if flags are missing
