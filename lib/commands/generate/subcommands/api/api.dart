@@ -62,6 +62,7 @@ class GenerateAPIService extends Command {
         await _addConstants(projectName);
         await _addAPIService(projectName);
         await _addAuthService(projectName);
+        await _addMainChanges(projectName);
       },
       remove: () async {
         print('Removing API Service...');
@@ -72,6 +73,7 @@ class GenerateAPIService extends Command {
         await _removeConstants();
         await _removeUserStateService();
         await _removeUserModel();
+        await _removeMainChanges();
       },
       rejectAdd: () async {
         print("Can't add API Service as it's already configured.");
@@ -82,6 +84,10 @@ class GenerateAPIService extends Command {
     );
     formatCode();
     dartFixCode();
+  }
+
+  Future<void> _removeMainChanges() async {
+    await removeLinesFromFile(path.join('lib', 'main.dart'), ['.devMode']);
   }
 
   Future<void> _removeConstants() async {
@@ -102,6 +108,16 @@ class GenerateAPIService extends Command {
 
   Future<void> _removeUserStateService() async {
     await File(path.join('lib', 'service', 'user_state_service.dart')).delete();
+  }
+
+  Future<void> _addMainChanges(String projectName) async {
+    await addLinesAfterLineInFile(path.join('lib', 'main.dart'), {
+      'return GetMaterialApp(': [
+        'debugShowCheckedModeBanner: ${projectName.capitalize()}Constants.devMode,',
+      ]
+    }, leading: [
+      "import './util/constants.dart';"
+    ]);
   }
 
   Future<void> _addConstants(String projectName) async {
