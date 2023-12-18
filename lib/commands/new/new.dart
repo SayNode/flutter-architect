@@ -66,6 +66,21 @@ class Creator extends Command {
         .writeAsString('');
     await addWorkflow();
     await deleteUnusedFolders();
+    await addMultidex();
+  }
+
+  Future<void> addMultidex() async {
+    if (argResults?['android'] == true) {
+      await addLinesAfterLineInFile(
+          path.join(projectName, 'android', 'app', 'build.gradle'), {
+        'defaultConfig {': ['        multiDexEnabled true'],
+      });
+      await replaceLineInFile(
+        path.join(projectName, 'android', 'app', 'build.gradle'),
+        'dependencies {}',
+        "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",
+      );
+    }
   }
 
   deleteUnusedFolders() {
