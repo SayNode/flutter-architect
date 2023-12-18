@@ -6,6 +6,10 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/util.dart';
 
+extension StringCapitalize on String {
+  String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
+}
+
 class GenerateTypographyService extends Command {
   late final String figmaFileKey;
   late final String figmaToken;
@@ -79,7 +83,7 @@ class GenerateTypographyService extends Command {
         "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n";
     for (var textStyle in textStyleList) {
       content +=
-          "TextStyle get ${textStyle['name']} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
+          "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
     }
     content +=
         'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}';
