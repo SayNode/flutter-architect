@@ -91,8 +91,8 @@ class Creator extends Command {
 
   Future<void> addWorkflow() async {
     Directory(path.join(projectName, '.github')).createSync();
-    Directory(path.join(projectName, '.github', 'workflow')).createSync();
-    File(path.join(projectName, '.github', 'workflow', 'lint_action.yaml'))
+    Directory(path.join(projectName, '.github', 'workflows')).createSync();
+    File(path.join(projectName, '.github', 'workflows', 'lint_action.yaml'))
         .writeAsString(
             " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze");
   }
