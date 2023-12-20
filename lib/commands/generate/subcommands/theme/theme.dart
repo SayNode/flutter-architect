@@ -299,8 +299,8 @@ class GenerateThemeService extends Command {
         'await storage.init();': [
           "Get.put<ThemeService>(ThemeService());",
         ],
+        '/// https://saynode.ch': ["import 'service/theme_service.dart';"],
       },
-      leading: ["import 'service/theme_service.dart';"],
     );
   }
 

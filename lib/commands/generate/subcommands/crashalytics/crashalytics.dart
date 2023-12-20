@@ -10,20 +10,20 @@ import 'package:project_initialization_tool/commands/generate/subcommands/crasha
     as firebase_configuration;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/lost_connection_page.dart'
     as lost_connection_page;
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/handle_error.dart'
+    as handle_error;
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/imports.dart'
+    as imports;
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/material_app_flag.dart'
+    as material_app_flag;
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/restart_widget.dart'
+    as restart_widget;
+import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/wrapper.dart'
+    as wrapper;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/network_service.dart'
     as network_service;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/util.dart'
     as util;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/handle_error.dart'
-    as handle_error;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/wrapper.dart'
-    as wrapper;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/imports.dart'
-    as imports;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/restart_widget.dart'
-    as restart_widget;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/material_app_flag.dart'
-    as material_app_flag;
 import 'package:project_initialization_tool/commands/util.dart';
 
 class GenerateCrashalyticsService extends Command {
@@ -183,11 +183,11 @@ class GenerateCrashalyticsService extends Command {
         'bool isFirstRun = false;': [
           restart_widget.content(),
           handle_error.content(),
-        ]
+        ],
+        '/// https://saynode.ch': [
+          imports.content(),
+        ],
       },
-      leading: [
-        imports.content(),
-      ],
     );
   }
 

@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/generate/subcommands/api/code/constants.dart'
-    as constants;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/code/api_service.dart'
     as api_service;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/code/auth_service.dart'
     as auth_service;
+import 'package:project_initialization_tool/commands/generate/subcommands/api/code/constants.dart'
+    as constants;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/code/user_model.dart'
     as user_model;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/code/user_state_service.dart'
@@ -114,10 +114,11 @@ class GenerateAPIService extends Command {
     await addLinesAfterLineInFile(path.join('lib', 'main.dart'), {
       'return GetMaterialApp(': [
         'debugShowCheckedModeBanner: ${projectName.capitalize()}Constants.devMode,',
-      ]
-    }, leading: [
-      "import './util/constants.dart';"
-    ]);
+      ],
+      '/// https://saynode.ch': [
+        "import './util/constants.dart';",
+      ],
+    });
   }
 
   Future<void> _addConstants(String projectName) async {

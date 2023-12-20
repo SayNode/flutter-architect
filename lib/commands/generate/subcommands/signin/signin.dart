@@ -1,11 +1,10 @@
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/google.dart'
-    as google;
 import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/apple.dart'
     as apple;
-import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/google.dart'
+    as google;
 import 'package:project_initialization_tool/commands/util.dart';
 
 class GenerateSigninService extends Command {
@@ -145,13 +144,13 @@ class GenerateSigninService extends Command {
     await addLinesAfterLineInFile(
       authPath,
       {
+        '/// https://saynode.ch': [google.imports()],
         'APIService apiService = Get.put(APIService());': [
           google.initialization()
         ],
         'void init() {': [google.initContent()],
         'Future<void> _disconnectProviders() async {': [google.disconnect()],
       },
-      leading: [google.imports()],
     );
 
     await addLinesBeforeLineInFile(
@@ -168,9 +167,9 @@ class GenerateSigninService extends Command {
     await addLinesAfterLineInFile(
       authPath,
       {
+        '/// https://saynode.ch': [apple.imports()],
         'Future<void> _disconnectProviders() async {': [apple.disconnect()],
       },
-      leading: [apple.imports()],
     );
 
     await addLinesBeforeLineInFile(
