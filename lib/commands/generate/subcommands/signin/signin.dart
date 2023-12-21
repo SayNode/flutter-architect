@@ -1,11 +1,10 @@
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/google.dart'
-    as google;
 import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/apple.dart'
     as apple;
-import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
+import 'package:project_initialization_tool/commands/generate/subcommands/signin/code/google.dart'
+    as google;
 import 'package:project_initialization_tool/commands/util.dart';
 
 class GenerateSigninService extends Command {

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/crashalytics.dart';
