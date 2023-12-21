@@ -1,0 +1,1 @@
+cd .. && rm -r testing && dart compile exe lib/project_initialization_tool.dart -o generator.exe && generator new --name=testing --ios --android && cd testing

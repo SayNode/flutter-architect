@@ -55,10 +55,10 @@ class Creator extends Command {
     await Process.run('flutter', ['create', projectName, '-e'],
         runInShell: true);
 
-    await addDependencyToPubspec('get', path.join(projectName));
+    await addDependenciesToPubspec(['get'], path.join(projectName));
     createCommonFolderStructure();
     _createSplashPage();
-    rewriteMain();
+    _rewriteMain();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
 
@@ -66,26 +66,55 @@ class Creator extends Command {
         .writeAsString('');
     await addWorkflow();
     await deleteUnusedFolders();
+    await addMultidex();
+  }
+
+  Future<void> addMultidex() async {
+    if (argResults?['android'] == true) {
+      await addLinesAfterLineInFile(
+          path.join(projectName, 'android', 'app', 'build.gradle'), {
+        'defaultConfig {': ['        multiDexEnabled true'],
+      });
+      await replaceLineInFile(
+        path.join(projectName, 'android', 'app', 'build.gradle'),
+        'dependencies {}',
+        "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",
+      );
+    }
   }
 
   deleteUnusedFolders() {
     if (argResults?['ios'] == false) {
-      Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'ios')).existsSync()) {
+        Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['android'] == false) {
-      Directory(path.join(projectName, 'android')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'android')).existsSync()) {
+        Directory(path.join(projectName, 'android'))
+            .deleteSync(recursive: true);
+      }
     }
     if (argResults?['macos'] == false) {
-      Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'macos')).existsSync()) {
+        Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['windows'] == false) {
-      Directory(path.join(projectName, 'windows')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'windows')).existsSync()) {
+        Directory(path.join(projectName, 'windows'))
+            .deleteSync(recursive: true);
+      }
     }
     if (argResults?['web'] == false) {
-      Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'web')).existsSync()) {
+        Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+      }
     }
     if (argResults?['linux'] == false) {
-      Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+      if (Directory(path.join(projectName, 'linux')).existsSync()) {
+        Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+      }
     }
   }
 
@@ -94,7 +123,7 @@ class Creator extends Command {
     Directory(path.join(projectName, '.github', 'workflows')).createSync();
     File(path.join(projectName, '.github', 'workflows', 'lint_action.yaml'))
         .writeAsString(
-            " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze");
+            " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos");
   }
 
   Future<void> rewriteAnalysisOptions() async {
@@ -178,15 +207,16 @@ class Creator extends Command {
     print('- $directory/widget ✔');
   }
 
-  _createSplashPage() {
-    File(
-      path.join(
-        projectName,
-        'lib',
-        'page',
-        'splash_page.dart',
-      ),
-    ).writeAsString(splash_page.content()).then((File file) {
+  void _createSplashPage() {
+    writeFileWithPrefix(
+            path.join(
+              projectName,
+              'lib',
+              'page',
+              'splash_page.dart',
+            ),
+            splash_page.content())
+        .then((File file) {
       print('-- /lib/page/splash_page.dart ✔');
     });
   }
@@ -194,14 +224,15 @@ class Creator extends Command {
   helperGenerator() {}
 
   /// Create the main.dart file
-  void rewriteMain() {
-    File(
-      path.join(
-        projectName,
-        'lib',
-        'main.dart',
-      ),
-    ).writeAsString(main_file.content(projectName)).then((File file) {
+  void _rewriteMain() {
+    writeFileWithPrefix(
+            path.join(
+              projectName,
+              'lib',
+              'main.dart',
+            ),
+            main_file.content(projectName))
+        .then((File file) {
       print('-- /lib/main.dart ✔');
     });
   }
