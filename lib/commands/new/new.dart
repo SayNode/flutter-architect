@@ -163,9 +163,7 @@ class Creator extends Command {
         if (line.contains('flutter:') &&
             pubspec.contains('dev_dependencies:\n')) {
           pubspec += '  assets:\n';
-          pubspec += '    - asset/image/\n';
-          pubspec += '    - asset/locale/\n';
-          pubspec += '    - asset/video/\n';
+          pubspec += '    - asset/\n';
           pubspec += '\n';
         }
       }
