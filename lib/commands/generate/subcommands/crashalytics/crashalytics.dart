@@ -184,7 +184,7 @@ class GenerateCrashalyticsService extends Command {
           restart_widget.content(),
           handle_error.content(),
         ],
-        '/// https://saynode.ch': [
+        '// https://saynode.ch': [
           imports.content(),
         ],
       },

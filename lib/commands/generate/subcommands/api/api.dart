@@ -115,7 +115,7 @@ class GenerateAPIService extends Command {
       'return GetMaterialApp(': [
         'debugShowCheckedModeBanner: ${projectName.capitalize()}Constants.devMode,',
       ],
-      '/// https://saynode.ch': [
+      '// https://saynode.ch': [
         "import './util/constants.dart';",
       ],
     });

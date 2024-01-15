@@ -137,7 +137,7 @@ class GeneratePageService extends Command {
       await addLinesAfterLineInFile(
         file,
         {
-          '/// https://saynode.ch': [
+          '// https://saynode.ch': [
             "import '../../service/theme_service.dart';",
             "import '../../theme/theme.dart';",
           ],

@@ -129,7 +129,7 @@ class GenerateStorageService extends Command {
           "final StorageService storage = Get.put<StorageService>(StorageService());",
           "await storage.init();",
         ],
-        '/// https://saynode.ch': ["import 'service/storage_service.dart';"],
+        '// https://saynode.ch': ["import 'service/storage_service.dart';"],
       },
     );
   }

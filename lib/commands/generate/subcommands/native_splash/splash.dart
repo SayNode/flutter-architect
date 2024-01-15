@@ -123,7 +123,7 @@ class GenerateSplashService extends Command {
         'WidgetsFlutterBinding.ensureInitialized();': [
           "FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);",
         ],
-        '/// https://saynode.ch': [
+        '// https://saynode.ch': [
           "import 'package:flutter_native_splash/flutter_native_splash.dart';",
         ],
       },
