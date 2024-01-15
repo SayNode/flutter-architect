@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/util.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/page/code/controller.dart'
     as controller;
 import 'package:project_initialization_tool/commands/generate/subcommands/page/code/page.dart'
     as page;
+import 'package:project_initialization_tool/commands/util.dart';
 
 class GeneratePageService extends Command {
   @override
@@ -133,10 +133,16 @@ class GeneratePageService extends Command {
         'return Container();': [
           'final CustomTheme theme = ThemeService().theme;'
         ],
-      }, leading: [
-        "import '../../service/theme_service.dart';",
-        "import '../../theme/theme.dart';",
-      ]);
+      });
+      await addLinesAfterLineInFile(
+        file,
+        {
+          '/// https://saynode.ch': [
+            "import '../../service/theme_service.dart';",
+            "import '../../theme/theme.dart';",
+          ],
+        },
+      );
     }
   }
 }

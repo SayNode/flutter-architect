@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/util.dart';
 import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/code/flutter_native_splash.dart'
     as flutter_native_splash;
+import 'package:project_initialization_tool/commands/util.dart';
 
 class GenerateSplashService extends Command {
   @override
@@ -123,10 +123,10 @@ class GenerateSplashService extends Command {
         'WidgetsFlutterBinding.ensureInitialized();': [
           "FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);",
         ],
+        '/// https://saynode.ch': [
+          "import 'package:flutter_native_splash/flutter_native_splash.dart';",
+        ],
       },
-      leading: [
-        "import 'package:flutter_native_splash/flutter_native_splash.dart';",
-      ],
     );
   }
 }

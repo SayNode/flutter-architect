@@ -146,6 +146,10 @@ class GenerateLocalizationService extends Command {
           'translations:',
           'Messages(languages: localizationController.translations),',
         ],
+        '/// https://saynode.ch': [
+          "import 'service/localization_controller.dart';",
+          "import 'model/message.dart';",
+        ],
       },
     );
 
@@ -161,10 +165,6 @@ class GenerateLocalizationService extends Command {
           'await localizationController.init();',
         ],
       },
-      leading: [
-        "import 'service/localization_controller.dart';",
-        "import 'model/message.dart';",
-      ],
     );
   }
 }

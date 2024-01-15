@@ -144,13 +144,13 @@ class GenerateSigninService extends Command {
     await addLinesAfterLineInFile(
       authPath,
       {
+        '/// https://saynode.ch': [google.imports()],
         'APIService apiService = Get.put(APIService());': [
           google.initialization()
         ],
         'void init() {': [google.initContent()],
         'Future<void> _disconnectProviders() async {': [google.disconnect()],
       },
-      leading: [google.imports()],
     );
 
     await addLinesBeforeLineInFile(
@@ -167,9 +167,9 @@ class GenerateSigninService extends Command {
     await addLinesAfterLineInFile(
       authPath,
       {
+        '/// https://saynode.ch': [apple.imports()],
         'Future<void> _disconnectProviders() async {': [apple.disconnect()],
       },
-      leading: [apple.imports()],
     );
 
     await addLinesBeforeLineInFile(

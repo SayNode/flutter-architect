@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:project_initialization_tool/commands/new/files/prefix.dart'
     as prefix;
 
@@ -250,7 +251,6 @@ Future<void> removeTextFromFile(String file, String text) async {
 /// Delete [amount] lines from file in path [file], after line [line].
 Future<void> removeLinesAfterFromFile(String file, String line, int amount,
     {bool includeFirst = false}) async {
-  print('deleteLinesAfterFromFile: $line, $amount');
   var fileLines = await File(file).readAsLines();
   var newFileLines = <String>[];
   for (int i = 0; i < fileLines.length; i++) {

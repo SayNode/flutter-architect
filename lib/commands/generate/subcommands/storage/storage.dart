@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:project_initialization_tool/commands/generate/subcommands/storage/code/secure_storage_service.dart'
+    as secure_storage;
 import 'package:project_initialization_tool/commands/generate/subcommands/storage/code/storage_service.dart'
     as shared_storage;
 import 'package:project_initialization_tool/commands/util.dart';
-
-import 'package:project_initialization_tool/commands/generate/subcommands/storage/code/secure_storage_service.dart'
-    as secure_storage;
 
 class GenerateStorageService extends Command {
   //-- Singleton
@@ -130,8 +129,8 @@ class GenerateStorageService extends Command {
           "final StorageService storage = Get.put<StorageService>(StorageService());",
           "await storage.init();",
         ],
+        '/// https://saynode.ch': ["import 'service/storage_service.dart';"],
       },
-      leading: ["import 'service/storage_service.dart';"],
     );
   }
 
