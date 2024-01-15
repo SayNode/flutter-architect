@@ -4,7 +4,6 @@ content() => """
 // Flutter Architect was created @SayNode Operations AG by Yann Marti and Francesco Romeo
 // https://saynode.ch
 //
-library;
 
 import 'package:get/get.dart';
 
