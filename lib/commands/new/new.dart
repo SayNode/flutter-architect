@@ -4,6 +4,8 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:project_initialization_tool/commands/new/files/analysis_options.dart'
     as analysis_option;
+import 'package:project_initialization_tool/commands/new/files/codemagic_yaml.dart'
+    as codemagic_yaml;
 import 'package:project_initialization_tool/commands/new/files/main.dart'
     as main_file;
 import 'package:project_initialization_tool/commands/new/files/splash_page.dart'
@@ -61,6 +63,7 @@ class Creator extends Command {
     _rewriteMain();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
+    await addCodemagicYaml();
 
     await File(path.join(projectName, 'added_boilerplate.txt'))
         .writeAsString('');
@@ -134,6 +137,17 @@ class Creator extends Command {
       ),
     ).writeAsString(analysis_option.content()).then((File file) {
       print('-- /analysis_options.yaml ✔');
+    });
+  }
+
+  Future<void> addCodemagicYaml() async {
+    File(
+      path.join(
+        projectName,
+        'codemagic.yaml',
+      ),
+    ).writeAsString(codemagic_yaml.content()).then((File file) {
+      print('-- /codemagic.yaml ✔');
     });
   }
 
