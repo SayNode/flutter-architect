@@ -2,20 +2,24 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'code/language_model.dart'
-    as language_model;
-import 'code/localization_controller.dart'
-    as localization_controller;
-import 'code/message.dart'
-    as message;
+
 import '../../../util.dart';
+import 'code/language_model.dart' as language_model;
+import 'code/localization_controller.dart' as localization_controller;
+import 'code/message.dart' as message;
 
-class GenerateLocalizationService extends Command {
-
+class GenerateLocalizationService extends Command<dynamic> {
   GenerateLocalizationService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
   }
   @override
   String get description => 'Create localization files and boilerplate code;';
@@ -37,7 +41,7 @@ class GenerateLocalizationService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Localization...');
+        stderr.writeln('Creating Localization...');
         await addAlreadyRun('localization');
         await _addLanguageModel();
         await _addMessageFile();
@@ -46,7 +50,7 @@ class GenerateLocalizationService extends Command {
         await _addMainChanges();
       },
       remove: () async {
-        print('Removing Localization...');
+        stderr.writeln('Removing Localization...');
         await removeAlreadyRun('localization');
         await _removeMainChanges();
         await _removeLanguageModel();
@@ -55,10 +59,10 @@ class GenerateLocalizationService extends Command {
         await _removeLanguageJson();
       },
       rejectAdd: () async {
-        print("Can't add Localization as it's already configured.");
+        stderr.writeln("Can't add Localization as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Localization as it's not yet configured.");
+        stderr.writeln("Can't remove Localization as it's not yet configured.");
       },
     );
     formatCode();
@@ -110,8 +114,10 @@ class GenerateLocalizationService extends Command {
   }
 
   Future<void> _addLanguageModel() async {
-    await writeFileWithPrefix(path.join('lib', 'model', 'language_model.dart'),
-        language_model.content(),);
+    await writeFileWithPrefix(
+      path.join('lib', 'model', 'language_model.dart'),
+      language_model.content(),
+    );
   }
 
   Future<void> _addLanguageJson() async {
@@ -121,13 +127,16 @@ class GenerateLocalizationService extends Command {
 
   Future<void> _addMessageFile() async {
     await writeFileWithPrefix(
-        path.join('lib', 'model', 'message.dart'), message.content(),);
+      path.join('lib', 'model', 'message.dart'),
+      message.content(),
+    );
   }
 
   Future<void> _addLocalizationController() async {
     await writeFileWithPrefix(
-        path.join('lib', 'service', 'localization_controller.dart'),
-        localization_controller.content(),);
+      path.join('lib', 'service', 'localization_controller.dart'),
+      localization_controller.content(),
+    );
   }
 
   Future<void> _addMainChanges() async {
