@@ -1,4 +1,6 @@
 import 'package:args/command_runner.dart';
+
+import '../../util.dart';
 import 'api/api.dart';
 import 'crashalytics/crashalytics.dart';
 import 'localization/localization.dart';
@@ -8,13 +10,14 @@ import 'storage/storage.dart';
 import 'theme/theme.dart';
 import 'typography/typography.dart';
 import 'wallet/wallet.dart';
-import '../../util.dart';
 
-class AllGeneratorService extends Command {
-
+class AllGeneratorService extends Command<dynamic> {
   AllGeneratorService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
+    argParser.addFlag(
+      'force',
+      help: 'Force replace in case it already exists.',
+    );
   }
   @override
   String get description => 'Add every component to this project;';
@@ -33,13 +36,16 @@ class AllGeneratorService extends Command {
     await storageService.runSecure();
     final GenerateThemeService themeService = GenerateThemeService();
     await themeService.run();
-    final GenerateTypographyService typographyService = GenerateTypographyService();
+    final GenerateTypographyService typographyService =
+        GenerateTypographyService();
     await typographyService.run();
-    final GenerateLocalizationService localizationService = GenerateLocalizationService();
+    final GenerateLocalizationService localizationService =
+        GenerateLocalizationService();
     await localizationService.run();
     final GenerateWalletService walletService = GenerateWalletService();
     await walletService.run();
-    final GenerateCrashalyticsService crashlyticsService = GenerateCrashalyticsService();
+    final GenerateCrashalyticsService crashlyticsService =
+        GenerateCrashalyticsService();
     await crashlyticsService.run();
     final GenerateSplashService splashService = GenerateSplashService();
     await splashService.run();
