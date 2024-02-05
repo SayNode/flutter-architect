@@ -16,8 +16,6 @@ import 'package:project_initialization_tool/commands/generate/subcommands/crasha
     as imports;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/material_app_flag.dart'
     as material_app_flag;
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/restart_widget.dart'
-    as restart_widget;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/main/wrapper.dart'
     as wrapper;
 import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/code/network_service.dart'
@@ -181,7 +179,6 @@ class GenerateCrashalyticsService extends Command {
           material_app_flag.content(),
         ],
         'bool isFirstRun = false;': [
-          restart_widget.content(),
           handle_error.content(),
         ],
         '/// https://saynode.ch': [
@@ -197,7 +194,6 @@ class GenerateCrashalyticsService extends Command {
     await removeTextFromFile(mainPath, wrapper.contentBefore());
     await removeTextFromFile(mainPath, wrapper.contentAfter());
     await removeTextFromFile(mainPath, material_app_flag.content());
-    await removeTextFromFile(mainPath, restart_widget.content());
     await removeTextFromFile(mainPath, handle_error.content());
   }
 
