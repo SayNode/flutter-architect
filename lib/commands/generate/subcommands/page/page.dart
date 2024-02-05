@@ -2,25 +2,30 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'code/controller.dart'
-    as controller;
-import 'code/page.dart'
-    as page;
+
 import '../../../util.dart';
+import 'code/controller.dart' as controller;
+import 'code/page.dart' as page;
 
-class GeneratePageService extends Command {
-
+class GeneratePageService extends Command<dynamic> {
   GeneratePageService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
-    argParser.addOption(
-      'name',
-      abbr: 'n',
-      help:
-          '--name is mandatory (name of the page/controller to create). Use Pascal Case for naming convention (ex. ForgotPassword).',
-      mandatory: true,
-    );
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      )
+      ..addOption(
+        'name',
+        abbr: 'n',
+        help:
+            '--name is mandatory (name of the page/controller to create). Use Pascal Case for naming convention (ex. ForgotPassword).',
+        mandatory: true,
+      );
   }
   @override
   String get description => 'Create new Page and boilerplate code;';
@@ -46,7 +51,7 @@ class GeneratePageService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating lib/$snakeCase...');
+        stderr.writeln('Creating lib/$snakeCase...');
         Directory(
           path.join('lib', 'page', snakeCase),
         ).createSync();
@@ -61,16 +66,16 @@ class GeneratePageService extends Command {
         await _handleTheme(pascalCase, snakeCase);
       },
       remove: () async {
-        print('Removing API Service...');
+        stderr.writeln('Removing API Service...');
         Directory(
           path.join('lib', 'page', snakeCase),
         ).deleteSync(recursive: true);
       },
       rejectAdd: () async {
-        print("Can't add page $pascalCase as it's already added.");
+        stderr.writeln("Can't add page $pascalCase as it's already added.");
       },
       rejectRemove: () async {
-        print("Can't remove page $pascalCase as it's not yet added.");
+        stderr.writeln("Can't remove page $pascalCase as it's not yet added.");
       },
     );
     formatCode();
@@ -89,38 +94,44 @@ class GeneratePageService extends Command {
 
   Future<void> _createController(String pascalCase, String snakeCase) async {
     await writeFileWithPrefix(
-        path.join(
-          'lib',
-          'page',
-          snakeCase,
-          'controller',
-          '${snakeCase}_controller.dart',
-        ),
-        controller.content(pascalCase, snakeCase),);
+      path.join(
+        'lib',
+        'page',
+        snakeCase,
+        'controller',
+        '${snakeCase}_controller.dart',
+      ),
+      controller.content(pascalCase, snakeCase),
+    );
   }
 
   Future<void> _createPage(String pascalCase, String snakeCase) async {
     await writeFileWithPrefix(
-        path.join(
-          'lib',
-          'page',
-          snakeCase,
-          '${snakeCase}_page.dart',
-        ),
-        page.content(pascalCase, snakeCase),);
+      path.join(
+        'lib',
+        'page',
+        snakeCase,
+        '${snakeCase}_page.dart',
+      ),
+      page.content(pascalCase, snakeCase),
+    );
   }
 
-  Future<void> _handleTheme(pascalCase, snakeCase) async {
-    if (File(path.join(
-          'lib',
-          'service',
-          'theme_service.dart',
-        ),).existsSync() &&
-        File(path.join(
-          'lib',
-          'theme',
-          'theme.dart',
-        ),).existsSync()) {
+  Future<void> _handleTheme(String pascalCase, String snakeCase) async {
+    if (File(
+          path.join(
+            'lib',
+            'service',
+            'theme_service.dart',
+          ),
+        ).existsSync() &&
+        File(
+          path.join(
+            'lib',
+            'theme',
+            'theme.dart',
+          ),
+        ).existsSync()) {
       final String file = path.join(
         'lib',
         'page',
