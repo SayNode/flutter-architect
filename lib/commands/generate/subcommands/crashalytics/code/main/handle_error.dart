@@ -1,4 +1,4 @@
-content() => """
+String content() => r"""
 Future<void> handleError(
   Object error,
   StackTrace? stack,
@@ -40,10 +40,10 @@ Future<void> handleError(
           stack,
           fatal: true,
           information: <Object>[
-            'Current Route: \${Get.currentRoute}',
-            'Previous Route:  \$previousRoute',
-            'Asynchronous: \$async',
-            // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+            'Current Route: ${Get.currentRoute}',
+            'Previous Route:  $previousRoute',
+            'Asynchronous: $async',
+            // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
             ...information,
           ],
         );
@@ -62,10 +62,10 @@ Future<void> handleError(
           stack,
           reason: 'a non-fatal error, this will be ignored',
           information: <Object>[
-            'Current Route: \${Get.currentRoute}',
-            'Previous Route:  \$previousRoute',
-            'Asynchronous: \$async',
-            // "User Id: \${Get.put(UserStateService()).user.value.id.toString()}",
+            'Current Route: ${Get.currentRoute}',
+            'Previous Route:  $previousRoute',
+            'Asynchronous: $async',
+            // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
             ...information,
           ],
         );

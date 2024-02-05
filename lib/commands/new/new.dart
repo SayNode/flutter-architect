@@ -2,24 +2,17 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/new/files/analysis_options.dart'
+import 'files/analysis_options.dart'
     as analysis_option;
-import 'package:project_initialization_tool/commands/new/files/codemagic_yaml.dart'
+import 'files/codemagic_yaml.dart'
     as codemagic_yaml;
-import 'package:project_initialization_tool/commands/new/files/main.dart'
+import 'files/main.dart'
     as main_file;
-import 'package:project_initialization_tool/commands/new/files/splash_page.dart'
+import 'files/splash_page.dart'
     as splash_page;
-import 'package:project_initialization_tool/commands/util.dart';
+import '../util.dart';
 
 class Creator extends Command {
-  late final String projectName;
-
-  @override
-  String get name => 'new';
-
-  @override
-  String get description => 'create new project';
 
   Creator() {
     argParser.addFlag('ios');
@@ -36,6 +29,13 @@ class Creator extends Command {
       mandatory: true,
     );
   }
+  late final String projectName;
+
+  @override
+  String get name => 'new';
+
+  @override
+  String get description => 'create new project';
 
   @override
   Future<void> run() async {
@@ -50,14 +50,14 @@ class Creator extends Command {
         !argResults?['windows'] &&
         !argResults?['linux']) {
       print(
-          'At least one platform must be selected. Use --help for more information.');
+          'At least one platform must be selected. Use --help for more information.',);
       exit(0);
     }
     projectName = argResults?['name'];
-    await Process.run('flutter', ['create', projectName, '-e'],
-        runInShell: true);
+    await Process.run('flutter', <String>['create', projectName, '-e'],
+        runInShell: true,);
 
-    await addDependenciesToPubspec(['get'], path.join(projectName));
+    await addDependenciesToPubspec(<String>['get'], path.join(projectName));
     createCommonFolderStructure();
     _createSplashPage();
     _rewriteMain();
@@ -75,8 +75,8 @@ class Creator extends Command {
   Future<void> addMultidex() async {
     if (argResults?['android'] == true) {
       await addLinesAfterLineInFile(
-          path.join(projectName, 'android', 'app', 'build.gradle'), {
-        'defaultConfig {': ['        multiDexEnabled true'],
+          path.join(projectName, 'android', 'app', 'build.gradle'), <String, List<String>>{
+        'defaultConfig {': <String>['        multiDexEnabled true'],
       });
       await replaceLineInFile(
         path.join(projectName, 'android', 'app', 'build.gradle'),
@@ -124,13 +124,13 @@ class Creator extends Command {
   Future<void> addWorkflow() async {
     Directory(path.join(projectName, '.github')).createSync();
     Directory(path.join(projectName, '.github', 'workflows')).createSync();
-    File(path.join(projectName, '.github', 'workflows', 'lint_action.yaml'))
+    await File(path.join(projectName, '.github', 'workflows', 'lint_action.yaml'))
         .writeAsString(
-            " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos");
+            " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos",);
   }
 
   Future<void> rewriteAnalysisOptions() async {
-    File(
+    await File(
       path.join(
         projectName,
         'analysis_options.yaml',
@@ -141,7 +141,7 @@ class Creator extends Command {
   }
 
   Future<void> addCodemagicYaml() async {
-    File(
+    await File(
       path.join(
         projectName,
         'codemagic.yaml',
@@ -153,11 +153,11 @@ class Creator extends Command {
 
   /// Add assets folder to pubspec.yaml
   void addAssetsToPubspec() {
-    String pubPath = path.join(projectName, 'pubspec.yaml');
+    final String pubPath = path.join(projectName, 'pubspec.yaml');
     File(pubPath).readAsLines().then((List<String> lines) {
       String pubspec = '';
 
-      for (String line in lines) {
+      for (final String line in lines) {
         pubspec += '$line\n';
 
         if (line.contains('flutter:') &&
@@ -168,7 +168,7 @@ class Creator extends Command {
         }
       }
 
-      File(pubPath).writeAsString(pubspec).then((file) {
+      File(pubPath).writeAsString(pubspec).then((File file) {
         print('- Assets added to pubspec.yaml ✔');
       });
 
@@ -180,7 +180,7 @@ class Creator extends Command {
     Directory(path.join(projectName)).createSync();
     print('- $projectName/ ✔');
 
-    String directory = path.join(
+    final String directory = path.join(
       projectName,
       'lib',
     );
@@ -229,7 +229,7 @@ class Creator extends Command {
               'page',
               'splash_page.dart',
             ),
-            splash_page.content())
+            splash_page.content(),)
         .then((File file) {
       print('-- /lib/page/splash_page.dart ✔');
     });
@@ -245,7 +245,7 @@ class Creator extends Command {
               'lib',
               'main.dart',
             ),
-            main_file.content(projectName))
+            main_file.content(projectName),)
         .then((File file) {
       print('-- /lib/main.dart ✔');
     });

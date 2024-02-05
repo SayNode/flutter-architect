@@ -2,24 +2,28 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/code/flutter_native_splash.dart'
-    as flutter_native_splash;
-import 'package:project_initialization_tool/commands/util.dart';
 
-class GenerateSplashService extends Command {
+import '../../../util.dart';
+import 'code/flutter_native_splash.dart' as flutter_native_splash;
+
+class GenerateSplashService extends Command<dynamic> {
+  GenerateSplashService() {
+    // Add parser options or flag here
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
+  }
   @override
   String get description => 'Create splash files and boilerplate code;';
 
   @override
   String get name => 'splash';
-
-  GenerateSplashService() {
-    // Add parser options or flag here
-    argParser.addFlag('force',
-        defaultsTo: false, help: 'Force replace in case it already exists.');
-    argParser.addFlag('remove',
-        defaultsTo: false, help: 'Remove in case it already exists.');
-  }
 
   @override
   Future<void> run() async {
@@ -27,9 +31,9 @@ class GenerateSplashService extends Command {
   }
 
   Future<void> _run() async {
-    bool alreadyBuilt = await checkIfAlreadyRunWithReturn("splash");
-    bool force = argResults?['force'] ?? false;
-    bool remove = argResults?['remove'] ?? false;
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('splash');
+    final bool force = argResults?['force'] ?? false;
+    final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
@@ -37,9 +41,9 @@ class GenerateSplashService extends Command {
       add: () async {
         print('Creating Native Splash...');
         await addAlreadyRun('splash');
-        addDependenciesToPubspecSync(['flutter_native_splash'], null);
-        String iconFile = getIconFile();
-        String color = getColor();
+        addDependenciesToPubspecSync(<String>['flutter_native_splash'], null);
+        final String iconFile = getIconFile();
+        final String color = getColor();
         await _writeSplashFile(iconFile, color);
         runNativeSplash(null);
         await _addMainChanges();
@@ -47,7 +51,10 @@ class GenerateSplashService extends Command {
       remove: () async {
         print('Removing Native Splash...');
         await removeAlreadyRun('splash');
-        removeDependenciesFromPubspecSync(['flutter_native_splash'], null);
+        removeDependenciesFromPubspecSync(
+          <String>['flutter_native_splash'],
+          null,
+        );
         await _removeSplashFile();
         await _removeMainChanges();
       },
@@ -74,16 +81,17 @@ class GenerateSplashService extends Command {
   // Request the user for the image path.
   String getIconFile() {
     stdout.writeln(
-        'Enter the path to your splash image (ex. asset/image/splash.png):');
+      'Enter the path to your splash image (ex. asset/image/splash.png):',
+    );
     return stdin.readLineSync() ?? '';
   }
 
   // Request the user for the background color.
   String getColor() {
     stdout.writeln('Enter the background color hexadecimal (ex. #EAF2FF):');
-    RegExp hex = RegExp('^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})');
+    final RegExp hex = RegExp('^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})');
     for (int i = 0; i < 10; i++) {
-      String value = stdin.readLineSync() ?? '';
+      final String value = stdin.readLineSync() ?? '';
       if (hex.hasMatch(value)) {
         return value;
       } else {
@@ -95,22 +103,22 @@ class GenerateSplashService extends Command {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    String mainPath = path.join('lib', 'main.dart');
-    await removeLinesFromFile(mainPath, [
-      "await Future.delayed(const Duration(seconds: 2));",
-      "FlutterNativeSplash.remove();",
-      "FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);",
+    final String mainPath = path.join('lib', 'main.dart');
+    await removeLinesFromFile(mainPath, <String>[
+      'await Future.delayed(const Duration(seconds: 2));',
+      'FlutterNativeSplash.remove();',
+      'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
       "import 'package:flutter_native_splash/flutter_native_splash.dart';",
     ]);
   }
 
   Future<void> _addMainChanges() async {
-    String mainPath = path.join('lib', 'main.dart');
+    final String mainPath = path.join('lib', 'main.dart');
 
     await addLinesBeforeLineInFile(
       mainPath,
-      {
-        'runApp(const MyApp());': [
+      <String, List<String>>{
+        'runApp(const MyApp());': <String>[
           'await Future.delayed(const Duration(seconds: 2));',
           'FlutterNativeSplash.remove();',
         ],
@@ -119,11 +127,11 @@ class GenerateSplashService extends Command {
 
     await addLinesAfterLineInFile(
       mainPath,
-      {
-        'WidgetsFlutterBinding.ensureInitialized();': [
-          "FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);",
+      <String, List<String>>{
+        'WidgetsFlutterBinding.ensureInitialized();': <String>[
+          'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
         ],
-        '// https://saynode.ch': [
+        '// https://saynode.ch': <String>[
           "import 'package:flutter_native_splash/flutter_native_splash.dart';",
         ],
       },

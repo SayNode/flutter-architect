@@ -4,7 +4,7 @@ extension StringExtension on String {
   }
 }
 
-content(String projectName) => """
+String content(String projectName) => """
 class ${projectName.capitalize()}Constants {
   static const String apiDomain = const String.fromEnvironment('DATABASE_URL');
   static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');

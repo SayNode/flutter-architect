@@ -1,24 +1,24 @@
-imports() => """
+String imports() => """
 import 'package:google_sign_in/google_sign_in.dart';""";
 
-initialization() => """
-  late GoogleSignIn _googleSignIn;""";
+String initialization() => '''
+  late GoogleSignIn _googleSignIn;''';
 
-initContent() => """
+String initContent() => """
     _googleSignIn = GoogleSignIn(
       scopes: <String>[
         'email',
       ],
     );""";
 
-disconnect() => """
+String disconnect() => r"""
     try {
       await _googleSignIn.disconnect();
     } catch (e) {
-      debugPrint('AuthService - error while logging out from google: \$e');
+      debugPrint('AuthService - error while logging out from google: $e');
     }""";
 
-signIn() => """
+String signIn() => r"""
 // Login with Google.
   Future<AuthResponse> googleSignIn() async {
     try {
@@ -30,7 +30,7 @@ signIn() => """
           await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
 
       if (result != null) {
-        debugPrint('Google Sign In result - \$result');
+        debugPrint('Google Sign In result - $result');
 
         final GoogleSignInAuthentication googleKey =
             await result.authentication;
@@ -63,10 +63,10 @@ signIn() => """
             /// save the token
             authenticationToken = userMap['access_token'] as String;
             debugPrint(
-              'AuthService - authenticationToken: \$authenticationToken',
+              'AuthService - authenticationToken: $authenticationToken',
             );
             debugPrint(
-              'AuthService - user logged in: \${userStateService.user.value.email}',
+              'AuthService - user logged in: ${userStateService.user.value.email}',
             );
 
             await storageService.setString(
@@ -86,7 +86,7 @@ signIn() => """
           } catch (error) {
             await _disconnectProviders();
             throw Exception(
-              'AuthService - error while parsing the user: \$error',
+              'AuthService - error while parsing the user: $error',
             );
           }
         } else if (response.statusCode == 400) {
@@ -94,7 +94,7 @@ signIn() => """
           return AuthResponse(parseErrorMap(response), false);
         } else {
           await _disconnectProviders();
-          throw Exception('AuthService - \${unexpectedError(response)}');
+          throw Exception('AuthService - ${unexpectedError(response)}');
         }
       }
       return AuthResponse(
@@ -103,6 +103,6 @@ signIn() => """
       );
     } catch (e) {
       // Other error occurred
-      throw Exception('Catched an error while logging in with Google: \$e');
+      throw Exception('Catched an error while logging in with Google: $e');
     }
   }""";

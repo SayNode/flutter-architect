@@ -1,6 +1,6 @@
-import 'package:project_initialization_tool/commands/generate/subcommands/api/code/constants.dart';
+import 'constants.dart';
 
-content(String projectName) {
+String content(String projectName) {
   projectName = projectName.capitalize();
   return """
 import 'dart:convert';

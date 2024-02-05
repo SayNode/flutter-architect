@@ -1,4 +1,5 @@
-String content() => """class Wallet {
+String content() => """
+class Wallet {
   Wallet(
     this.address,
     this.keystore,

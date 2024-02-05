@@ -1,52 +1,51 @@
 import 'package:args/command_runner.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/api/api.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/crashalytics/crashalytics.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/localization/localization.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/native_splash/splash.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/signin/signin.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/storage/storage.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/theme/theme.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/typography/typography.dart';
-import 'package:project_initialization_tool/commands/generate/subcommands/wallet/wallet.dart';
-import 'package:project_initialization_tool/commands/util.dart';
+import 'api/api.dart';
+import 'crashalytics/crashalytics.dart';
+import 'localization/localization.dart';
+import 'native_splash/splash.dart';
+import 'signin/signin.dart';
+import 'storage/storage.dart';
+import 'theme/theme.dart';
+import 'typography/typography.dart';
+import 'wallet/wallet.dart';
+import '../../util.dart';
 
 class AllGeneratorService extends Command {
+
+  AllGeneratorService() {
+    // Add parser options or flag here
+    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
+  }
   @override
   String get description => 'Add every component to this project;';
 
   @override
   String get name => 'all';
 
-  AllGeneratorService() {
-    // Add parser options or flag here
-    argParser.addFlag('force',
-        defaultsTo: false, help: 'Force replace in case it already exists.');
-  }
-
   @override
-  void run() async {
+  Future<void> run() async {
     await spinnerLoading(_run);
   }
 
   Future<void> _run() async {
-    var storageService = GenerateStorageService();
+    final GenerateStorageService storageService = GenerateStorageService();
     await storageService.runShared();
     await storageService.runSecure();
-    var themeService = GenerateThemeService();
+    final GenerateThemeService themeService = GenerateThemeService();
     await themeService.run();
-    var typographyService = GenerateTypographyService();
+    final GenerateTypographyService typographyService = GenerateTypographyService();
     await typographyService.run();
-    var localizationService = GenerateLocalizationService();
+    final GenerateLocalizationService localizationService = GenerateLocalizationService();
     await localizationService.run();
-    var walletService = GenerateWalletService();
+    final GenerateWalletService walletService = GenerateWalletService();
     await walletService.run();
-    var crashlyticsService = GenerateCrashalyticsService();
+    final GenerateCrashalyticsService crashlyticsService = GenerateCrashalyticsService();
     await crashlyticsService.run();
-    var splashService = GenerateSplashService();
+    final GenerateSplashService splashService = GenerateSplashService();
     await splashService.run();
-    var apiService = GenerateAPIService();
+    final GenerateAPIService apiService = GenerateAPIService();
     await apiService.run();
-    var signinService = GenerateSigninService();
+    final GenerateSigninService signinService = GenerateSigninService();
     await signinService.runGoogle();
     await signinService.runApple();
   }

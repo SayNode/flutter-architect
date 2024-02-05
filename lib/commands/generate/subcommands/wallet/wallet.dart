@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/generate/subcommands/wallet/code/wallet_model.dart'
+import 'code/wallet_model.dart'
     as wallet_model;
-import 'package:project_initialization_tool/commands/generate/subcommands/wallet/code/wallet_service.dart'
+import 'code/wallet_service.dart'
     as wallet_service;
-import 'package:project_initialization_tool/commands/util.dart';
+import '../../../util.dart';
 
 import '../storage/storage.dart';
 
@@ -14,10 +14,8 @@ class GenerateWalletService extends Command {
   //-- Singleton
   GenerateWalletService() {
     // Add parser options or flag here
-    argParser.addFlag('force',
-        defaultsTo: false, help: 'Force replace in case it already exists.');
-    argParser.addFlag('remove',
-        defaultsTo: false, help: 'Remove in case it already exists.');
+    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
+    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
   }
 
   @override
@@ -33,33 +31,33 @@ class GenerateWalletService extends Command {
   }
 
   _run() async {
-    bool storageIsSetUp = await checkIfAlreadyRunWithReturn("shared_storage");
+    final bool storageIsSetUp = await checkIfAlreadyRunWithReturn('shared_storage');
 
     // Check for required storage
     if (!storageIsSetUp) {
       print(
-          "Configuring Shared Storage, as it's requried for Wallet Service...");
-      var storageService = GenerateStorageService();
+          "Configuring Shared Storage, as it's requried for Wallet Service...",);
+      final GenerateStorageService storageService = GenerateStorageService();
       await storageService.runShared();
     }
 
-    bool alreadyBuilt = await checkIfAlreadyRunWithReturn("wallet");
-    bool force = argResults?['force'] ?? false;
-    bool remove = argResults?['remove'] ?? false;
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('wallet');
+    final bool force = argResults?['force'] ?? false;
+    final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
         print('Creating Wallet Service...');
-        addDependenciesToPubspecSync(['thor_devkit_dart'], null);
+        addDependenciesToPubspecSync(<String>['thor_devkit_dart'], null);
         await addAlreadyRun('wallet');
         await _addWalletService();
         await _addWalletModel();
       },
       remove: () async {
         print('Removing Wallet Service...');
-        removeDependenciesFromPubspecSync(['thor_devkit_dart'], null);
+        removeDependenciesFromPubspecSync(<String>['thor_devkit_dart'], null);
         await removeAlreadyRun('wallet');
         await _removeWalletService();
         await _removeWalletModel();
@@ -86,11 +84,11 @@ class GenerateWalletService extends Command {
   Future<void> _addWalletService() async {
     await writeFileWithPrefix(
         path.join('lib', 'service', 'wallet_service.dart'),
-        wallet_service.content());
+        wallet_service.content(),);
   }
 
   Future<void> _addWalletModel() async {
     await writeFileWithPrefix(
-        path.join('lib', 'model', 'wallet_model.dart'), wallet_model.content());
+        path.join('lib', 'model', 'wallet_model.dart'), wallet_model.content(),);
   }
 }
