@@ -4,19 +4,26 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
+
 import '../../../util.dart';
 
 extension StringCapitalize on String {
   String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
 }
 
-class GenerateTypographyService extends Command {
-
+class GenerateTypographyService extends Command<dynamic> {
   //-- Singleton
   GenerateTypographyService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
   }
   late final String figmaFileKey;
   late final String figmaToken;
@@ -38,7 +45,7 @@ class GenerateTypographyService extends Command {
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');
     figmaToken = stdin.readLineSync() ?? '';
-    final styles = await _getFigmaStyles();
+    final List<dynamic> styles = await _getFigmaStyles();
 
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('typography');
     final bool force = argResults?['force'] ?? false;
@@ -48,23 +55,23 @@ class GenerateTypographyService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Typography...');
+        stderr.writeln('Creating Typography...');
         await addAlreadyRun('typography');
-        final textStyles = await _getTextStyles(styles);
+        final List<dynamic> textStyles = await _getTextStyles(styles);
         addDependenciesToPubspecSync(<String>['google_fonts'], null);
         await _addTypographyFile(textStyles);
       },
       remove: () async {
-        print('Removing Typography...');
+        stderr.writeln('Removing Typography...');
         await removeAlreadyRun('typography');
         removeDependenciesFromPubspecSync(<String>['google_fonts'], null);
         await _removeTypographyFile();
       },
       rejectAdd: () async {
-        print("Can't add Typography as it's already configured.");
+        stderr.writeln("Can't add Typography as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Typography as it's not yet configured.");
+        stderr.writeln("Can't remove Typography as it's not yet configured.");
       },
     );
     formatCode();
@@ -75,23 +82,30 @@ class GenerateTypographyService extends Command {
     await File(path.join('lib', 'theme', 'typography.dart')).delete();
   }
 
-  Future<void> _addTypographyFile(List textStyleList) async {
-    print(textStyleList);
-    String content =
-        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n";
-    for (final textStyle in textStyleList) {
-      content +=
-          "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
+  Future<void> _addTypographyFile(List<dynamic> textStyleList) async {
+    stderr.writeln(textStyleList);
+    final StringBuffer buffer = StringBuffer()
+      ..write(
+        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n",
+      );
+
+    for (final Map<String, dynamic> textStyle in textStyleList) {
+      buffer.write(
+        "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n",
+      );
     }
-    content +=
-        'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}';
+    buffer.write(
+      'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}',
+    );
     await writeFileWithPrefix(
-        path.join('lib', 'theme', 'typography.dart'), content,);
+      path.join('lib', 'theme', 'typography.dart'),
+      buffer.toString(),
+    );
   }
 
-  Future<dynamic> _getTextStyles(List styles) async {
+  Future<dynamic> _getTextStyles(List<dynamic> styles) async {
     final List<String> ids = <String>[];
-    for (final style in styles) {
+    for (final Map<String, dynamic> style in styles) {
       if (style['style_type'] == 'TEXT') {
         ids.add(style['node_id']);
       }
@@ -101,21 +115,25 @@ class GenerateTypographyService extends Command {
     };
 
     final Uri url = Uri.parse(
-        'https://api.figma.com/v1/files/$figmaFileKey/nodes?ids=${ids.join(',')}',);
+      'https://api.figma.com/v1/files/$figmaFileKey/nodes?ids=${ids.join(',')}',
+    );
     final http.Response res = await http.get(url, headers: headers);
     final int status = res.statusCode;
     if (status != 200) throw Exception('http.get error: statusCode= $status');
-    final Map data = jsonDecode(res.body);
+    final Map<String, dynamic> data = jsonDecode(res.body);
     if (data['error'] == true) {
       throw Exception('Figma returned an error: ${data['status']}');
     }
-    final List textStyles = <>[];
+    final List<Map<String, dynamic>> textStyles = <Map<String, dynamic>>[];
     for (final String node in ids) {
-      final styleMap = data['nodes'][node]['document']['style'];
-      textStyles.add(<String, >{
+      final Map<String, dynamic> styleMap =
+          // ignore: avoid_dynamic_calls
+          data['nodes'][node]['document']['style'];
+      textStyles.add(<String, dynamic>{
         'fontFamily': styleMap['fontFamily'],
         'fontSize': styleMap['fontSize'],
         'fontWeight': styleMap['fontWeight'],
+        // ignore: avoid_dynamic_calls
         'name': lowerCamelCase(data['nodes'][node]['document']['name']),
       });
     }
@@ -134,14 +152,14 @@ class GenerateTypographyService extends Command {
       final http.Response res = await http.get(url, headers: headers);
       final int status = res.statusCode;
       if (status != 200) throw Exception('http.get error: statusCode= $status');
-      final Map data = jsonDecode(res.body);
+      final Map<String, dynamic> data = jsonDecode(res.body);
       if (data['error'] == true) {
         throw Exception('Figma returned an error: ${data['status']}');
       }
-      print('got styles');
-      return data['meta']['styles'];
+      stderr.writeln('got styles');
+      return (data['meta'] as Map<String, dynamic>)['styles'];
     } catch (e) {
-      print(e);
+      stderr.writeln(e);
       exit(1);
     }
   }
