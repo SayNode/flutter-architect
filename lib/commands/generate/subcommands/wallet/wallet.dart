@@ -2,20 +2,25 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'code/wallet_model.dart'
-    as wallet_model;
-import 'code/wallet_service.dart'
-    as wallet_service;
+
 import '../../../util.dart';
-
 import '../storage/storage.dart';
+import 'code/wallet_model.dart' as wallet_model;
+import 'code/wallet_service.dart' as wallet_service;
 
-class GenerateWalletService extends Command {
+class GenerateWalletService extends Command<dynamic> {
   //-- Singleton
   GenerateWalletService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
   }
 
   @override
@@ -30,13 +35,15 @@ class GenerateWalletService extends Command {
     await spinnerLoading(_run);
   }
 
-  _run() async {
-    final bool storageIsSetUp = await checkIfAlreadyRunWithReturn('shared_storage');
+  Future<void> _run() async {
+    final bool storageIsSetUp =
+        await checkIfAlreadyRunWithReturn('shared_storage');
 
     // Check for required storage
     if (!storageIsSetUp) {
-      print(
-          "Configuring Shared Storage, as it's requried for Wallet Service...",);
+      stderr.writeln(
+        "Configuring Shared Storage, as it's requried for Wallet Service...",
+      );
       final GenerateStorageService storageService = GenerateStorageService();
       await storageService.runShared();
     }
@@ -49,24 +56,25 @@ class GenerateWalletService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Wallet Service...');
+        stderr.writeln('Creating Wallet Service...');
         addDependenciesToPubspecSync(<String>['thor_devkit_dart'], null);
         await addAlreadyRun('wallet');
         await _addWalletService();
         await _addWalletModel();
       },
       remove: () async {
-        print('Removing Wallet Service...');
+        stderr.writeln('Removing Wallet Service...');
         removeDependenciesFromPubspecSync(<String>['thor_devkit_dart'], null);
         await removeAlreadyRun('wallet');
         await _removeWalletService();
         await _removeWalletModel();
       },
       rejectAdd: () async {
-        print("Can't add Wallet Service as it's already configured.");
+        stderr.writeln("Can't add Wallet Service as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Wallet Service as it's not yet configured.");
+        stderr
+            .writeln("Can't remove Wallet Service as it's not yet configured.");
       },
     );
     formatCode();
@@ -83,12 +91,15 @@ class GenerateWalletService extends Command {
 
   Future<void> _addWalletService() async {
     await writeFileWithPrefix(
-        path.join('lib', 'service', 'wallet_service.dart'),
-        wallet_service.content(),);
+      path.join('lib', 'service', 'wallet_service.dart'),
+      wallet_service.content(),
+    );
   }
 
   Future<void> _addWalletModel() async {
     await writeFileWithPrefix(
-        path.join('lib', 'model', 'wallet_model.dart'), wallet_model.content(),);
+      path.join('lib', 'model', 'wallet_model.dart'),
+      wallet_model.content(),
+    );
   }
 }
