@@ -1,4 +1,4 @@
-content() => """
+String content() => """
 class User {
   User();
 

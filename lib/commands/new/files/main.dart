@@ -10,8 +10,7 @@ import 'page/splash_page.dart';
 bool isFirstRun = false;
 
 void main() async {
-  final WidgetsBinding widgetsBinding =
-      WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

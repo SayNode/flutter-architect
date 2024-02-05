@@ -13,3 +13,5 @@ Theme:
 
  Storage:
  -- add warning in console if flags are missing
+
+Add prompt for custom bundle id

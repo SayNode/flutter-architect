@@ -2,28 +2,30 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/generate/subcommands/localization/code/language_model.dart'
-    as language_model;
-import 'package:project_initialization_tool/commands/generate/subcommands/localization/code/localization_controller.dart'
-    as localization_controller;
-import 'package:project_initialization_tool/commands/generate/subcommands/localization/code/message.dart'
-    as message;
-import 'package:project_initialization_tool/commands/util.dart';
 
-class GenerateLocalizationService extends Command {
+import '../../../util.dart';
+import 'code/language_model.dart' as language_model;
+import 'code/localization_controller.dart' as localization_controller;
+import 'code/message.dart' as message;
+
+class GenerateLocalizationService extends Command<dynamic> {
+  GenerateLocalizationService() {
+    // Add parser options or flag here
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
+  }
   @override
   String get description => 'Create localization files and boilerplate code;';
 
   @override
   String get name => 'localization';
-
-  GenerateLocalizationService() {
-    // Add parser options or flag here
-    argParser.addFlag('force',
-        defaultsTo: false, help: 'Force replace in case it already exists.');
-    argParser.addFlag('remove',
-        defaultsTo: false, help: 'Remove in case it already exists.');
-  }
 
   @override
   Future<void> run() async {
@@ -31,16 +33,16 @@ class GenerateLocalizationService extends Command {
   }
 
   Future<void> _run() async {
-    bool alreadyBuilt = await checkIfAlreadyRunWithReturn("localization");
-    bool force = argResults?['force'] ?? false;
-    bool remove = argResults?['remove'] ?? false;
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('localization');
+    final bool force = argResults?['force'] ?? false;
+    final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Localization...');
-        await addAlreadyRun("localization");
+        stderr.writeln('Creating Localization...');
+        await addAlreadyRun('localization');
         await _addLanguageModel();
         await _addMessageFile();
         await _addLocalizationController();
@@ -48,8 +50,8 @@ class GenerateLocalizationService extends Command {
         await _addMainChanges();
       },
       remove: () async {
-        print('Removing Localization...');
-        await removeAlreadyRun("localization");
+        stderr.writeln('Removing Localization...');
+        await removeAlreadyRun('localization');
         await _removeMainChanges();
         await _removeLanguageModel();
         await _removeMessageFile();
@@ -57,10 +59,10 @@ class GenerateLocalizationService extends Command {
         await _removeLanguageJson();
       },
       rejectAdd: () async {
-        print("Can't add Localization as it's already configured.");
+        stderr.writeln("Can't add Localization as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Localization as it's not yet configured.");
+        stderr.writeln("Can't remove Localization as it's not yet configured.");
       },
     );
     formatCode();
@@ -86,21 +88,21 @@ class GenerateLocalizationService extends Command {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    String mainPath = path.join('lib', 'main.dart');
+    final String mainPath = path.join('lib', 'main.dart');
 
     await removeLinesFromFile(
       mainPath,
-      [
+      <String>[
         "import 'service/localization_controller.dart';",
         "import 'model/message.dart';",
-        "return GetBuilder<LocalizationController>(",
-        "builder: (LocalizationController localizationController) {",
-        "locale: localizationController.locale,",
-        "translations:",
-        "Messages(languages: localizationController.translations),",
-        "final LocalizationController localizationController =",
-        "Get.put(LocalizationController());",
-        "await localizationController.init();",
+        'return GetBuilder<LocalizationController>(',
+        'builder: (LocalizationController localizationController) {',
+        'locale: localizationController.locale,',
+        'translations:',
+        'Messages(languages: localizationController.translations),',
+        'final LocalizationController localizationController =',
+        'Get.put(LocalizationController());',
+        'await localizationController.init();',
       ],
     );
 
@@ -112,41 +114,46 @@ class GenerateLocalizationService extends Command {
   }
 
   Future<void> _addLanguageModel() async {
-    await writeFileWithPrefix(path.join('lib', 'model', 'language_model.dart'),
-        language_model.content());
+    await writeFileWithPrefix(
+      path.join('lib', 'model', 'language_model.dart'),
+      language_model.content(),
+    );
   }
 
   Future<void> _addLanguageJson() async {
     Directory(path.join('asset', 'locale')).createSync();
-    File(path.join('asset', 'locale', 'en.json')).writeAsString('{}');
+    await File(path.join('asset', 'locale', 'en.json')).writeAsString('{}');
   }
 
   Future<void> _addMessageFile() async {
     await writeFileWithPrefix(
-        path.join('lib', 'model', 'message.dart'), message.content());
+      path.join('lib', 'model', 'message.dart'),
+      message.content(),
+    );
   }
 
   Future<void> _addLocalizationController() async {
     await writeFileWithPrefix(
-        path.join('lib', 'service', 'localization_controller.dart'),
-        localization_controller.content());
+      path.join('lib', 'service', 'localization_controller.dart'),
+      localization_controller.content(),
+    );
   }
 
   Future<void> _addMainChanges() async {
-    String mainPath = path.join('lib', 'main.dart');
+    final String mainPath = path.join('lib', 'main.dart');
 
     await addLinesAfterLineInFile(
       mainPath,
-      {
-        '//End MaterialApp': [
+      <String, List<String>>{
+        '//End MaterialApp': <String>[
           '},);',
         ],
-        'return GetMaterialApp(': [
+        'return GetMaterialApp(': <String>[
           'locale: localizationController.locale,',
           'translations:',
           'Messages(languages: localizationController.translations),',
         ],
-        '/// https://saynode.ch': [
+        '// https://saynode.ch': <String>[
           "import 'service/localization_controller.dart';",
           "import 'model/message.dart';",
         ],
@@ -155,12 +162,12 @@ class GenerateLocalizationService extends Command {
 
     await addLinesBeforeLineInFile(
       mainPath,
-      {
-        '//Start MaterialApp': [
-          "return GetBuilder<LocalizationController>(",
-          "builder: (LocalizationController localizationController) {",
+      <String, List<String>>{
+        '//Start MaterialApp': <String>[
+          'return GetBuilder<LocalizationController>(',
+          'builder: (LocalizationController localizationController) {',
         ],
-        'runApp(const MyApp());': [
+        'runApp(const MyApp());': <String>[
           'final LocalizationController localizationController = Get.put(LocalizationController());',
           'await localizationController.init();',
         ],

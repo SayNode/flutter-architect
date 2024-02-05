@@ -1,5 +1,5 @@
 String content() {
-  return """
+  return '''
 include: package:flutter_lints/flutter.yaml 
 
 
@@ -204,5 +204,5 @@ linter:
     - use_to_and_as_if_applicable
     - valid_regexps
     - void_checks
-""";
+''';
 }

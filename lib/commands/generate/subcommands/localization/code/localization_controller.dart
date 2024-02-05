@@ -1,4 +1,4 @@
-String content() => """
+String content() => r"""
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -30,7 +30,7 @@ class LocalizationController extends GetxController implements GetxService {
   Future<void> _loadLanguages() async {
     for (final LanguageModel languageModel in _supportedLanguageList) {
       final String jsonStringValues = await rootBundle
-          .loadString('asset/locale/\${languageModel.languageCode}.json');
+          .loadString('asset/locale/${languageModel.languageCode}.json');
       final Map<String, dynamic> mappedJson =
           jsonDecode(jsonStringValues) as Map<String, dynamic>;
       final Map<String, String> json = <String, String>{};
@@ -38,7 +38,7 @@ class LocalizationController extends GetxController implements GetxService {
         json[key] = value.toString();
       });
       translations[
-          '\${languageModel.languageCode}_\${languageModel.countryCode}'] = json;
+          '${languageModel.languageCode}_${languageModel.countryCode}'] = json;
     }
   }
 }""";

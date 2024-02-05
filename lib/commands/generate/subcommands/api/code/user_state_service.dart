@@ -1,4 +1,4 @@
-content() => """
+String content() => """
 import 'package:get/get.dart';
 
 import '../model/user.dart';

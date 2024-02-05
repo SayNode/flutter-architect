@@ -1,16 +1,33 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/new/files/analysis_options.dart'
-    as analysis_option;
-import 'package:project_initialization_tool/commands/new/files/main.dart'
-    as main_file;
-import 'package:project_initialization_tool/commands/new/files/splash_page.dart'
-    as splash_page;
-import 'package:project_initialization_tool/commands/util.dart';
 
-class Creator extends Command {
+import '../util.dart';
+import 'files/analysis_options.dart' as analysis_option;
+import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/main.dart' as main_file;
+import 'files/splash_page.dart' as splash_page;
+
+class Creator extends Command<dynamic> {
+  Creator() {
+    argParser
+      ..addFlag('ios')
+      ..addFlag('android')
+      ..addFlag('web')
+      ..addFlag('macos')
+      ..addFlag('windows')
+      ..addFlag('linux')
+      ..addOption(
+        'name',
+        abbr: 'n',
+        help:
+            '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
+        mandatory: true,
+      );
+  }
   late final String projectName;
 
   @override
@@ -18,22 +35,6 @@ class Creator extends Command {
 
   @override
   String get description => 'create new project';
-
-  Creator() {
-    argParser.addFlag('ios');
-    argParser.addFlag('android');
-    argParser.addFlag('web');
-    argParser.addFlag('macos');
-    argParser.addFlag('windows');
-    argParser.addFlag('linux');
-    argParser.addOption(
-      'name',
-      abbr: 'n',
-      help:
-          '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
-      mandatory: true,
-    );
-  }
 
   @override
   Future<void> run() async {
@@ -47,34 +48,40 @@ class Creator extends Command {
         !argResults?['macos'] &&
         !argResults?['windows'] &&
         !argResults?['linux']) {
-      print(
-          'At least one platform must be selected. Use --help for more information.');
+      stderr.writeln(
+        'At least one platform must be selected. Use --help for more information.',
+      );
       exit(0);
     }
     projectName = argResults?['name'];
-    await Process.run('flutter', ['create', projectName, '-e'],
-        runInShell: true);
+    await Process.run(
+      'flutter',
+      <String>['create', projectName, '-e'],
+      runInShell: true,
+    );
 
-    await addDependenciesToPubspec(['get'], path.join(projectName));
+    await addDependenciesToPubspec(<String>['get'], path.join(projectName));
     createCommonFolderStructure();
     _createSplashPage();
     _rewriteMain();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
+    await addCodemagicYaml();
 
     await File(path.join(projectName, 'added_boilerplate.txt'))
         .writeAsString('');
     await addWorkflow();
-    await deleteUnusedFolders();
+    deleteUnusedFolders();
     await addMultidex();
   }
 
   Future<void> addMultidex() async {
     if (argResults?['android'] == true) {
       await addLinesAfterLineInFile(
-          path.join(projectName, 'android', 'app', 'build.gradle'), {
-        'defaultConfig {': ['        multiDexEnabled true'],
-      });
+          path.join(projectName, 'android', 'app', 'build.gradle'),
+          <String, List<String>>{
+            'defaultConfig {': <String>['        multiDexEnabled true'],
+          });
       await replaceLineInFile(
         path.join(projectName, 'android', 'app', 'build.gradle'),
         'dependencies {}',
@@ -83,7 +90,7 @@ class Creator extends Command {
     }
   }
 
-  deleteUnusedFolders() {
+  void deleteUnusedFolders() {
     if (argResults?['ios'] == false) {
       if (Directory(path.join(projectName, 'ios')).existsSync()) {
         Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
@@ -120,122 +127,132 @@ class Creator extends Command {
 
   Future<void> addWorkflow() async {
     Directory(path.join(projectName, '.github')).createSync();
-    Directory(path.join(projectName, '.github', 'workflow')).createSync();
-    File(path.join(projectName, '.github', 'workflow', 'lint_action.yaml'))
-        .writeAsString(
-            " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze");
+    Directory(path.join(projectName, '.github', 'workflows')).createSync();
+    await File(
+      path.join(projectName, '.github', 'workflows', 'lint_action.yaml'),
+    ).writeAsString(
+      " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos",
+    );
   }
 
   Future<void> rewriteAnalysisOptions() async {
-    File(
+    await File(
       path.join(
         projectName,
         'analysis_options.yaml',
       ),
     ).writeAsString(analysis_option.content()).then((File file) {
-      print('-- /analysis_options.yaml ✔');
+      stderr.writeln('-- /analysis_options.yaml ✔');
+    });
+  }
+
+  Future<void> addCodemagicYaml() async {
+    await File(
+      path.join(
+        projectName,
+        'codemagic.yaml',
+      ),
+    ).writeAsString(codemagic_yaml.content()).then((File file) {
+      stderr.writeln('-- /codemagic.yaml ✔');
     });
   }
 
   /// Add assets folder to pubspec.yaml
   void addAssetsToPubspec() {
-    String pubPath = path.join(projectName, 'pubspec.yaml');
+    final String pubPath = path.join(projectName, 'pubspec.yaml');
     File(pubPath).readAsLines().then((List<String> lines) {
-      String pubspec = '';
+      final StringBuffer buffer = StringBuffer();
 
-      for (String line in lines) {
-        pubspec += '$line\n';
+      for (final String line in lines) {
+        buffer.write('$line\n');
 
         if (line.contains('flutter:') &&
-            pubspec.contains('dev_dependencies:\n')) {
-          pubspec += '  assets:\n';
-          pubspec += '    - asset/image/\n';
-          pubspec += '    - asset/locale/\n';
-          pubspec += '    - asset/video/\n';
-          pubspec += '\n';
+            buffer.toString().contains('dev_dependencies:\n')) {
+          buffer
+            ..write('  assets:\n')
+            ..write('    - asset/\n')
+            ..write('\n');
         }
       }
 
-      File(pubPath).writeAsString(pubspec).then((file) {
-        print('- Assets added to pubspec.yaml ✔');
+      File(pubPath).writeAsString(buffer.toString()).then((File file) {
+        stderr.writeln('- Assets added to pubspec.yaml ✔');
       });
 
-      print('# add assets to pubspec CREATED');
+      stderr.writeln('# add assets to pubspec CREATED');
     });
   }
 
   void createCommonFolderStructure() {
     Directory(path.join(projectName)).createSync();
-    print('- $projectName/ ✔');
+    stderr.writeln('- $projectName/ ✔');
 
-    String directory = path.join(
+    final String directory = path.join(
       projectName,
       'lib',
     );
 
     Directory(directory).createSync();
-    print('- $directory/ ✔');
+    stderr.writeln('- $directory/ ✔');
 
     // Asset
     Directory(path.join(projectName, 'asset')).createSync();
-    print('- $projectName/asset ✔');
+    stderr.writeln('- $projectName/asset ✔');
 
     // model
     Directory(path.join(directory, 'model')).createSync();
-    print('- $directory/model ✔');
+    stderr.writeln('- $directory/model ✔');
 
     // Page
     Directory(path.join(directory, 'page')).createSync();
-    print('- $directory/page ✔');
+    stderr.writeln('- $directory/page ✔');
 
     // service
     Directory(path.join(directory, 'service')).createSync();
-    print('- $directory/service ✔');
+    stderr.writeln('- $directory/service ✔');
 
     // Theme
     Directory(path.join(directory, 'theme')).createSync();
-    print('- $directory/theme ✔');
+    stderr.writeln('- $directory/theme ✔');
 
     // Util
     Directory(path.join(directory, 'util')).createSync();
-    print('- $directory/util ✔');
+    stderr.writeln('- $directory/util ✔');
 
     // Helper
     Directory(path.join(directory, 'helper')).createSync();
-    print('- $directory/helper ✔');
+    stderr.writeln('- $directory/helper ✔');
 
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
-    print('- $directory/widget ✔');
+    stderr.writeln('- $directory/widget ✔');
   }
 
   void _createSplashPage() {
     writeFileWithPrefix(
-            path.join(
-              projectName,
-              'lib',
-              'page',
-              'splash_page.dart',
-            ),
-            splash_page.content())
-        .then((File file) {
-      print('-- /lib/page/splash_page.dart ✔');
+      path.join(
+        projectName,
+        'lib',
+        'page',
+        'splash_page.dart',
+      ),
+      splash_page.content(),
+    ).then((File file) {
+      stderr.writeln('-- /lib/page/splash_page.dart ✔');
     });
   }
-
-  helperGenerator() {}
 
   /// Create the main.dart file
   void _rewriteMain() {
     writeFileWithPrefix(
-            path.join(
-              projectName,
-              'lib',
-              'main.dart',
-            ),
-            main_file.content(projectName))
-        .then((File file) {
-      print('-- /lib/main.dart ✔');
+      path.join(
+        projectName,
+        'lib',
+        'main.dart',
+      ),
+      main_file.content(projectName),
+    ).then((File file) {
+      stderr.writeln('-- /lib/main.dart ✔');
     });
   }
 }

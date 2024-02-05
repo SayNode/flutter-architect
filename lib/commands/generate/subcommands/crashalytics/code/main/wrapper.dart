@@ -1,4 +1,4 @@
-contentBefore() => """
+String contentBefore() => """
   FlutterError.onError = (FlutterErrorDetails details) async {
     await handleError(
       details.exception,
@@ -22,7 +22,7 @@ contentBefore() => """
     );
     isFirstRun = await IsFirstRun.isFirstRun();""";
 
-contentAfter() => """
+String contentAfter() => """
   }, (Object error, StackTrace stack) async {
     debugPrint('Error caught by main zone');
     debugPrint(error.toString());

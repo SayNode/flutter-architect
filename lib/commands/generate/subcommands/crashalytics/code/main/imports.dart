@@ -1,4 +1,4 @@
-content() => """
+String content() => """
 import 'dart:async';
 import 'page/lost_connection/lost_connection_page.dart';
 import 'firebase_options.dart';

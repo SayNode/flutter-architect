@@ -1,12 +1,12 @@
-imports() => """
+String imports() => """
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/services.dart';""";
 
-disconnect() => """
+String disconnect() => '''
     // TODO: Disconnect from apple
-""";
+''';
 
-signIn() => """
+String signIn() => r"""
   // Login with Apple.
   Future<AuthResponse> appleSignIn({
     String? authorizationCode,
@@ -60,9 +60,9 @@ signIn() => """
 
           /// save the token
           authenticationToken = userMap['access_token'] as String;
-          debugPrint('AuthService - authenticationToken: \$authenticationToken');
+          debugPrint('AuthService - authenticationToken: $authenticationToken');
           debugPrint(
-            'AuthService - user logged in: \${userStateService.user.value.email}',
+            'AuthService - user logged in: ${userStateService.user.value.email}',
           );
 
           await storageService.setString(
@@ -89,7 +89,7 @@ signIn() => """
           return AuthResponse(<String, dynamic>{'success': 'Successfully signed in with Apple.'}, true);
         } catch (error) {
           await _disconnectProviders();
-          throw Exception('AuthService - error while parsing the user: \$error');
+          throw Exception('AuthService - error while parsing the user: $error');
         }
       } else {
         await _disconnectProviders();
@@ -102,13 +102,13 @@ signIn() => """
         return AuthResponse(<String, dynamic>{'error': 'Sign in cancelled'}, false);
       } else {
         // Other authorization error occurred
-        throw Exception('Authorization error: \$e');
+        throw Exception('Authorization error: $e');
       }
     } on SignInWithAppleAuthorizationException catch (e) {
       // Other error occurred
       return AuthResponse(<String, dynamic>{'error': e.message}, false);
     } catch (e) {
       // Other error occurred
-      throw Exception('Authorization error: \$e');
+      throw Exception('Authorization error: $e');
     }
   }""";

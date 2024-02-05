@@ -4,24 +4,29 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:project_initialization_tool/commands/util.dart';
+
+import '../../../util.dart';
 
 extension StringCapitalize on String {
   String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
 }
 
-class GenerateTypographyService extends Command {
-  late final String figmaFileKey;
-  late final String figmaToken;
-
+class GenerateTypographyService extends Command<dynamic> {
   //-- Singleton
   GenerateTypographyService() {
     // Add parser options or flag here
-    argParser.addFlag('force',
-        defaultsTo: false, help: 'Force replace in case it already exists.');
-    argParser.addFlag('remove',
-        defaultsTo: false, help: 'Remove in case it already exists.');
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
   }
+  late final String figmaFileKey;
+  late final String figmaToken;
 
   @override
   String get description =>
@@ -40,33 +45,33 @@ class GenerateTypographyService extends Command {
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');
     figmaToken = stdin.readLineSync() ?? '';
-    var styles = await _getFigmaStyles();
+    final List<dynamic> styles = await _getFigmaStyles();
 
-    bool alreadyBuilt = await checkIfAlreadyRunWithReturn("typography");
-    bool force = argResults?['force'] ?? false;
-    bool remove = argResults?['remove'] ?? false;
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('typography');
+    final bool force = argResults?['force'] ?? false;
+    final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Typography...');
+        stderr.writeln('Creating Typography...');
         await addAlreadyRun('typography');
-        var textStyles = await _getTextStyles(styles);
-        addDependenciesToPubspecSync(["google_fonts"], null);
+        final List<dynamic> textStyles = await _getTextStyles(styles);
+        addDependenciesToPubspecSync(<String>['google_fonts'], null);
         await _addTypographyFile(textStyles);
       },
       remove: () async {
-        print('Removing Typography...');
+        stderr.writeln('Removing Typography...');
         await removeAlreadyRun('typography');
-        removeDependenciesFromPubspecSync(["google_fonts"], null);
+        removeDependenciesFromPubspecSync(<String>['google_fonts'], null);
         await _removeTypographyFile();
       },
       rejectAdd: () async {
-        print("Can't add Typography as it's already configured.");
+        stderr.writeln("Can't add Typography as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Typography as it's not yet configured.");
+        stderr.writeln("Can't remove Typography as it's not yet configured.");
       },
     );
     formatCode();
@@ -77,48 +82,59 @@ class GenerateTypographyService extends Command {
     await File(path.join('lib', 'theme', 'typography.dart')).delete();
   }
 
-  Future<void> _addTypographyFile(List textStyleList) async {
-    print(textStyleList);
-    String content =
-        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n";
-    for (var textStyle in textStyleList) {
-      content +=
-          "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n";
+  Future<void> _addTypographyFile(List<dynamic> textStyleList) async {
+    stderr.writeln(textStyleList);
+    final StringBuffer buffer = StringBuffer()
+      ..write(
+        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n",
+      );
+
+    for (final Map<String, dynamic> textStyle in textStyleList) {
+      buffer.write(
+        "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n",
+      );
     }
-    content +=
-        'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}';
+    buffer.write(
+      'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}',
+    );
     await writeFileWithPrefix(
-        path.join('lib', 'theme', 'typography.dart'), content);
+      path.join('lib', 'theme', 'typography.dart'),
+      buffer.toString(),
+    );
   }
 
-  Future<dynamic> _getTextStyles(List styles) async {
-    List<String> ids = [];
-    for (var style in styles) {
+  Future<dynamic> _getTextStyles(List<dynamic> styles) async {
+    final List<String> ids = <String>[];
+    for (final Map<String, dynamic> style in styles) {
       if (style['style_type'] == 'TEXT') {
         ids.add(style['node_id']);
       }
     }
-    final headers = {
+    final Map<String, String> headers = <String, String>{
       'X-FIGMA-TOKEN': figmaToken,
     };
 
-    final url = Uri.parse(
-        'https://api.figma.com/v1/files/$figmaFileKey/nodes?ids=${ids.join(',')}');
-    final res = await http.get(url, headers: headers);
-    final status = res.statusCode;
+    final Uri url = Uri.parse(
+      'https://api.figma.com/v1/files/$figmaFileKey/nodes?ids=${ids.join(',')}',
+    );
+    final http.Response res = await http.get(url, headers: headers);
+    final int status = res.statusCode;
     if (status != 200) throw Exception('http.get error: statusCode= $status');
-    Map data = jsonDecode(res.body);
+    final Map<String, dynamic> data = jsonDecode(res.body);
     if (data['error'] == true) {
       throw Exception('Figma returned an error: ${data['status']}');
     }
-    List textStyles = [];
-    for (var node in ids) {
-      var styleMap = data['nodes'][node]['document']['style'];
-      textStyles.add({
+    final List<Map<String, dynamic>> textStyles = <Map<String, dynamic>>[];
+    for (final String node in ids) {
+      final Map<String, dynamic> styleMap =
+          // ignore: avoid_dynamic_calls
+          data['nodes'][node]['document']['style'];
+      textStyles.add(<String, dynamic>{
         'fontFamily': styleMap['fontFamily'],
         'fontSize': styleMap['fontSize'],
         'fontWeight': styleMap['fontWeight'],
-        'name': lowerCamelCase(data['nodes'][node]['document']['name'])
+        // ignore: avoid_dynamic_calls
+        'name': lowerCamelCase(data['nodes'][node]['document']['name']),
       });
     }
     return textStyles;
@@ -126,24 +142,24 @@ class GenerateTypographyService extends Command {
 
   Future<dynamic> _getFigmaStyles() async {
     try {
-      final headers = {
+      final Map<String, String> headers = <String, String>{
         'X-FIGMA-TOKEN': figmaToken,
       };
 
-      final url =
+      final Uri url =
           Uri.parse('https://api.figma.com/v1/files/$figmaFileKey/styles');
 
-      final res = await http.get(url, headers: headers);
-      final status = res.statusCode;
+      final http.Response res = await http.get(url, headers: headers);
+      final int status = res.statusCode;
       if (status != 200) throw Exception('http.get error: statusCode= $status');
-      Map data = jsonDecode(res.body);
+      final Map<String, dynamic> data = jsonDecode(res.body);
       if (data['error'] == true) {
         throw Exception('Figma returned an error: ${data['status']}');
       }
-      print('got styles');
-      return data['meta']['styles'];
+      stderr.writeln('got styles');
+      return (data['meta'] as Map<String, dynamic>)['styles'];
     } catch (e) {
-      print(e.toString());
+      stderr.writeln(e);
       exit(1);
     }
   }

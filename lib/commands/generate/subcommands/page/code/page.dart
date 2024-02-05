@@ -1,4 +1,4 @@
-content(pascal, snake) => """
+String content(String pascal, String snake) => """
 import 'controller/${snake}_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
