@@ -1,7 +1,7 @@
 import 'constants.dart';
 
 String content(String projectName) {
-  projectName = projectName.capitalize();
+  final String projectNameCapitaliezed = projectName.capitalize();
   return """
 import 'dart:convert';
 import 'dart:io';
@@ -16,7 +16,7 @@ import 'auth_service.dart';
 class APIService extends GetxService {
   AuthService get authService => Get.put(AuthService());
 
-  /// Patch request to $projectName backend.
+  /// Patch request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> patch(
@@ -28,14 +28,14 @@ class APIService extends GetxService {
     bool omitBearerToken = false,
   }) async {
     final Uri url =
-        Uri.https(${projectName}Constants.apiDomain, path, queryParameters);
+        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
     debugPrint(
       'API - PATCH to \$path\${body != null ? ' with body: \$body' : ''}',
     );
     final http.Response response = await http.patch(
       url,
       headers: <String, String>{
-        'key': ${projectName}Constants.apiKey,
+        'key': ${projectNameCapitaliezed}Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
@@ -53,7 +53,7 @@ class APIService extends GetxService {
     return response;
   }
 
-  /// Put request to $projectName backend.
+  /// Put request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> put(
@@ -65,14 +65,14 @@ class APIService extends GetxService {
     bool omitBearerToken = false,
   }) async {
     final Uri url =
-        Uri.https(${projectName}Constants.apiDomain, path, queryParameters);
+        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
     debugPrint(
       'API - PUT to \$path\${body != null ? ' with body: \$body' : ''}',
     );
     final http.Response response = await http.put(
       url,
       headers: <String, String>{
-        'key': ${projectName}Constants.apiKey,
+        'key': ${projectNameCapitaliezed}Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
@@ -90,7 +90,7 @@ class APIService extends GetxService {
     return response;
   }
 
-  /// Post request to $projectName backend.
+  /// Post request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> post(
@@ -102,14 +102,14 @@ class APIService extends GetxService {
     bool omitBearerToken = false,
   }) async {
     final Uri url =
-        Uri.https(${projectName}Constants.apiDomain, path, queryParameters);
+        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
     debugPrint(
       'API - POST to \$path\${body != null ? ' with body: \$body' : ''}',
     );
     final http.Response response = await http.post(
       url,
       headers: <String, String>{
-        'key': ${projectName}Constants.apiKey,
+        'key': ${projectNameCapitaliezed}Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
@@ -127,7 +127,7 @@ class APIService extends GetxService {
     return response;
   }
 
-  /// Get request to $projectName backend.
+  /// Get request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
   Future<http.Response> get(
     String path, {
@@ -136,12 +136,12 @@ class APIService extends GetxService {
     bool omitBearerToken = false,
   }) async {
     final Uri url =
-        Uri.https(${projectName}Constants.apiDomain, path, queryParameters);
+        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
     debugPrint('API - GET to \$path');
     final http.Response response = await http.get(
       url,
       headers: <String, String>{
-        'key': ${projectName}Constants.apiKey,
+        'key': ${projectNameCapitaliezed}Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
@@ -157,7 +157,7 @@ class APIService extends GetxService {
     return response;
   }
 
-  /// Delete request to $projectName backend.
+  /// Delete request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> delete(
@@ -169,14 +169,14 @@ class APIService extends GetxService {
     bool omitBearerToken = false,
   }) async {
     final Uri url =
-        Uri.https(${projectName}Constants.apiDomain, path, queryParameters);
+        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
     debugPrint(
       'API - DELETE to \$path\${body != null ? ' with body: \$body' : ''}',
     );
     final http.Response response = await http.delete(
       url,
       headers: <String, String>{
-        'key': ${projectName}Constants.apiKey,
+        'key': ${projectNameCapitaliezed}Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}

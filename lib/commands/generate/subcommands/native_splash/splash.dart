@@ -39,7 +39,7 @@ class GenerateSplashService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Native Splash...');
+        stderr.writeln('Creating Native Splash...');
         await addAlreadyRun('splash');
         addDependenciesToPubspecSync(<String>['flutter_native_splash'], null);
         final String iconFile = getIconFile();
@@ -49,7 +49,7 @@ class GenerateSplashService extends Command<dynamic> {
         await _addMainChanges();
       },
       remove: () async {
-        print('Removing Native Splash...');
+        stderr.writeln('Removing Native Splash...');
         await removeAlreadyRun('splash');
         removeDependenciesFromPubspecSync(
           <String>['flutter_native_splash'],
@@ -59,10 +59,11 @@ class GenerateSplashService extends Command<dynamic> {
         await _removeMainChanges();
       },
       rejectAdd: () async {
-        print("Can't add Native Splash as it's already configured.");
+        stderr.writeln("Can't add Native Splash as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Native Splash as it's not yet configured.");
+        stderr
+            .writeln("Can't remove Native Splash as it's not yet configured.");
       },
     );
     formatCode();
@@ -95,7 +96,7 @@ class GenerateSplashService extends Command<dynamic> {
       if (hex.hasMatch(value)) {
         return value;
       } else {
-        print('Invalid hexadecimal value. Try the #xxxxxx format.');
+        stderr.writeln('Invalid hexadecimal value. Try the #xxxxxx format.');
       }
     }
     exit(1);

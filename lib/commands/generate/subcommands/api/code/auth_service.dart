@@ -1,7 +1,4 @@
-import 'constants.dart';
-
-String content(String projectName) {
-  projectName = projectName.capitalize();
+String content() {
   return r"""
 import 'dart:convert';
 

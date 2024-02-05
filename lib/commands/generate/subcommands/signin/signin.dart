@@ -92,7 +92,8 @@ class GenerateSigninService extends Command<dynamic> {
       },
       rejectAdd: () async {
         stderr.writeln(
-            "Can't add the Google Signin option as it's already configured.");
+          "Can't add the Google Signin option as it's already configured.",
+        );
       },
       rejectRemove: () async {
         stderr.writeln(
@@ -129,7 +130,8 @@ class GenerateSigninService extends Command<dynamic> {
       },
       rejectAdd: () async {
         stderr.writeln(
-            "Can't add the Apple Signin option as it's already configured.");
+          "Can't add the Apple Signin option as it's already configured.",
+        );
       },
       rejectRemove: () async {
         stderr.writeln(
