@@ -1,4 +1,4 @@
-content() => """
+String content() => '''
 class RestartWidget extends StatefulWidget {
   const RestartWidget({required this.child, super.key});
 
@@ -31,4 +31,4 @@ class _RestartWidgetState extends State<RestartWidget> {
       child: widget.child,
     );
   }
-}""";
+}''';

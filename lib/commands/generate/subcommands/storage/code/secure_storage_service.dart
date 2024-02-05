@@ -1,4 +1,4 @@
-String content() => """
+String content() => r"""
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
@@ -12,10 +12,10 @@ class SecureStorageService extends GetxService {
         if (storedValue != null) {
           return storedValue;
         } else {
-          throw SecureStorageException('Key \$key is null');
+          throw SecureStorageException('Key $key is null');
         }
       } else {
-        throw SecureStorageException('Key \$key not found');
+        throw SecureStorageException('Key $key not found');
       }
     });
     throw SecureStorageException('Critical Error. This should never happen');

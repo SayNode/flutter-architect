@@ -24,7 +24,7 @@ workflows:
         script: |
           git fetch --all --tags
           prev_tag=\$(git for-each-ref --sort=-creatordate  --format '%(objectname)' refs/tags | sed -n 2p )
-          notes="{[\"text\":"
+          notes="{["text":"
           notes+=\$(git log --pretty=format:"%s," "\$prev_tag"..HEAD)
           notes+="]}"
           echo "\$notes"
@@ -47,12 +47,12 @@ workflows:
         #          and create all the required env variables in the codemagic project
         script: |
           BUILD_NUMBER=\$((\$PROJECT_BUILD_NUMBER + 400))
-          flutter build appbundle --release \
-            --no-tree-shake-icons \
-            --build-name=1.3.\$((\$PROJECT_BUILD_NUMBER + 10)) \
-            --build-number=\$BUILD_NUMBER \
-            --dart-define=DATABASE_URL=api-dev.skillbuddy.io \
-            --dart-define=DATABASE_API_KEY=\$DATABASE_API_KEY_DEV_ENV \
+          flutter build appbundle --release 
+            --no-tree-shake-icons 
+            --build-name=1.3.\$((\$PROJECT_BUILD_NUMBER + 10)) 
+            --build-number=\$BUILD_NUMBER 
+            --dart-define=DATABASE_URL=api-dev.skillbuddy.io 
+            --dart-define=DATABASE_API_KEY=\$DATABASE_API_KEY_DEV_ENV 
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -98,7 +98,7 @@ workflows:
           git fetch --all --tags
           prev_tag=\$(git for-each-ref --sort=-creatordate  --format '%(objectname)' refs/tags | sed -n 2p )
           notes=\$(git log --pretty=format:"\n- %s" "\$prev_tag"..HEAD)
-          notes="{[\"text\":"
+          notes="{["text":"
           notes+=\$(git log --pretty=format:"%s," "\$prev_tag"..HEAD)
           notes+="]}"
           echo "\$notes"
@@ -111,7 +111,7 @@ workflows:
           flutter packages pub get
       - name: Install pods
         script: |
-          find . -name "Podfile" -execdir pod install \;
+          find . -name "Podfile" -execdir pod install ;
       #      - name: Flutter analyze
       #        script: |
       #          flutter analyze
@@ -135,12 +135,12 @@ workflows:
           pod update
           appversion = \$PROJECT_BUILD_NUMBER
           echo "version from store \${appversion}"
-          flutter build ipa --release \
-            --no-tree-shake-icons \
-            --build-name=1.3.\$((\$PROJECT_BUILD_NUMBER + 10)) \
-            --build-number=\$((\$PROJECT_BUILD_NUMBER + 10)) \
-            --dart-define=DATABASE_URL=api-dev.skillbuddy.io \
-            --dart-define=DATABASE_API_KEY=\$DATABASE_API_KEY_DEV_ENV \
+          flutter build ipa --release 
+            --no-tree-shake-icons 
+            --build-name=1.3.\$((\$PROJECT_BUILD_NUMBER + 10)) 
+            --build-number=\$((\$PROJECT_BUILD_NUMBER + 10)) 
+            --dart-define=DATABASE_URL=api-dev.skillbuddy.io 
+            --dart-define=DATABASE_API_KEY=\$DATABASE_API_KEY_DEV_ENV 
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa

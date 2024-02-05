@@ -1,8 +1,5 @@
-import 'package:project_initialization_tool/commands/generate/subcommands/api/code/constants.dart';
-
-content(String projectName) {
-  projectName = projectName.capitalize();
-  return """
+String content() {
+  return r"""
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -43,7 +40,7 @@ class AuthService extends GetxService {
   }
 
   String unexpectedError(http.Response response) {
-    return '[Status Code : \${response.statusCode}] \${response.body}';
+    return '[Status Code : ${response.statusCode}] ${response.body}';
   }
 
   Map<String, dynamic> parseErrorMap(http.Response response) {
@@ -74,9 +71,9 @@ class AuthService extends GetxService {
 
           /// save the token
           authenticationToken = userMap['access_token'] as String;
-          debugPrint('AuthService - authenticationToken: \$authenticationToken');
+          debugPrint('AuthService - authenticationToken: $authenticationToken');
           debugPrint(
-            'AuthService - user logged in: \${userStateService.user.value.email}',
+            'AuthService - user logged in: ${userStateService.user.value.email}',
           );
 
           // Disconnect other providers
@@ -92,18 +89,18 @@ class AuthService extends GetxService {
           );
         } catch (error) {
           // Request parsing went wrong:
-          throw Exception('AuthService - error while parsing the user: \$error');
+          throw Exception('AuthService - error while parsing the user: $error');
         }
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${response.statusCode} \${response.body}',
+          'AuthService - ${response.statusCode} ${response.body}',
         );
         return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
-      throw Exception('AuthService login endpoint failed - \$e');
+      throw Exception('AuthService login endpoint failed - $e');
     }
   }
 
@@ -129,12 +126,12 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         throw Exception(
-          'AuthService - error while logging out the user \${unexpectedError(response)}',
+          'AuthService - error while logging out the user ${unexpectedError(response)}',
         );
       }
     } catch (e) {
       // Endpoint failed:
-      throw Exception('AuthService logout endpoint failed - \$e');
+      throw Exception('AuthService logout endpoint failed - $e');
     }
   }
 
@@ -167,9 +164,9 @@ class AuthService extends GetxService {
 
           /// save the token
           authenticationToken = userMap['access_token'] as String;
-          debugPrint('AuthService - authenticationToken: \$authenticationToken');
+          debugPrint('AuthService - authenticationToken: $authenticationToken');
           debugPrint(
-            'AuthService - user registered in: \${userStateService.user.value.email}',
+            'AuthService - user registered in: ${userStateService.user.value.email}',
           );
 
           // Disconnect other providers
@@ -186,18 +183,18 @@ class AuthService extends GetxService {
           );
         } catch (error) {
           // Request parsing went wrong:
-          throw Exception('AuthService - error while parsing the user: \$error');
+          throw Exception('AuthService - error while parsing the user: $error');
         }
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${unexpectedError(response)}',
+          'AuthService - ${unexpectedError(response)}',
         );
         return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
-      throw Exception('AuthService registration endpoint failed - \$e');
+      throw Exception('AuthService registration endpoint failed - $e');
     }
   }
 
@@ -222,13 +219,13 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${unexpectedError(response)}',
+          'AuthService - ${unexpectedError(response)}',
         );
         return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
-      throw Exception('AuthService reset password endpoint failed - \$e');
+      throw Exception('AuthService reset password endpoint failed - $e');
     }
   }
 
@@ -253,7 +250,7 @@ class AuthService extends GetxService {
           verificationToken = userMap['token'] as String;
           verificationUid = userMap['code'] as String;
           debugPrint(
-            'AuthService - verification Token and UID: \$verificationUid \$verificationToken',
+            'AuthService - verification Token and UID: $verificationUid $verificationToken',
           );
           return AuthResponse(
             <String, dynamic>{'success': 'Verification code is valid.'},
@@ -268,13 +265,13 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${unexpectedError(response)}',
+          'AuthService - ${unexpectedError(response)}',
         );
         return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
-      throw Exception('AuthService validate code endpoint failed - \$e');
+      throw Exception('AuthService validate code endpoint failed - $e');
     }
   }
 
@@ -304,14 +301,14 @@ class AuthService extends GetxService {
       } else {
         // Unexpected status code:
         debugPrint(
-          'AuthService - \${unexpectedError(response)}',
+          'AuthService - ${unexpectedError(response)}',
         );
         return AuthResponse(parseErrorMap(response), false);
       }
     } catch (e) {
       // Endpoint failed:
       throw Exception(
-        'AuthService change password after reset endpoint failed - \$e',
+        'AuthService change password after reset endpoint failed - $e',
       );
     }
   }
@@ -330,7 +327,7 @@ class AuthService extends GetxService {
       return response.statusCode == 200;
     } catch (e) {
       throw Exception(
-        'AuthService send verification email endpoint failed - \$e',
+        'AuthService send verification email endpoint failed - $e',
       );
     }
   }

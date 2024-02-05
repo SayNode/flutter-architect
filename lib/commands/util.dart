@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:project_initialization_tool/commands/new/files/prefix.dart'
-    as prefix;
+import 'new/files/prefix.dart' as prefix;
 
 /// Logic for building a component.
 Future<void> componentBuilder({
@@ -36,9 +35,15 @@ Future<void> componentBuilder({
 
 /// Add dependencies to pubspec.yaml
 Future<ProcessResult> addDependenciesToPubspec(
-    List<String> dependencies, String? workingDirectory) async {
-  var result = await Process.run('flutter', ['pub', 'add', ...dependencies],
-      runInShell: true, workingDirectory: workingDirectory);
+  List<String> dependencies,
+  String? workingDirectory,
+) async {
+  final ProcessResult result = await Process.run(
+    'flutter',
+    <String>['pub', 'add', ...dependencies],
+    runInShell: true,
+    workingDirectory: workingDirectory,
+  );
   if (result.stderr != null) {
     stderr.write(result.stderr);
   }
@@ -50,9 +55,15 @@ Future<ProcessResult> addDependenciesToPubspec(
 
 /// Add dependencies to pubspec.yaml
 ProcessResult addDependenciesToPubspecSync(
-    List<String> dependencies, String? workingDirectory) {
-  var result = Process.runSync('flutter', ['pub', 'add', ...dependencies],
-      runInShell: true, workingDirectory: workingDirectory);
+  List<String> dependencies,
+  String? workingDirectory,
+) {
+  final ProcessResult result = Process.runSync(
+    'flutter',
+    <String>['pub', 'add', ...dependencies],
+    runInShell: true,
+    workingDirectory: workingDirectory,
+  );
   if (result.stderr != null) {
     stderr.write(result.stderr);
   }
@@ -64,9 +75,15 @@ ProcessResult addDependenciesToPubspecSync(
 
 /// Remove dependencies from pubspec.yaml
 Future<ProcessResult> removeDependenciesFromPubspec(
-    List<String> dependencies, String? workingDirectory) async {
-  var result = await Process.run('flutter', ['pub', 'remove', ...dependencies],
-      runInShell: true, workingDirectory: workingDirectory);
+  List<String> dependencies,
+  String? workingDirectory,
+) async {
+  final ProcessResult result = await Process.run(
+    'flutter',
+    <String>['pub', 'remove', ...dependencies],
+    runInShell: true,
+    workingDirectory: workingDirectory,
+  );
   if (result.stderr != null) {
     stderr.write(result.stderr);
   }
@@ -78,9 +95,15 @@ Future<ProcessResult> removeDependenciesFromPubspec(
 
 /// Remove dependencies from pubspec.yaml
 ProcessResult removeDependenciesFromPubspecSync(
-    List<String> dependencies, String? workingDirectory) {
-  var result = Process.runSync('flutter', ['pub', 'remove', ...dependencies],
-      runInShell: true, workingDirectory: workingDirectory);
+  List<String> dependencies,
+  String? workingDirectory,
+) {
+  final ProcessResult result = Process.runSync(
+    'flutter',
+    <String>['pub', 'remove', ...dependencies],
+    runInShell: true,
+    workingDirectory: workingDirectory,
+  );
   if (result.stderr != null) {
     stderr.write(result.stderr);
   }
@@ -92,15 +115,16 @@ ProcessResult removeDependenciesFromPubspecSync(
 
 /// Run flutter_native_splash command
 ProcessResult runNativeSplash(String? workingDirectory) {
-  var result = Process.runSync(
-      'dart',
-      [
-        'run',
-        'flutter_native_splash:create',
-        '--path=flutter_native_splash.yaml',
-      ],
-      runInShell: true,
-      workingDirectory: workingDirectory);
+  final ProcessResult result = Process.runSync(
+    'dart',
+    <String>[
+      'run',
+      'flutter_native_splash:create',
+      '--path=flutter_native_splash.yaml',
+    ],
+    runInShell: true,
+    workingDirectory: workingDirectory,
+  );
   if (result.stderr != null) {
     stderr.write(result.stderr);
   }
@@ -112,9 +136,9 @@ ProcessResult runNativeSplash(String? workingDirectory) {
 
 /// Run dart format
 void formatCode() {
-  var result = Process.runSync(
+  final ProcessResult result = Process.runSync(
     'dart',
-    ['format', '.'],
+    <String>['format', '.'],
     runInShell: true,
   );
   if (result.stderr != null) {
@@ -127,9 +151,9 @@ void formatCode() {
 
 // Run dart fix
 void dartFixCode() {
-  var result = Process.runSync(
+  final ProcessResult result = Process.runSync(
     'dart',
-    ['fix', '--apply'],
+    <String>['fix', '--apply'],
     runInShell: true,
   );
   if (result.stderr != null) {
@@ -150,7 +174,7 @@ Future<void> addAlreadyRun(String command) async {
 Future<void> removeAlreadyRun(String command) async {
   await removeLinesFromFile(
     'added_boilerplate.txt',
-    [command],
+    <String>[command],
   );
 }
 
@@ -166,7 +190,7 @@ Future<void> removeAlreadyRunStartingWith(String command) async {
 /// Exits if [command] already run
 Future<void> checkIfAlreadyRun(String command) async {
   await File('added_boilerplate.txt').readAsLines().then((List<String> lines) {
-    for (var line in lines) {
+    for (final String line in lines) {
       if (line.contains(command)) {
         //print('$command already added');
         exit(0);
@@ -178,10 +202,8 @@ Future<void> checkIfAlreadyRun(String command) async {
 /// Check if [command] already run for this project
 /// Returns true if [command] already run, otheriwse false
 Future<bool> checkIfAlreadyRunWithReturn(String command) async {
-  return await File('added_boilerplate.txt')
-      .readAsLines()
-      .then((List<String> lines) {
-    for (var line in lines) {
+  return File('added_boilerplate.txt').readAsLines().then((List<String> lines) {
+    for (final String line in lines) {
       //print('line: $line');
       if (line.contains(command)) {
         return true;
@@ -193,9 +215,9 @@ Future<bool> checkIfAlreadyRunWithReturn(String command) async {
 
 /// Delete [lines] from [file].
 Future<void> removeLinesFromFile(String file, List<String> lines) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
-  for (var line in fileLines) {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
+  for (final String line in fileLines) {
     if (!lines.contains(line.trim())) {
       newFileLines.add(line);
     }
@@ -205,10 +227,12 @@ Future<void> removeLinesFromFile(String file, List<String> lines) async {
 
 /// Delete lines from [file] that start with [startsWith].
 Future<void> removeLinesStartingWithFromFile(
-    String file, String startsWith) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
-  for (var line in fileLines) {
+  String file,
+  String startsWith,
+) async {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
+  for (final String line in fileLines) {
     if (!line.trim().startsWith(startsWith)) {
       newFileLines.add(line);
     }
@@ -218,11 +242,14 @@ Future<void> removeLinesStartingWithFromFile(
 
 /// Delete lines from [file], from [line1] to [line2].
 Future<void> removeLineRangeFromFile(
-    String file, String line1, String line2) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
-  var delete = false;
-  for (var line in fileLines) {
+  String file,
+  String line1,
+  String line2,
+) async {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
+  bool delete = false;
+  for (final String line in fileLines) {
     if (line.trim().contains(line1)) {
       delete = true;
     }
@@ -238,7 +265,7 @@ Future<void> removeLineRangeFromFile(
 
 /// Delete string [text] from file in path [file].
 Future<void> removeTextFromFile(String file, String text) async {
-  List<String> lines = text.split('\n');
+  final List<String> lines = text.split('\n');
 
   await removeLinesAfterFromFile(
     file,
@@ -249,12 +276,16 @@ Future<void> removeTextFromFile(String file, String text) async {
 }
 
 /// Delete [amount] lines from file in path [file], after line [line].
-Future<void> removeLinesAfterFromFile(String file, String line, int amount,
-    {bool includeFirst = false}) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
+Future<void> removeLinesAfterFromFile(
+  String file,
+  String line,
+  int amount, {
+  bool includeFirst = false,
+}) async {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
   for (int i = 0; i < fileLines.length; i++) {
-    String fileLine = fileLines[i];
+    final String fileLine = fileLines[i];
     if (fileLine.trim().contains(line.trim())) {
       i += amount;
       if (!includeFirst) {
@@ -269,9 +300,9 @@ Future<void> removeLinesAfterFromFile(String file, String line, int amount,
 
 /// Replace [line] with [newLine] in [file].
 Future<void> replaceLineInFile(String file, String line, String newLine) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
-  for (var l in fileLines) {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
+  for (final String l in fileLines) {
     if (l.trim().contains(line)) {
       newFileLines.add(newLine);
     } else {
@@ -283,16 +314,18 @@ Future<void> replaceLineInFile(String file, String line, String newLine) async {
 
 /// Add lines in value of [lines] after line in key of [lines], in file [file].
 Future<void> addLinesAfterLineInFile(
-    String file, Map<String, List<String>> lines,
-    {List<String> leading = const [], List<String> trailing = const []}) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
+  String file,
+  Map<String, List<String>> lines, {
+  List<String> leading = const <String>[],
+  List<String> trailing = const <String>[],
+}) async {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[...leading];
 
-  newFileLines.addAll(leading);
-
-  for (String line in fileLines) {
-    newFileLines.add(line);
-    newFileLines.addAll(lines[line.trim()] ?? []);
+  for (final String line in fileLines) {
+    newFileLines
+      ..add(line)
+      ..addAll(lines[line.trim()] ?? <String>[]);
   }
 
   newFileLines.addAll(trailing);
@@ -302,16 +335,18 @@ Future<void> addLinesAfterLineInFile(
 
 /// Add lines in value of [lines] before line in key of [lines], in file [file].
 Future<void> addLinesBeforeLineInFile(
-    String file, Map<String, List<String>> lines,
-    {List<String> leading = const [], List<String> trailing = const []}) async {
-  var fileLines = await File(file).readAsLines();
-  var newFileLines = <String>[];
+  String file,
+  Map<String, List<String>> lines, {
+  List<String> leading = const <String>[],
+  List<String> trailing = const <String>[],
+}) async {
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[...leading];
 
-  newFileLines.addAll(leading);
-
-  for (String line in fileLines) {
-    newFileLines.addAll(lines[line.trim()] ?? []);
-    newFileLines.add(line);
+  for (final String line in fileLines) {
+    newFileLines
+      ..addAll(lines[line.trim()] ?? <String>[])
+      ..add(line);
   }
 
   newFileLines.addAll(trailing);
@@ -322,7 +357,7 @@ Future<void> addLinesBeforeLineInFile(
 Future<String> getProjectName() async {
   String name = '';
   await File('pubspec.yaml').readAsLines().then((List<String> lines) {
-    for (var line in lines) {
+    for (final String line in lines) {
       if (line.contains('name:')) {
         name = line.split(':')[1].trim();
         break;
@@ -335,16 +370,19 @@ Future<String> getProjectName() async {
 String get getPrefix => prefix.content();
 
 Future<File> writeFileWithPrefix(String path, String content) async {
-  return await File(path).writeAsString(prefix.content() + content);
+  final File file = await File(path).writeAsString(prefix.content() + content);
+  return file;
 }
 
-spinnerLoading(Function function) async {
-  var P = ["\\", "|", "/", "-"];
-  var x = 0;
-  var timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
-    stdout.write("\r${P[x++]}");
+Future<void> spinnerLoading(Function function) async {
+  final List<String> P = <String>[r'\', '|', '/', '-'];
+  int x = 0;
+  final Timer timer =
+      Timer.periodic(const Duration(milliseconds: 250), (Timer timer) {
+    stdout.write('\r${P[x++]}');
     x &= 3;
   });
+  // ignore: avoid_dynamic_calls
   await function();
   timer.cancel();
 }
@@ -355,13 +393,12 @@ String capitalizeFirstLetter(String s) {
 
 //function to turn string to lower camel case
 String lowerCamelCase(String s) {
-  var words = s.split(RegExp(r'[_\s-]'));
-  var result = '';
-  result += words[0].toLowerCase();
-  for (var i = 1; i < words.length; i++) {
-    result += capitalizeFirstLetter(words[i]);
+  final List<String> words = s.split(RegExp(r'[_\s-]'));
+  final StringBuffer buffer = StringBuffer()..write(words[0].toLowerCase());
+  for (int i = 1; i < words.length; i++) {
+    buffer.write(capitalizeFirstLetter(words[i]));
   }
-  return result;
+  return buffer.toString();
 }
 
 // Black:   \x1B[30m
@@ -376,36 +413,27 @@ String lowerCamelCase(String s) {
 
 // \x1B  [31m  Hello  \x1B  [0m
 
-printColor(String textToPrint, ColorText colorText) {
+void printColor(String textToPrint, ColorText colorText) {
   // generate a switch on the colorText enum
   switch (colorText) {
     case ColorText.black:
-      print('\x1B[30m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[30m$textToPrint\x1B[0m');
     case ColorText.red:
-      print('\x1B[31m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[31m$textToPrint\x1B[0m');
     case ColorText.green:
-      print('\x1B[32m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[32m$textToPrint\x1B[0m');
     case ColorText.yellow:
-      print('\x1B[33m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[33m$textToPrint\x1B[0m');
     case ColorText.blue:
-      print('\x1B[34m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[34m$textToPrint\x1B[0m');
     case ColorText.magenta:
-      print('\x1B[35m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[35m$textToPrint\x1B[0m');
     case ColorText.cyan:
-      print('\x1B[36m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[36m$textToPrint\x1B[0m');
     case ColorText.white:
-      print('\x1B[37m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[37m$textToPrint\x1B[0m');
     case ColorText.reset:
-      print('\x1B[0m$textToPrint\x1B[0m');
-      break;
+      stderr.writeln('\x1B[0m$textToPrint\x1B[0m');
   }
 }
 

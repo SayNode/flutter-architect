@@ -1,1 +1,1 @@
-content() => "getMaterialAppCalled = true;";
+String content() => 'getMaterialAppCalled = true;';

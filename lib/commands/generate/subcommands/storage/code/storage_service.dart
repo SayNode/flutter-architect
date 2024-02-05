@@ -1,4 +1,4 @@
-String content() => """
+String content() => r"""
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,50 +31,50 @@ class StorageService extends GetxService {
 
   String getString(String key) {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key \$key not found');
+      throw StorageException('Key $key not found');
     }
     if (_prefs.getString(key) == null) {
-      throw StorageException('Key \$key is null');
+      throw StorageException('Key $key is null');
     }
     return _prefs.getString(key)!;
   }
 
   bool getBool(String key) {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key \$key not found');
+      throw StorageException('Key $key not found');
     }
     if (_prefs.getBool(key) == null) {
-      throw StorageException('Key \$key is null');
+      throw StorageException('Key $key is null');
     }
     return _prefs.getBool(key)!;
   }
 
   int getInt(String key) {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key \$key not found');
+      throw StorageException('Key $key not found');
     }
     if (_prefs.getInt(key) == null) {
-      throw StorageException('Key \$key is null');
+      throw StorageException('Key $key is null');
     }
     return _prefs.getInt(key)!;
   }
 
   double getDouble(String key) {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key \$key not found');
+      throw StorageException('Key $key not found');
     }
     if (_prefs.getDouble(key) == null) {
-      throw StorageException('Key \$key is null');
+      throw StorageException('Key $key is null');
     }
     return _prefs.getDouble(key)!;
   }
 
   List<String> getStringList(String key) {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key \$key not found');
+      throw StorageException('Key $key not found');
     }
     if (_prefs.getStringList(key) == null) {
-      throw StorageException('Key \$key is null');
+      throw StorageException('Key $key is null');
     }
     return _prefs.getStringList(key)!;
   }
@@ -106,6 +106,6 @@ class StorageException implements Exception {
 
   @override
   String toString() {
-    return 'StorageException: \$message';
+    return 'StorageException: $message';
   }
 }""";

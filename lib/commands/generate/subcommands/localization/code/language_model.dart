@@ -1,4 +1,4 @@
-String content() => """
+String content() => '''
 class LanguageModel {
   LanguageModel({
     required this.imageUrl,
@@ -11,4 +11,4 @@ class LanguageModel {
   String languageName;
   String languageCode;
   String countryCode;
-}""";
+}''';
