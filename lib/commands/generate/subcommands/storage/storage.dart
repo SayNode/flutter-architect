@@ -2,20 +2,26 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'code/secure_storage_service.dart'
-    as secure_storage;
-import 'code/storage_service.dart'
-    as shared_storage;
-import '../../../util.dart';
 
-class GenerateStorageService extends Command {
+import '../../../util.dart';
+import 'code/secure_storage_service.dart' as secure_storage;
+import 'code/storage_service.dart' as shared_storage;
+
+class GenerateStorageService extends Command<dynamic> {
   //-- Singleton
   GenerateStorageService() {
     // Add parser options or flag here
-    argParser.addFlag('secure', help: 'Create secure storage service.');
-    argParser.addFlag('shared', help: 'Create shared storage service.');
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
+    argParser
+      ..addFlag('secure', help: 'Create secure storage service.')
+      ..addFlag('shared', help: 'Create shared storage service.')
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      );
   }
 
   @override
@@ -39,13 +45,15 @@ class GenerateStorageService extends Command {
         await runShared();
       }
     } else {
-      print(
-          'Please specify which storage service you want to create. Use --help for more info.',);
+      stderr.writeln(
+        'Please specify which storage service you want to create. Use --help for more info.',
+      );
     }
   }
 
   Future<void> runSecure() async {
-    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('secure_storage');
+    final bool alreadyBuilt =
+        await checkIfAlreadyRunWithReturn('secure_storage');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
@@ -53,22 +61,26 @@ class GenerateStorageService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Secure Storage service...');
+        stderr.writeln('Creating Secure Storage service...');
         await addAlreadyRun('secure_storage');
         addDependenciesToPubspecSync(<String>['flutter_secure_storage'], null);
         await _addSecureStorageService();
       },
       remove: () async {
-        print('Removing Secure Storage service...');
+        stderr.writeln('Removing Secure Storage service...');
         await removeAlreadyRun('secure_storage');
-        removeDependenciesFromPubspecSync(<String>['flutter_secure_storage'], null);
+        removeDependenciesFromPubspecSync(
+          <String>['flutter_secure_storage'],
+          null,
+        );
         await _removeSecureStorageService();
       },
       rejectAdd: () async {
-        print("Can't add Secure Storage as it's already configured.");
+        stderr.writeln("Can't add Secure Storage as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Secure Storage as it's not yet configured.");
+        stderr
+            .writeln("Can't remove Secure Storage as it's not yet configured.");
       },
     );
     formatCode();
@@ -76,7 +88,8 @@ class GenerateStorageService extends Command {
   }
 
   Future<void> runShared() async {
-    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('shared_storage');
+    final bool alreadyBuilt =
+        await checkIfAlreadyRunWithReturn('shared_storage');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
@@ -84,24 +97,25 @@ class GenerateStorageService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Shared Storage service...');
+        stderr.writeln('Creating Shared Storage service...');
         addDependenciesToPubspecSync(<String>['shared_preferences'], null);
         await addAlreadyRun('shared_storage');
         await _addSharedStorageService();
         await _addMainChanges();
       },
       remove: () async {
-        print('Removing Shared Storage service...');
+        stderr.writeln('Removing Shared Storage service...');
         removeDependenciesFromPubspecSync(<String>['shared_preferences'], null);
         await removeAlreadyRun('shared_storage');
         await _removeSharedStorageService();
         await _removeMainChanges();
       },
       rejectAdd: () async {
-        print("Can't add Shared Storage as it's already configured.");
+        stderr.writeln("Can't add Shared Storage as it's already configured.");
       },
       rejectRemove: () async {
-        print("Can't remove Shared Storage as it's not yet configured.");
+        stderr
+            .writeln("Can't remove Shared Storage as it's not yet configured.");
       },
     );
     formatCode();
@@ -127,7 +141,9 @@ class GenerateStorageService extends Command {
           'final StorageService storage = Get.put<StorageService>(StorageService());',
           'await storage.init();',
         ],
-        '// https://saynode.ch': <String>["import 'service/storage_service.dart';"],
+        '// https://saynode.ch': <String>[
+          "import 'service/storage_service.dart';",
+        ],
       },
     );
   }
@@ -143,13 +159,15 @@ class GenerateStorageService extends Command {
 
   Future<void> _addSharedStorageService() async {
     await writeFileWithPrefix(
-        path.join('lib', 'service', 'storage_service.dart'),
-        shared_storage.content(),);
+      path.join('lib', 'service', 'storage_service.dart'),
+      shared_storage.content(),
+    );
   }
 
   Future<void> _addSecureStorageService() async {
     await writeFileWithPrefix(
-        path.join('lib', 'service', 'secure_storage_service.dart'),
-        secure_storage.content(),);
+      path.join('lib', 'service', 'secure_storage_service.dart'),
+      secure_storage.content(),
+    );
   }
 }
