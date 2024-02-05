@@ -11,7 +11,6 @@ import 'code/lost_connection_page.dart' as lost_connection_page;
 import 'code/main/handle_error.dart' as handle_error;
 import 'code/main/imports.dart' as imports;
 import 'code/main/material_app_flag.dart' as material_app_flag;
-import 'code/main/restart_widget.dart' as restart_widget;
 import 'code/main/wrapper.dart' as wrapper;
 import 'code/network_service.dart' as network_service;
 import 'code/util.dart' as util;
@@ -182,7 +181,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
           material_app_flag.content(),
         ],
         'bool isFirstRun = false;': <String>[
-          restart_widget.content(),
           handle_error.content(),
         ],
         '// https://saynode.ch': <String>[
@@ -198,7 +196,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
     await removeTextFromFile(mainPath, wrapper.contentBefore());
     await removeTextFromFile(mainPath, wrapper.contentAfter());
     await removeTextFromFile(mainPath, material_app_flag.content());
-    await removeTextFromFile(mainPath, restart_widget.content());
     await removeTextFromFile(mainPath, handle_error.content());
   }
 
