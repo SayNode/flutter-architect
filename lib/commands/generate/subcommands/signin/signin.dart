@@ -1,20 +1,33 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import '../api/api.dart';
-import 'code/apple.dart'
-    as apple;
-import 'code/google.dart'
-    as google;
+
 import '../../../util.dart';
+import '../api/api.dart';
+import 'code/apple.dart' as apple;
+import 'code/google.dart' as google;
 
-class GenerateSigninService extends Command {
-
+class GenerateSigninService extends Command<dynamic> {
   GenerateSigninService() {
     // Add parser options or flag here
-    argParser.addFlag('force', help: 'Force replace in case it already exists.',);
-    argParser.addFlag('remove', help: 'Remove in case it already exists.',);
-    argParser.addFlag('google', help: 'Include Google Auth in Auth Service.',);
-    argParser.addFlag('apple', help: 'Include Apple Auth in Auth Service.',);
+    argParser
+      ..addFlag(
+        'force',
+        help: 'Force replace in case it already exists.',
+      )
+      ..addFlag(
+        'remove',
+        help: 'Remove in case it already exists.',
+      )
+      ..addFlag(
+        'google',
+        help: 'Include Google Auth in Auth Service.',
+      )
+      ..addFlag(
+        'apple',
+        help: 'Include Apple Auth in Auth Service.',
+      );
   }
   @override
   String get description =>
@@ -45,13 +58,15 @@ class GenerateSigninService extends Command {
         await runApple();
       }
     } else {
-      print(
-          'Please specify which signin service you want to create. Use --help for more info.',);
+      stderr.writeln(
+        'Please specify which signin service you want to create. Use --help for more info.',
+      );
     }
   }
 
   Future<void> runGoogle() async {
-    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('signin-google');
+    final bool alreadyBuilt =
+        await checkIfAlreadyRunWithReturn('signin-google');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
@@ -59,7 +74,7 @@ class GenerateSigninService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Google Signin Service...');
+        stderr.writeln('Creating Google Signin Service...');
         await addAlreadyRun('signin-google');
         addDependenciesToPubspecSync(<String>['google_sign_in'], null);
         await _addGoogleAuthChanges();
@@ -68,7 +83,7 @@ class GenerateSigninService extends Command {
         printGoogleInstructions();
       },
       remove: () async {
-        print('Removing Google Signin Service...');
+        stderr.writeln('Removing Google Signin Service...');
         await removeAlreadyRun('signin-google');
         removeDependenciesFromPubspecSync(<String>['google_sign_in'], null);
         await _removeGoogleAuthChanges();
@@ -76,11 +91,13 @@ class GenerateSigninService extends Command {
         dartFixCode();
       },
       rejectAdd: () async {
-        print("Can't add the Google Signin option as it's already configured.");
+        stderr.writeln(
+            "Can't add the Google Signin option as it's already configured.");
       },
       rejectRemove: () async {
-        print(
-            "Can't remove the Google Signin option as it's not yet configured.",);
+        stderr.writeln(
+          "Can't remove the Google Signin option as it's not yet configured.",
+        );
       },
     );
   }
@@ -94,7 +111,7 @@ class GenerateSigninService extends Command {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        print('Creating Apple Signin Service...');
+        stderr.writeln('Creating Apple Signin Service...');
         await addAlreadyRun('signin-apple');
         addDependenciesToPubspecSync(<String>['sign_in_with_apple'], null);
         await _addAppleAuthChanges();
@@ -103,7 +120,7 @@ class GenerateSigninService extends Command {
         printAppleInstructions();
       },
       remove: () async {
-        print('Removing Apple Signin Service...');
+        stderr.writeln('Removing Apple Signin Service...');
         await removeAlreadyRun('signin-apple');
         removeDependenciesFromPubspecSync(<String>['sign_in_with_apple'], null);
         await _removeAppleAuthChanges();
@@ -111,11 +128,13 @@ class GenerateSigninService extends Command {
         dartFixCode();
       },
       rejectAdd: () async {
-        print("Can't add the Apple Signin option as it's already configured.");
+        stderr.writeln(
+            "Can't add the Apple Signin option as it's already configured.");
       },
       rejectRemove: () async {
-        print(
-            "Can't remove the Apple Signin option as it's not yet configured.",);
+        stderr.writeln(
+          "Can't remove the Apple Signin option as it's not yet configured.",
+        );
       },
     );
   }
@@ -145,14 +164,18 @@ class GenerateSigninService extends Command {
           google.initialization(),
         ],
         'void init() {': <String>[google.initContent()],
-        'Future<void> _disconnectProviders() async {': <String>[google.disconnect()],
+        'Future<void> _disconnectProviders() async {': <String>[
+          google.disconnect(),
+        ],
       },
     );
 
     await addLinesBeforeLineInFile(
       authPath,
       <String, List<String>>{
-        'Future<void> _disconnectProviders() async {': <String>[google.signIn()],
+        'Future<void> _disconnectProviders() async {': <String>[
+          google.signIn(),
+        ],
       },
     );
   }
@@ -164,7 +187,9 @@ class GenerateSigninService extends Command {
       authPath,
       <String, List<String>>{
         '// https://saynode.ch': <String>[apple.imports()],
-        'Future<void> _disconnectProviders() async {': <String>[apple.disconnect()],
+        'Future<void> _disconnectProviders() async {': <String>[
+          apple.disconnect(),
+        ],
       },
     );
 
