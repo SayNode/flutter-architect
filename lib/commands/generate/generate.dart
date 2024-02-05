@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+
 import 'subcommands/all.dart';
 import 'subcommands/api/api.dart';
+import 'subcommands/crashalytics/crashalytics.dart';
 import 'subcommands/localization/localization.dart';
 import 'subcommands/native_splash/splash.dart';
 import 'subcommands/page/page.dart';
@@ -10,11 +12,9 @@ import 'subcommands/signin/signin.dart';
 import 'subcommands/storage/storage.dart';
 import 'subcommands/theme/theme.dart';
 import 'subcommands/typography/typography.dart';
-import 'subcommands/crashalytics/crashalytics.dart';
-
 import 'subcommands/wallet/wallet.dart';
 
-class Generator extends Command {
+class Generator extends Command<dynamic> {
   //-- Singleton
   Generator._privateConstructor() {
     // Add Sub Commands here (for project components)
@@ -43,9 +43,9 @@ class Generator extends Command {
 
   @override
   void run() {
-    runner?.runCommand(argResults!).catchError((error) {
+    runner?.runCommand(argResults!).catchError((dynamic error) {
       if (error is! UsageException) throw error;
-      print('Error $error');
+      stderr.writeln('Error $error');
       exit(64); // Exit code 64 indicates a usage error.
     });
   }
