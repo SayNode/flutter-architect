@@ -176,50 +176,68 @@ class GenerateThemeService extends Command<dynamic> {
   }
 
   Future<void> _addThemeFile(List<dynamic> colorList) async {
-    final StringBuffer buffer = StringBuffer()
-      ..write(
-        "import 'package:flutter/material.dart';\n import 'color.dart'; \n class CustomTheme extends ThemeExtension<CustomTheme>{\nconst CustomTheme(\n{",
+    final StringBuffer content = StringBuffer()
+      ..writeln("import 'package:flutter/material.dart';")
+      ..writeln("import 'color.dart';")
+      ..writeln('class CustomTheme extends ThemeExtension<CustomTheme> {')
+      ..writeln('const CustomTheme({');
+
+    for (final Map<String, dynamic> color in colorList) {
+      content.writeln("required this.${color['name']},");
+    }
+
+    content
+      ..writeln('});')
+      ..writeln();
+
+    for (final Map<String, dynamic> color in colorList) {
+      content
+        ..writeln("final Color ${color['name']};")
+        ..writeln();
+    }
+
+    content
+      ..writeln('@override')
+      ..writeln('CustomTheme copyWith({');
+
+    for (final Map<String, dynamic> color in colorList) {
+      content.writeln("Color? ${color['name']},");
+    }
+
+    content
+      ..writeln('}) {')
+      ..writeln('return CustomTheme(');
+
+    for (final Map<String, dynamic> color in colorList) {
+      content.writeln(
+        "${color['name']}: ${color['name']} ?? this.${color['name']},",
       );
-    for (final Map<String, dynamic> color in colorList) {
-      buffer.write("required this.${color['name']},\n");
-    }
-    buffer.write('});\n');
-
-    for (final Map<String, dynamic> color in colorList) {
-      buffer.write("final Color ${color['name']};\n");
-    }
-    buffer.write('  @override\nCustomTheme copyWith({');
-    for (final Map<String, dynamic> color in colorList) {
-      buffer.write("Color? ${color['name']},\n");
     }
 
-    buffer.write('}) {\nreturn CustomTheme(\n');
+    content
+      ..writeln(');}')
+      ..writeln()
+      ..writeln('//list of themes')
+      ..writeln('static const $themeName = CustomTheme(');
+
     for (final Map<String, dynamic> color in colorList) {
-      buffer.write(
-        "${color['name']}: ${color['name']} ?? this.${color['name']},\n",
-      );
+      content.writeln("${color['name']}: $colorName.${color['name']},");
     }
 
-    buffer
-      ..write(
-        '${buffer.toString().substring(0, buffer.toString().length - 2)});}\n\n',
+    content
+      ..writeln(');')
+      ..writeln()
+      ..writeln('@override')
+      ..writeln(
+        'ThemeExtension<CustomTheme> lerp(ThemeExtension<CustomTheme>? other, double t) {',
       )
-      ..write('//list of themes\n')
-      ..write('  static const $themeName = CustomTheme(\n');
-    for (final Map<String, dynamic> color in colorList) {
-      buffer.write("${color['name']}: $colorName.${color['name']},\n");
-    }
+      ..writeln('// TODO: implement lerp')
+      ..writeln('throw UnimplementedError();')
+      ..writeln('}}');
 
-    buffer
-      ..write(
-        '${buffer.toString().substring(0, buffer.toString().length - 1)});\n\n',
-      )
-      ..write(
-        '@override \nThemeExtension<CustomTheme> lerp( \ncovariant ThemeExtension<CustomTheme>? other, double t) { \n// TODO: implement lerp \nthrow UnimplementedError(); \n} \n}',
-      );
     await writeFileWithPrefix(
       path.join('lib', 'theme', 'theme.dart'),
-      buffer.toString(),
+      content.toString(),
     );
   }
 
