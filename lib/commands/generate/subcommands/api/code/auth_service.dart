@@ -47,6 +47,28 @@ class AuthService extends GetxService {
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
+  // Check if the user is logged in already, and if so, perform a silent login and return true.
+  Future<bool> silentLogin() async {
+    try {
+      switch (ProviderTypes.values[storageService.getInt('provider')]) {
+        case ProviderTypes.email:
+          return (await login(
+            storageService.getString('email'),
+            storageService.getString('password'),
+          ))
+              .success;
+        case ProviderTypes.google:
+          return false;
+        case ProviderTypes.apple:
+          return false;
+        case ProviderTypes.none:
+          return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Log the user in. This function is not responsible for any navigation.
   Future<AuthResponse> login(
     String email,

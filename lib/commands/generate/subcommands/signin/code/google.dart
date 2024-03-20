@@ -19,7 +19,7 @@ String disconnect() => r"""
     }""";
 
 String signIn() => r"""
-// Login with Google.
+  // Login with Google.
   Future<AuthResponse> googleSignIn() async {
     try {
       // Clear cache
@@ -82,7 +82,12 @@ String signIn() => r"""
               ProviderTypes.google.index,
             );
 
-            return AuthResponse(<String, dynamic>{'success': 'Successfully signed in with Google.'}, true);
+            return AuthResponse(
+              <String, dynamic>{
+                'success': 'Successfully signed in with Google.',
+              },
+              true,
+            );
           } catch (error) {
             await _disconnectProviders();
             throw Exception(
@@ -98,7 +103,10 @@ String signIn() => r"""
         }
       }
       return AuthResponse(
-       <String, dynamic>{'error': "Google auth isn't working at the moment. Please try again later."},
+        <String, dynamic>{
+          'error':
+              "Google auth isn't working at the moment. Please try again later.",
+        },
         false,
       );
     } catch (e) {
@@ -106,3 +114,9 @@ String signIn() => r"""
       throw Exception('Catched an error while logging in with Google: $e');
     }
   }""";
+
+String switchCase() {
+  return '''
+        case ProviderTypes.google:
+          return (await googleSignIn()).success;''';
+}

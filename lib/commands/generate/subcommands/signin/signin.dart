@@ -41,6 +41,14 @@ class GenerateSigninService extends Command<dynamic> {
     await spinnerLoading(_run);
   }
 
+  String get defaultSwitchCaseApple => '''
+        case ProviderTypes.apple:
+          return false;''';
+
+  String get defaultSwitchCaseGoogle => '''
+        case ProviderTypes.google:
+          return false;''';
+
   Future<void> _run() async {
     if (argResults?['google'] || argResults?['apple']) {
       // Check if API Service has already been set up. Signin requires API Service.
@@ -158,6 +166,8 @@ class GenerateSigninService extends Command<dynamic> {
   Future<void> _addGoogleAuthChanges() async {
     final String authPath = path.join('lib', 'service', 'auth_service.dart');
 
+    await _removeDefaultSwitchCaseGoogle();
+
     await addLinesAfterLineInFile(
       authPath,
       <String, List<String>>{
@@ -178,12 +188,15 @@ class GenerateSigninService extends Command<dynamic> {
         'Future<void> _disconnectProviders() async {': <String>[
           google.signIn(),
         ],
+        'case ProviderTypes.none:': <String>[google.switchCase()],
       },
     );
   }
 
   Future<void> _addAppleAuthChanges() async {
     final String authPath = path.join('lib', 'service', 'auth_service.dart');
+
+    await _removeDefaultSwitchCaseApple();
 
     await addLinesAfterLineInFile(
       authPath,
@@ -199,6 +212,7 @@ class GenerateSigninService extends Command<dynamic> {
       authPath,
       <String, List<String>>{
         'Future<void> _disconnectProviders() async {': <String>[apple.signIn()],
+        'case ProviderTypes.none:': <String>[apple.switchCase()],
       },
     );
   }
@@ -211,6 +225,8 @@ class GenerateSigninService extends Command<dynamic> {
     await removeTextFromFile(authPath, google.initContent());
     await removeTextFromFile(authPath, google.disconnect());
     await removeTextFromFile(authPath, google.signIn());
+    await removeTextFromFile(authPath, google.switchCase());
+    await _addDefaultSwitchCaseGoogle();
   }
 
   Future<void> _removeAppleAuthChanges() async {
@@ -219,5 +235,41 @@ class GenerateSigninService extends Command<dynamic> {
     await removeTextFromFile(authPath, apple.imports());
     await removeTextFromFile(authPath, apple.disconnect());
     await removeTextFromFile(authPath, apple.signIn());
+    await removeTextFromFile(authPath, apple.switchCase());
+    await _addDefaultSwitchCaseApple();
+  }
+
+  Future<void> _addDefaultSwitchCaseApple() async {
+    final String authPath = path.join('lib', 'service', 'auth_service.dart');
+
+    await addLinesBeforeLineInFile(
+      authPath,
+      <String, List<String>>{
+        'case ProviderTypes.none:': <String>[defaultSwitchCaseApple],
+      },
+    );
+  }
+
+  Future<void> _removeDefaultSwitchCaseApple() async {
+    final String authPath = path.join('lib', 'service', 'auth_service.dart');
+
+    await removeTextFromFile(authPath, defaultSwitchCaseApple);
+  }
+
+  Future<void> _addDefaultSwitchCaseGoogle() async {
+    final String authPath = path.join('lib', 'service', 'auth_service.dart');
+
+    await addLinesBeforeLineInFile(
+      authPath,
+      <String, List<String>>{
+        'case ProviderTypes.none:': <String>[defaultSwitchCaseGoogle],
+      },
+    );
+  }
+
+  Future<void> _removeDefaultSwitchCaseGoogle() async {
+    final String authPath = path.join('lib', 'service', 'auth_service.dart');
+
+    await removeTextFromFile(authPath, defaultSwitchCaseGoogle);
   }
 }
