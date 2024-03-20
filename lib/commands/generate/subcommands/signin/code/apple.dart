@@ -86,7 +86,12 @@ String signIn() => r"""
             identityToken ?? '',
           );
 
-          return AuthResponse(<String, dynamic>{'success': 'Successfully signed in with Apple.'}, true);
+          return AuthResponse(
+            <String, dynamic>{
+              'success': 'Successfully signed in with Apple.',
+            },
+            true,
+          );
         } catch (error) {
           await _disconnectProviders();
           throw Exception('AuthService - error while parsing the user: $error');
@@ -99,7 +104,10 @@ String signIn() => r"""
     on PlatformException catch (e) {
       if (e.code == 'cancelled') {
         // User canceled the sign in
-        return AuthResponse(<String, dynamic>{'error': 'Sign in cancelled'}, false);
+        return AuthResponse(
+          <String, dynamic>{'error': 'Sign in cancelled'},
+          false,
+        );
       } else {
         // Other authorization error occurred
         throw Exception('Authorization error: $e');
@@ -112,3 +120,13 @@ String signIn() => r"""
       throw Exception('Authorization error: $e');
     }
   }""";
+
+String switchCase() {
+  return """
+        case ProviderTypes.apple:
+          return (await appleSignIn(
+            authorizationCode: storageService.getString('authorizationCode'),
+            identityToken: storageService.getString('identityToken'),
+          ))
+              .success;""";
+}

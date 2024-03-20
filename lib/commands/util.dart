@@ -267,12 +267,27 @@ Future<void> removeLineRangeFromFile(
 Future<void> removeTextFromFile(String file, String text) async {
   final List<String> lines = text.split('\n');
 
-  await removeLinesAfterFromFile(
-    file,
-    lines.first,
-    lines.length - 1,
-    includeFirst: true,
-  );
+  final List<String> fileLines = await File(file).readAsLines();
+  final List<String> newFileLines = <String>[];
+
+  final List<String> toDeleteLines = <String>[];
+
+  for (int i = 0; i < fileLines.length; i++) {
+    final String fileLine = fileLines[i];
+    if (toDeleteLines.length == lines.length) {
+      toDeleteLines.clear();
+      newFileLines.add(fileLine);
+    } else {
+      if (fileLine.trim().contains(lines[toDeleteLines.length].trim())) {
+        toDeleteLines.add(fileLine);
+      } else {
+        newFileLines.addAll(toDeleteLines);
+        toDeleteLines.clear();
+        newFileLines.add(fileLine);
+      }
+    }
+  }
+  await File(file).writeAsString(newFileLines.join('\n'));
 }
 
 /// Delete [amount] lines from file in path [file], after line [line].
