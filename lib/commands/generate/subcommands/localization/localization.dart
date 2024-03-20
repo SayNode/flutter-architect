@@ -47,6 +47,7 @@ class GenerateLocalizationService extends Command<dynamic> {
         await _addMessageFile();
         await _addLocalizationController();
         await _addLanguageJson();
+        await _addAssetToPubspec();
         await _addMainChanges();
       },
       remove: () async {
@@ -57,6 +58,7 @@ class GenerateLocalizationService extends Command<dynamic> {
         await _removeMessageFile();
         await _removeLocalizationController();
         await _removeLanguageJson();
+        await _removeAssetFromPubspec();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add Localization as it's already configured.");
@@ -84,6 +86,16 @@ class GenerateLocalizationService extends Command<dynamic> {
   Future<void> _removeLocalizationController() async {
     await File(path.join('lib', 'service', 'localization_controller.dart'))
         .delete();
+  }
+
+  Future<void> _removeAssetFromPubspec() async {
+    final String pubspecPath = path.join('pubspec.yaml');
+    await removeLinesFromFile(
+      pubspecPath,
+      <String>[
+        '    - asset/locale/',
+      ],
+    );
   }
 
   // Remove the Storage-related lines from main.
@@ -136,6 +148,18 @@ class GenerateLocalizationService extends Command<dynamic> {
     await writeFileWithPrefix(
       path.join('lib', 'service', 'localization_controller.dart'),
       localization_controller.content(),
+    );
+  }
+
+  Future<void> _addAssetToPubspec() async {
+    final String pubspecPath = path.join('pubspec.yaml');
+    await addLinesAfterLineInFile(
+      pubspecPath,
+      <String, List<String>>{
+        '- asset/': <String>[
+          '    - asset/locale/',
+        ],
+      },
     );
   }
 
