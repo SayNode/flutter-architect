@@ -11,6 +11,10 @@ extension StringCapitalize on String {
   String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
 }
 
+extension StringDecapitalize on String {
+  String get decapitalize => '${this[0].toLowerCase()}${substring(1)}';
+}
+
 class GenerateTypographyService extends Command<dynamic> {
   //-- Singleton
   GenerateTypographyService() {
@@ -91,7 +95,7 @@ class GenerateTypographyService extends Command<dynamic> {
 
     for (final Map<String, dynamic> textStyle in textStyleList) {
       buffer.write(
-        "TextStyle get k${(textStyle['name'] as String).capitalize} => TextStyle( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontFamily: '${textStyle['fontFamily']}', \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n",
+        "TextStyle get k${(textStyle['name'] as String).capitalize} => GoogleFonts.${textStyle['fontFamily'].toString().decapitalize}( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n",
       );
     }
     buffer.write(
