@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 import '../storage/storage.dart';
 import 'code/wallet_model.dart' as wallet_model;
 import 'code/wallet_service.dart' as wallet_service;

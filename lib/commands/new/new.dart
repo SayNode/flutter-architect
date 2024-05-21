@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../util.dart';
+import '../../util/util.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
 import 'files/main.dart' as main_file;

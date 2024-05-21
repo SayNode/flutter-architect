@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 import 'code/error_controller.dart' as error_controller;
 import 'code/error_page.dart' as error_page;
 import 'code/firebase_configuration.dart' as firebase_configuration;
