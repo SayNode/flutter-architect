@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 import 'code/flutter_native_splash.dart' as flutter_native_splash;
 
 class GenerateSplashService extends Command<dynamic> {

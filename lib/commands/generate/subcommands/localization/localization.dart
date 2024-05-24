@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 import 'code/language_model.dart' as language_model;
 import 'code/localization_controller.dart' as localization_controller;
 import 'code/message.dart' as message;
