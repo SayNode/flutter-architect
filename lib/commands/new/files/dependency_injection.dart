@@ -6,8 +6,6 @@ import '../../../interfaces/file_manipulator.dart';
 import '../../../util/util.dart';
 
 class DependencyInjection extends FileManipulator {
-  //NOTE: project name needs to be set before running create command for now
-  String projectName = '';
   @override
   Future<void> create() async {
     // TODO: implement create
@@ -19,9 +17,7 @@ class DependencyInjection extends FileManipulator {
   String get name => 'MainBindings';
 
   @override
-  String get path => (projectName.isNotEmpty)
-      ? '$projectName/lib/service/main_bindings.dart'
-      : 'lib/service/main_bindings.dart';
+  String get path => 'lib/service/main_bindings.dart';
 
   @override
   String content() {
@@ -94,7 +90,7 @@ class MainBindings extends Bindings {
   }
 
   Future<void> _updateMain() async {
-    final String mainPath = path_package.join(projectName, 'lib', 'main.dart');
+    final String mainPath = path_package.join('lib', 'main.dart');
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
