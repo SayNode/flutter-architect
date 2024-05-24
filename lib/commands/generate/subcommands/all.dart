@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
 
-import '../../util.dart';
+import '../../../util/util.dart';
 import 'api/api.dart';
 import 'crashalytics/crashalytics.dart';
 import 'localization/localization.dart';

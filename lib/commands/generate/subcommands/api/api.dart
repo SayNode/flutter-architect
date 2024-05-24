@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 import '../storage/storage.dart';
 import 'code/api_service.dart' as api_service;
 import 'code/auth_service.dart' as auth_service;

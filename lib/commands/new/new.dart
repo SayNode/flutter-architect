@@ -5,9 +5,10 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../util.dart';
+import '../../util/util.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/dependency_injection.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
 
@@ -66,8 +67,8 @@ class Creator extends Command<dynamic> {
       <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
       runInShell: true,
     );
-
-    await addDependenciesToPubspec(<String>['get'], path.join(projectName));
+    Directory.current = '${Directory.current.path}/$projectName';
+    await addDependenciesToPubspec(<String>['get'], null);
     createCommonFolderStructure();
     _createSplashPage();
     _rewriteMain();
@@ -75,53 +76,51 @@ class Creator extends Command<dynamic> {
     await rewriteAnalysisOptions();
     await addCodemagicYaml();
 
-    await File(path.join(projectName, 'added_boilerplate.txt'))
-        .writeAsString('');
+    await File(path.join('added_boilerplate.txt')).writeAsString('');
     await addWorkflow();
     deleteUnusedFolders();
     await updateGradleFile();
+    await _addDepencyInjection();
   }
 
   void deleteUnusedFolders() {
     if (argResults?['ios'] == false) {
-      if (Directory(path.join(projectName, 'ios')).existsSync()) {
-        Directory(path.join(projectName, 'ios')).deleteSync(recursive: true);
+      if (Directory(path.join('ios')).existsSync()) {
+        Directory(path.join('ios')).deleteSync(recursive: true);
       }
     }
     if (argResults?['android'] == false) {
-      if (Directory(path.join(projectName, 'android')).existsSync()) {
-        Directory(path.join(projectName, 'android'))
-            .deleteSync(recursive: true);
+      if (Directory(path.join('android')).existsSync()) {
+        Directory(path.join('android')).deleteSync(recursive: true);
       }
     }
     if (argResults?['macos'] == false) {
-      if (Directory(path.join(projectName, 'macos')).existsSync()) {
-        Directory(path.join(projectName, 'macos')).deleteSync(recursive: true);
+      if (Directory(path.join('macos')).existsSync()) {
+        Directory(path.join('macos')).deleteSync(recursive: true);
       }
     }
     if (argResults?['windows'] == false) {
-      if (Directory(path.join(projectName, 'windows')).existsSync()) {
-        Directory(path.join(projectName, 'windows'))
-            .deleteSync(recursive: true);
+      if (Directory(path.join('windows')).existsSync()) {
+        Directory(path.join('windows')).deleteSync(recursive: true);
       }
     }
     if (argResults?['web'] == false) {
-      if (Directory(path.join(projectName, 'web')).existsSync()) {
-        Directory(path.join(projectName, 'web')).deleteSync(recursive: true);
+      if (Directory(path.join('web')).existsSync()) {
+        Directory(path.join('web')).deleteSync(recursive: true);
       }
     }
     if (argResults?['linux'] == false) {
-      if (Directory(path.join(projectName, 'linux')).existsSync()) {
-        Directory(path.join(projectName, 'linux')).deleteSync(recursive: true);
+      if (Directory(path.join('linux')).existsSync()) {
+        Directory(path.join('linux')).deleteSync(recursive: true);
       }
     }
   }
 
   Future<void> addWorkflow() async {
-    Directory(path.join(projectName, '.github')).createSync();
-    Directory(path.join(projectName, '.github', 'workflows')).createSync();
+    Directory(path.join('.github')).createSync();
+    Directory(path.join('.github', 'workflows')).createSync();
     await File(
-      path.join(projectName, '.github', 'workflows', 'lint_action.yaml'),
+      path.join('.github', 'workflows', 'lint_action.yaml'),
     ).writeAsString(
       " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos",
     );
@@ -130,7 +129,6 @@ class Creator extends Command<dynamic> {
   Future<void> rewriteAnalysisOptions() async {
     await File(
       path.join(
-        projectName,
         'analysis_options.yaml',
       ),
     ).writeAsString(analysis_option.content()).then((File file) {
@@ -141,7 +139,6 @@ class Creator extends Command<dynamic> {
   Future<void> addCodemagicYaml() async {
     await File(
       path.join(
-        projectName,
         'codemagic.yaml',
       ),
     ).writeAsString(codemagic_yaml.content()).then((File file) {
@@ -151,7 +148,7 @@ class Creator extends Command<dynamic> {
 
   /// Add assets folder to pubspec.yaml
   void addAssetsToPubspec() {
-    final String pubPath = path.join(projectName, 'pubspec.yaml');
+    final String pubPath = path.join('pubspec.yaml');
     File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
 
@@ -302,11 +299,10 @@ class Creator extends Command<dynamic> {
   }
 
   void createCommonFolderStructure() {
-    Directory(path.join(projectName)).createSync();
+    Directory(Directory.current.path).createSync();
     stderr.writeln('- $projectName/ ✔');
 
     final String directory = path.join(
-      projectName,
       'lib',
     );
 
@@ -314,7 +310,7 @@ class Creator extends Command<dynamic> {
     stderr.writeln('- $directory/ ✔');
 
     // Asset
-    Directory(path.join(projectName, 'asset')).createSync();
+    Directory(path.join('asset')).createSync();
     stderr.writeln('- $projectName/asset ✔');
 
     // model
@@ -349,7 +345,6 @@ class Creator extends Command<dynamic> {
   void _createSplashPage() {
     writeFileWithPrefix(
       path.join(
-        projectName,
         'lib',
         'page',
         'splash_page.dart',
@@ -364,7 +359,6 @@ class Creator extends Command<dynamic> {
   void _rewriteMain() {
     writeFileWithPrefix(
       path.join(
-        projectName,
         'lib',
         'main.dart',
       ),
@@ -372,5 +366,10 @@ class Creator extends Command<dynamic> {
     ).then((File file) {
       stderr.writeln('-- /lib/main.dart ✔');
     });
+  }
+
+  Future<void> _addDepencyInjection() async {
+    final DependencyInjection dependencyInjection = DependencyInjection();
+    await dependencyInjection.create();
   }
 }
