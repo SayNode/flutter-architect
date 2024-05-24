@@ -61,7 +61,7 @@ class Creator extends Command<dynamic> {
       exit(0);
     }
     projectName = argResults?['name'];
-    await Process.run(
+    await Process.run( //TODO: add the --org command
       'flutter',
       <String>['create', projectName, '-e'],
       runInShell: true,
@@ -79,7 +79,7 @@ class Creator extends Command<dynamic> {
         .writeAsString('');
     await addWorkflow();
     deleteUnusedFolders();
-    updateGradleFile();
+    await updateGradleFile();
   }
 
   void deleteUnusedFolders() {
@@ -176,9 +176,14 @@ class Creator extends Command<dynamic> {
   }
 
   /// Update the gradle file with the CI/CD configuration & multidex
-  void updateGradleFile() {
+  Future<void> updateGradleFile() async {
     final String pubPath = path.join(projectName, 'android', 'app', 'build.gradle');
-    File(pubPath).readAsLines().then((List<String> lines) {
+    await replaceLineInFile(
+      pubPath,
+      'signingConfig = signingConfigs.debug',
+      '            signingConfig = signingConfigs.release',
+    );
+    await File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
       int lineNumber = 0;
       bool keystoreUpdated = false;
@@ -210,9 +215,9 @@ class Creator extends Command<dynamic> {
         if (line.contains('dev.flutter.flutter-gradle-plugin') && !isPluginUpdated){
           buffer
             ..write('\n')
-            ..write('id "com.google.firebase.firebase-perf"\n')
-            ..write('id "com.google.firebase.crashlytics"\n')
-            ..write('id "com.google.gms.google-services"\n')
+            ..write('    id "com.google.firebase.firebase-perf"\n')
+            ..write('    id "com.google.firebase.crashlytics"\n')
+            ..write('    id "com.google.gms.google-services"\n')
             ..write('\n');
         }
 
@@ -248,10 +253,12 @@ class Creator extends Command<dynamic> {
             ..write('\n');
         }
 
+
+
         if(line.contains('defaultConfig {') && !isMultidexUpdated){
           buffer
             ..write('\n')
-            ..write('multiDexEnabled true\n')
+            ..write('        multiDexEnabled true\n')
             ..write('\n');
         }
 
