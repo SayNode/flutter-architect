@@ -27,6 +27,13 @@ class Creator extends Command<dynamic> {
         help:
             '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
         mandatory: true,
+      )
+      ..addOption(
+        'org',
+        abbr: 'o',
+        help:
+            '--org is mandatory(domain of the project). Organise the domain so that it is owned by SayNode or the customer before initializing the project.',
+        mandatory: true,
       );
   }
   late final String projectName;
@@ -57,7 +64,7 @@ class Creator extends Command<dynamic> {
     projectName = argResults?['name'];
     await Process.run(
       'flutter',
-      <String>['create', projectName, '-e'],
+      <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
       runInShell: true,
     );
     Directory.current = '${Directory.current.path}/$projectName';
@@ -72,22 +79,8 @@ class Creator extends Command<dynamic> {
     await File(path.join('added_boilerplate.txt')).writeAsString('');
     await addWorkflow();
     deleteUnusedFolders();
-    await addMultidex();
+    await updateGradleFile();
     await _addDepencyInjection();
-  }
-
-  Future<void> addMultidex() async {
-    if (argResults?['android'] == true) {
-      await addLinesAfterLineInFile(
-          path.join('android', 'app', 'build.gradle'), <String, List<String>>{
-        'defaultConfig {': <String>['        multiDexEnabled true'],
-      });
-      await replaceLineInFile(
-        path.join('android', 'app', 'build.gradle'),
-        'dependencies {}',
-        "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",
-      );
-    }
   }
 
   void deleteUnusedFolders() {
@@ -176,6 +169,132 @@ class Creator extends Command<dynamic> {
       });
 
       stderr.writeln('# add assets to pubspec CREATED');
+    });
+  }
+
+  /// Update the gradle file with the CI/CD configuration & multidex
+  Future<void> updateGradleFile() async {
+    final String pubPath =
+        path.join(projectName, 'android', 'app', 'build.gradle');
+    await replaceLineInFile(
+      pubPath,
+      'signingConfig = signingConfigs.debug',
+      '            signingConfig = signingConfigs.release',
+    );
+    await File(pubPath).readAsLines().then((List<String> lines) {
+      final StringBuffer buffer = StringBuffer();
+      int lineNumber = 0;
+      bool keystoreUpdated = false;
+      bool isPluginUpdated = false;
+      bool isMultidexUpdated = false;
+      bool isMultidexImplementationUpdated = false;
+      bool isSigningConfigUpdated = false;
+      for (final String line in lines) {
+        if (line.contains('com.google.firebase.firebase-perf')) {
+          isPluginUpdated = true;
+        }
+        if (line.contains('keystoreProperties')) {
+          keystoreUpdated = true;
+        }
+        if (line.contains('multiDexEnabled')) {
+          isMultidexUpdated = true;
+        }
+        if (line
+            .contains("implementation 'androidx.multidex:multidex:2.0.1'")) {
+          isMultidexImplementationUpdated = true;
+        }
+        if (line.contains('System.getenv()["CI"]')) {
+          isSigningConfigUpdated = true;
+        }
+      }
+
+      for (final String line in lines) {
+        buffer.write('$line\n');
+
+        if (line.contains('dev.flutter.flutter-gradle-plugin') &&
+            !isPluginUpdated) {
+          buffer
+            ..write('\n')
+            ..write('    id "com.google.firebase.firebase-perf"\n')
+            ..write('    id "com.google.firebase.crashlytics"\n')
+            ..write('    id "com.google.gms.google-services"\n')
+            ..write('\n');
+        }
+
+        if (lineNumber == 15 && !keystoreUpdated) {
+          buffer
+            ..write('\n')
+            ..write('def keystoreProperties = new Properties()\n')
+            ..write(
+              "def keystorePropertiesFile = rootProject.file('key.properties')\n",
+            )
+            ..write('if (keystorePropertiesFile.exists()) {\n')
+            ..write(
+              ' keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n',
+            )
+            ..write('}\n')
+            ..write('\n');
+        }
+
+        if (line.contains('android {') && !isSigningConfigUpdated) {
+          buffer
+            ..write('\n')
+            ..write('    signingConfigs {\n')
+            ..write('        release {\n')
+            ..write('            if (System.getenv()["CI"]) {\n')
+            ..write(
+              '                storeFile file(System.getenv()["CM_KEYSTORE_PATH"])\n',
+            )
+            ..write(
+              '                storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]\n',
+            )
+            ..write(
+              '                keyAlias System.getenv()["CM_KEY_ALIAS"]\n',
+            )
+            ..write(
+              '                keyPassword System.getenv()["CM_KEY_PASSWORD"]\n',
+            )
+            ..write('            } else {\n')
+            ..write("                keyAlias keystoreProperties['keyAlias']\n")
+            ..write(
+              "                keyPassword keystoreProperties['keyPassword']\n",
+            )
+            ..write(
+              "                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n",
+            )
+            ..write(
+              "                storePassword keystoreProperties['storePassword']\n",
+            )
+            ..write('            }\n')
+            ..write('        }\n')
+            ..write('    }\n')
+            ..write('\n');
+        }
+
+        if (line.contains('defaultConfig {') && !isMultidexUpdated) {
+          buffer
+            ..write('\n')
+            ..write('        multiDexEnabled true\n')
+            ..write('\n');
+        }
+
+        if (lines.length == lineNumber + 1 &&
+            !isMultidexImplementationUpdated) {
+          buffer
+            ..write('\n')
+            ..write(
+              "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",
+            )
+            ..write('\n');
+        }
+        lineNumber++;
+      }
+
+      File(pubPath).writeAsString(buffer.toString()).then((File file) {
+        stderr.writeln('- Config updated in build.gradle ✔');
+      });
+
+      stderr.writeln('# config in build.gradle CREATED');
     });
   }
 
