@@ -24,16 +24,16 @@ class Creator extends Command<dynamic> {
         'name',
         abbr: 'n',
         help:
-        '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
+            '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
         mandatory: true,
       )
       ..addOption(
-      'org',
-      abbr: 'o',
-      help:
-      '--org is mandatory(domain of the project). Organise the domain so that it is owned by SayNode or the customer before initializing the project.',
-      mandatory: true,
-    );
+        'org',
+        abbr: 'o',
+        help:
+            '--org is mandatory(domain of the project). Organise the domain so that it is owned by SayNode or the customer before initializing the project.',
+        mandatory: true,
+      );
   }
   late final String projectName;
 
@@ -61,7 +61,8 @@ class Creator extends Command<dynamic> {
       exit(0);
     }
     projectName = argResults?['name'];
-    await Process.run( //TODO: add the --org command
+    await Process.run(
+      //TODO: add the --org command
       'flutter',
       <String>['create', projectName, '-e'],
       runInShell: true,
@@ -177,7 +178,8 @@ class Creator extends Command<dynamic> {
 
   /// Update the gradle file with the CI/CD configuration & multidex
   Future<void> updateGradleFile() async {
-    final String pubPath = path.join(projectName, 'android', 'app', 'build.gradle');
+    final String pubPath =
+        path.join(projectName, 'android', 'app', 'build.gradle');
     await replaceLineInFile(
       pubPath,
       'signingConfig = signingConfigs.debug',
@@ -192,19 +194,20 @@ class Creator extends Command<dynamic> {
       bool isMultidexImplementationUpdated = false;
       bool isSigningConfigUpdated = false;
       for (final String line in lines) {
-        if(line.contains('com.google.firebase.firebase-perf')) {
+        if (line.contains('com.google.firebase.firebase-perf')) {
           isPluginUpdated = true;
         }
-        if(line.contains('keystoreProperties')) {
+        if (line.contains('keystoreProperties')) {
           keystoreUpdated = true;
         }
-        if(line.contains('multiDexEnabled')) {
+        if (line.contains('multiDexEnabled')) {
           isMultidexUpdated = true;
         }
-        if(line.contains("implementation 'androidx.multidex:multidex:2.0.1'")) {
+        if (line
+            .contains("implementation 'androidx.multidex:multidex:2.0.1'")) {
           isMultidexImplementationUpdated = true;
         }
-        if(line.contains('System.getenv()["CI"]')) {
+        if (line.contains('System.getenv()["CI"]')) {
           isSigningConfigUpdated = true;
         }
       }
@@ -212,7 +215,8 @@ class Creator extends Command<dynamic> {
       for (final String line in lines) {
         buffer.write('$line\n');
 
-        if (line.contains('dev.flutter.flutter-gradle-plugin') && !isPluginUpdated){
+        if (line.contains('dev.flutter.flutter-gradle-plugin') &&
+            !isPluginUpdated) {
           buffer
             ..write('\n')
             ..write('    id "com.google.firebase.firebase-perf"\n')
@@ -221,51 +225,60 @@ class Creator extends Command<dynamic> {
             ..write('\n');
         }
 
-        if (lineNumber == 15 && !keystoreUpdated){
+        if (lineNumber == 15 && !keystoreUpdated) {
           buffer
             ..write('\n')
             ..write('def keystoreProperties = new Properties()\n')
-            ..write("def keystorePropertiesFile = rootProject.file('key.properties')\n")
+            ..write(
+                "def keystorePropertiesFile = rootProject.file('key.properties')\n")
             ..write('if (keystorePropertiesFile.exists()) {\n')
-            ..write(' keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n')
+            ..write(
+                ' keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n')
             ..write('}\n')
             ..write('\n');
         }
 
-        if(line.contains('android {') && !isSigningConfigUpdated){
+        if (line.contains('android {') && !isSigningConfigUpdated) {
           buffer
             ..write('\n')
             ..write('    signingConfigs {\n')
             ..write('        release {\n')
             ..write('            if (System.getenv()["CI"]) {\n')
-            ..write('                storeFile file(System.getenv()["CM_KEYSTORE_PATH"])\n')
-            ..write('                storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]\n')
-            ..write('                keyAlias System.getenv()["CM_KEY_ALIAS"]\n')
-            ..write('                keyPassword System.getenv()["CM_KEY_PASSWORD"]\n')
+            ..write(
+                '                storeFile file(System.getenv()["CM_KEYSTORE_PATH"])\n')
+            ..write(
+                '                storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]\n')
+            ..write(
+                '                keyAlias System.getenv()["CM_KEY_ALIAS"]\n')
+            ..write(
+                '                keyPassword System.getenv()["CM_KEY_PASSWORD"]\n')
             ..write('            } else {\n')
             ..write("                keyAlias keystoreProperties['keyAlias']\n")
-            ..write("                keyPassword keystoreProperties['keyPassword']\n")
-            ..write("                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n")
-            ..write("                storePassword keystoreProperties['storePassword']\n")
+            ..write(
+                "                keyPassword keystoreProperties['keyPassword']\n")
+            ..write(
+                "                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n")
+            ..write(
+                "                storePassword keystoreProperties['storePassword']\n")
             ..write('            }\n')
             ..write('        }\n')
             ..write('    }\n')
             ..write('\n');
         }
 
-
-
-        if(line.contains('defaultConfig {') && !isMultidexUpdated){
+        if (line.contains('defaultConfig {') && !isMultidexUpdated) {
           buffer
             ..write('\n')
             ..write('        multiDexEnabled true\n')
             ..write('\n');
         }
 
-        if(lines.length == lineNumber + 1 && !isMultidexImplementationUpdated){
+        if (lines.length == lineNumber + 1 &&
+            !isMultidexImplementationUpdated) {
           buffer
             ..write('\n')
-            ..write("dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}")
+            ..write(
+                "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}")
             ..write('\n');
         }
         lineNumber++;
