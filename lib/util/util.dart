@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'new/files/prefix.dart' as prefix;
+import '../commands/new/files/prefix.dart' as prefix;
 
 /// Logic for building a component.
 Future<void> componentBuilder({

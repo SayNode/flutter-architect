@@ -5,7 +5,7 @@ import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
-import '../../../util.dart';
+import '../../../../util/util.dart';
 
 extension StringCapitalize on String {
   String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
