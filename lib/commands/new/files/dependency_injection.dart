@@ -1,8 +1,18 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as path_package;
+
 import '../../../interfaces/file_manipulator.dart';
+import '../../../util/util.dart';
 
 class DependencyInjection extends FileManipulator {
+  @override
+  Future<void> create() async {
+    // TODO: implement create
+    await _updateMain();
+    return super.create();
+  }
+
   @override
   String get name => 'MainBindings';
 
@@ -77,5 +87,21 @@ class MainBindings extends Bindings {
     }
 
     await file.writeAsString(newLines.join('\n'));
+  }
+
+  Future<void> _updateMain() async {
+    final String mainPath = path_package.join('lib', 'main.dart');
+    await addLinesAfterLineInFile(
+      mainPath,
+      <String, List<String>>{
+        'void main() async {': <String>[
+          'final MainBindings mainBinding = MainBindings();',
+          'await mainBinding.dependencies();',
+        ],
+        '// https://saynode.ch': <String>[
+          "import 'service/dependency_injection.dart';",
+        ],
+      },
+    );
   }
 }
