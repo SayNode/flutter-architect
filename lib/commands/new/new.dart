@@ -62,9 +62,8 @@ class Creator extends Command<dynamic> {
     }
     projectName = argResults?['name'];
     await Process.run(
-      //TODO: add the --org command
       'flutter',
-      <String>['create', projectName, '-e'],
+      <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
       runInShell: true,
     );
 
@@ -230,10 +229,12 @@ class Creator extends Command<dynamic> {
             ..write('\n')
             ..write('def keystoreProperties = new Properties()\n')
             ..write(
-                "def keystorePropertiesFile = rootProject.file('key.properties')\n",)
+              "def keystorePropertiesFile = rootProject.file('key.properties')\n",
+            )
             ..write('if (keystorePropertiesFile.exists()) {\n')
             ..write(
-                ' keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n',)
+              ' keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n',
+            )
             ..write('}\n')
             ..write('\n');
         }
@@ -245,21 +246,28 @@ class Creator extends Command<dynamic> {
             ..write('        release {\n')
             ..write('            if (System.getenv()["CI"]) {\n')
             ..write(
-                '                storeFile file(System.getenv()["CM_KEYSTORE_PATH"])\n',)
+              '                storeFile file(System.getenv()["CM_KEYSTORE_PATH"])\n',
+            )
             ..write(
-                '                storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]\n',)
+              '                storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]\n',
+            )
             ..write(
-                '                keyAlias System.getenv()["CM_KEY_ALIAS"]\n',)
+              '                keyAlias System.getenv()["CM_KEY_ALIAS"]\n',
+            )
             ..write(
-                '                keyPassword System.getenv()["CM_KEY_PASSWORD"]\n',)
+              '                keyPassword System.getenv()["CM_KEY_PASSWORD"]\n',
+            )
             ..write('            } else {\n')
             ..write("                keyAlias keystoreProperties['keyAlias']\n")
             ..write(
-                "                keyPassword keystoreProperties['keyPassword']\n",)
+              "                keyPassword keystoreProperties['keyPassword']\n",
+            )
             ..write(
-                "                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n",)
+              "                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n",
+            )
             ..write(
-                "                storePassword keystoreProperties['storePassword']\n",)
+              "                storePassword keystoreProperties['storePassword']\n",
+            )
             ..write('            }\n')
             ..write('        }\n')
             ..write('    }\n')
@@ -278,7 +286,8 @@ class Creator extends Command<dynamic> {
           buffer
             ..write('\n')
             ..write(
-                "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",)
+              "dependencies {\n    implementation 'androidx.multidex:multidex:2.0.1'\n}",
+            )
             ..write('\n');
         }
         lineNumber++;
