@@ -1,4 +1,4 @@
-String content(String name) => """
+String themeContent(String name) => """
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
