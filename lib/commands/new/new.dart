@@ -259,7 +259,8 @@ class Creator extends Command<dynamic> {
   }
 
   Future<void> _addDepencyInjection() async {
-    final DependencyInjection dependencyInjection = DependencyInjection();
+    final DependencyInjection dependencyInjection = DependencyInjection()
+      ..projectName = projectName;
     await dependencyInjection.create();
   }
 }
