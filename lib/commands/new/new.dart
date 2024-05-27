@@ -8,7 +8,9 @@ import 'package:path/path.dart' as path;
 import '../../util/util.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/constant_manipulator.dart';
 import 'files/dependency_injection.dart';
+import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
 
@@ -80,7 +82,19 @@ class Creator extends Command<dynamic> {
     await addWorkflow();
     deleteUnusedFolders();
     await updateGradleFile();
-    await _addDepencyInjection();
+
+    //Add Dependency Injection
+    final DependencyInjection dependencyInjection = DependencyInjection();
+    await dependencyInjection.create();
+
+    //Add constants
+    final ConstantManipulator constantManipulator = ConstantManipulator();
+    await constantManipulator.create();
+
+    //Add Logger Service
+    final LoggerServiceManipulator loggerServiceManipulator =
+        LoggerServiceManipulator();
+    await loggerServiceManipulator.create();
   }
 
   void deleteUnusedFolders() {
@@ -366,10 +380,5 @@ class Creator extends Command<dynamic> {
     ).then((File file) {
       stderr.writeln('-- /lib/main.dart ✔');
     });
-  }
-
-  Future<void> _addDepencyInjection() async {
-    final DependencyInjection dependencyInjection = DependencyInjection();
-    await dependencyInjection.create();
   }
 }
