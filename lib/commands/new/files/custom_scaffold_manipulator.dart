@@ -5,7 +5,7 @@ class CustomScaffoldManipulator extends FileManipulator {
   String get name => 'CustomScaffold';
 
   @override
-  String get path => 'lib/widgets/custom_scaffold.dart';
+  String get path => 'lib/widget/custom_scaffold.dart';
 
   @override
   String content() {
@@ -13,7 +13,7 @@ class CustomScaffoldManipulator extends FileManipulator {
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'service/logger_service.dart';
+import '../service/logger_service.dart';
 
 class CustomScaffold extends StatelessWidget {
   const CustomScaffold({required this.body, super.key});
@@ -27,7 +27,7 @@ class CustomScaffold extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () {
-          Get.find<Logger>().show();
+          Get.find<LoggerService>().show();
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logo_dev_rounded),

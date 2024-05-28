@@ -26,7 +26,7 @@ class LoggerServiceManipulator extends ServiceManipulator {
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'util/constants.dart';
+import '../util/constants.dart';
 
 class LoggerService extends GetxService {
   final RxList<Widget> _logs = <Widget>[].obs;

@@ -51,26 +51,25 @@ class MainBindings extends Bindings {
 """;
   }
 
-  Future<void> addService(String serviceName, {bool initialize = false}) async {
+  Future<void> addService(String serviceName, {bool initialize = false, required String servicePath}) async {
     final File file = File(path);
     final List<String> lines = (await file.readAsString()).split('\n');
     final List<String> newLines = <String>[];
     for (final String line in lines) {
       newLines.add(line);
-      if (line.contains('_injectControllers();') && initialize) {
-        newLines.add('\nGet.lazyPut($serviceName.new);');
-        break;
-      }
+      // if (line.contains('_injectControllers();') && initialize) {
+      //   newLines.add('\nGet.lazyPut($serviceName.new);');
+      //   break;
+      // }
       if (line.contains("import 'package:get/get.dart';") && initialize) {
-        newLines.add('\nimport: $serviceName.new);');
-        break;
+        String serviceFileName = servicePath.substring(0, servicePath.indexOf('.'));
+        serviceFileName = serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
+        newLines.add("\nimport 'package:$projectName/service/$serviceFileName.dart';");
       }
-
       if (line.contains('    //Services injection') && initialize) {
         newLines
           ..add('\n')
           ..add('Get.lazyPut($serviceName.new);');
-        break;
       }
     }
 

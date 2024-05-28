@@ -6,8 +6,6 @@ abstract class ServiceManipulator extends FileManipulator {
 
   @override
   Future<void> create({String projectName = 'Service', bool initialize = false}) {
-    final DependencyInjection dependencyInjection = DependencyInjection(projectName: projectName);
-    dependencyInjection.addService(name, initialize: initialize);
     return super.create();
   }
 

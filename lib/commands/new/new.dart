@@ -13,6 +13,7 @@ import 'files/dependency_injection.dart';
 import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
+import 'files/custom_scaffold_manipulator.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -97,6 +98,13 @@ class Creator extends Command<dynamic> {
     final LoggerServiceManipulator loggerServiceManipulator =
         LoggerServiceManipulator();
     await loggerServiceManipulator.create(projectName: projectName);
+    await dependencyInjection.addService(loggerServiceManipulator.name, initialize: true, servicePath: loggerServiceManipulator.path);
+
+    //Add Logger Service
+    final CustomScaffoldManipulator customScaffoldManipulator =
+        CustomScaffoldManipulator();
+    await customScaffoldManipulator.create();
+
     await updateGradleFile();
   }
 
