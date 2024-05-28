@@ -71,7 +71,6 @@ class Creator extends Command<dynamic> {
       runInShell: true,
     ).then((ProcessResult result) {
       stderr.writeln(result.stdout);
-      stderr.writeln(result.stderr);
     });
     Directory.current = '${Directory.current.path}/$projectName';
     await addDependenciesToPubspec(<String>['get'], null);
