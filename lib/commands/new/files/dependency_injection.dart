@@ -6,6 +6,13 @@ import '../../../interfaces/file_manipulator.dart';
 import '../../../util/util.dart';
 
 class DependencyInjection extends FileManipulator {
+
+  DependencyInjection({required String projectName}): _projectName = projectName;
+  final String _projectName;
+
+  String get projectName => _projectName;
+
+
   @override
   Future<void> create() async {
     // TODO: implement create
@@ -23,6 +30,7 @@ class DependencyInjection extends FileManipulator {
   String content() {
     return """
 import 'package:get/get.dart';
+import 'package:$projectName/util/constants.dart';
 
 class MainBindings extends Bindings {
   @override
@@ -47,21 +55,22 @@ class MainBindings extends Bindings {
     final File file = File(path);
     final List<String> lines = (await file.readAsString()).split('\n');
     final List<String> newLines = <String>[];
-    bool foundInjectServices = false;
     for (final String line in lines) {
       newLines.add(line);
       if (line.contains('_injectControllers();') && initialize) {
         newLines.add('\nGet.lazyPut($serviceName.new);');
         break;
       }
-
-      if (foundInjectServices && line.trim() == '}') {
-        newLines.add('\nGet.lazyPut($serviceName.new);');
-        foundInjectServices = false;
+      if (line.contains("import 'package:get/get.dart';") && initialize) {
+        newLines.add('\nimport: $serviceName.new);');
+        break;
       }
 
-      if (line.contains('void _injectServices() {')) {
-        foundInjectServices = true;
+      if (line.contains('    //Services injection') && initialize) {
+        newLines
+          ..add('\n')
+          ..add('Get.lazyPut($serviceName.new);');
+        break;
       }
     }
 

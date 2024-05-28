@@ -68,7 +68,10 @@ class Creator extends Command<dynamic> {
       'flutter',
       <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
       runInShell: true,
-    );
+    ).then((ProcessResult result) {
+      stderr.writeln(result.stdout);
+      stderr.writeln(result.stderr);
+    });
     Directory.current = '${Directory.current.path}/$projectName';
     await addDependenciesToPubspec(<String>['get'], null);
     createCommonFolderStructure();
@@ -81,10 +84,9 @@ class Creator extends Command<dynamic> {
     await File(path.join('added_boilerplate.txt')).writeAsString('');
     await addWorkflow();
     deleteUnusedFolders();
-    await updateGradleFile();
 
     //Add Dependency Injection
-    final DependencyInjection dependencyInjection = DependencyInjection();
+    final DependencyInjection dependencyInjection = DependencyInjection(projectName: projectName);
     await dependencyInjection.create();
 
     //Add constants
@@ -94,7 +96,8 @@ class Creator extends Command<dynamic> {
     //Add Logger Service
     final LoggerServiceManipulator loggerServiceManipulator =
         LoggerServiceManipulator();
-    await loggerServiceManipulator.create();
+    await loggerServiceManipulator.create(projectName: projectName);
+    await updateGradleFile();
   }
 
   void deleteUnusedFolders() {
@@ -165,12 +168,19 @@ class Creator extends Command<dynamic> {
     final String pubPath = path.join('pubspec.yaml');
     File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
+      bool isAssetsIncluded = false;
+      for (final String line in lines) {
+        if (line.contains('  assets:')) {
+          isAssetsIncluded = true;
+        }
+      }
 
       for (final String line in lines) {
         buffer.write('$line\n');
 
         if (line.contains('flutter:') &&
-            buffer.toString().contains('dev_dependencies:\n')) {
+            buffer.toString().contains('dev_dependencies:\n') &&
+            !isAssetsIncluded) {
           buffer
             ..write('  assets:\n')
             ..write('    - asset/\n')
@@ -188,25 +198,15 @@ class Creator extends Command<dynamic> {
 
   /// Update the gradle file with the CI/CD configuration & multidex
   Future<void> updateGradleFile() async {
-    final String pubPath =
-        path.join(projectName, 'android', 'app', 'build.gradle');
-    await replaceLineInFile(
-      pubPath,
-      'signingConfig = signingConfigs.debug',
-      '            signingConfig = signingConfigs.release',
-    );
+    final String pubPath = path.join('android', 'app', 'build.gradle');
     await File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
       int lineNumber = 0;
       bool keystoreUpdated = false;
-      bool isPluginUpdated = false;
       bool isMultidexUpdated = false;
       bool isMultidexImplementationUpdated = false;
       bool isSigningConfigUpdated = false;
       for (final String line in lines) {
-        if (line.contains('com.google.firebase.firebase-perf')) {
-          isPluginUpdated = true;
-        }
         if (line.contains('keystoreProperties')) {
           keystoreUpdated = true;
         }
@@ -224,16 +224,6 @@ class Creator extends Command<dynamic> {
 
       for (final String line in lines) {
         buffer.write('$line\n');
-
-        if (line.contains('dev.flutter.flutter-gradle-plugin') &&
-            !isPluginUpdated) {
-          buffer
-            ..write('\n')
-            ..write('    id "com.google.firebase.firebase-perf"\n')
-            ..write('    id "com.google.firebase.crashlytics"\n')
-            ..write('    id "com.google.gms.google-services"\n')
-            ..write('\n');
-        }
 
         if (lineNumber == 15 && !keystoreUpdated) {
           buffer
@@ -310,6 +300,11 @@ class Creator extends Command<dynamic> {
 
       stderr.writeln('# config in build.gradle CREATED');
     });
+    await replaceLineInFile(
+      pubPath,
+      'signingConfig = signingConfigs.debug',
+      '            signingConfig = signingConfigs.release',
+    );
   }
 
   void createCommonFolderStructure() {

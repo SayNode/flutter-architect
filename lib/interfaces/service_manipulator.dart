@@ -3,9 +3,10 @@ import 'file_manipulator.dart';
 
 ///Interface for Service Manipulators
 abstract class ServiceManipulator extends FileManipulator {
-  final DependencyInjection dependencyInjection = DependencyInjection();
+
   @override
-  Future<void> create({bool initialize = false}) {
+  Future<void> create({String projectName = 'Service', bool initialize = false}) {
+    final DependencyInjection dependencyInjection = DependencyInjection(projectName: projectName);
     dependencyInjection.addService(name, initialize: initialize);
     return super.create();
   }

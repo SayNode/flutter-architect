@@ -24,19 +24,13 @@ class Constants {
     final File file = File(path);
     final List<String> lines = (await file.readAsString()).split('\n');
     final List<String> newLines = <String>[];
-    bool foundConstantAddingSpace = false;
     for (final String line in lines) {
       newLines.add(line);
-
-      if (foundConstantAddingSpace) {
-        newLines.add('\n$constant');
-        foundConstantAddingSpace = false;
-      }
 
       if (line.contains(
         '// Add your constants here. Do not remove this comment.',
       )) {
-        foundConstantAddingSpace = true;
+        newLines.add('\n$constant');
       }
     }
 
