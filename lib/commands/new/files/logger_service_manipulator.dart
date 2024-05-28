@@ -3,8 +3,10 @@ import 'constant_manipulator.dart';
 
 class LoggerServiceManipulator extends ServiceManipulator {
   @override
-  Future<void> create(
-      {bool initialize = false, String projectName = '',}) async {
+  Future<void> create({
+    bool initialize = false,
+    String projectName = '',
+  }) async {
     final ConstantManipulator constantManipulator = ConstantManipulator();
     await constantManipulator.addConstant(
       'static const bool devMode = true;',
