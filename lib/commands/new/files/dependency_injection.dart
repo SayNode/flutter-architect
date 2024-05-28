@@ -6,12 +6,11 @@ import '../../../interfaces/file_manipulator.dart';
 import '../../../util/util.dart';
 
 class DependencyInjection extends FileManipulator {
-
-  DependencyInjection({required String projectName}): _projectName = projectName;
+  DependencyInjection({required String projectName})
+      : _projectName = projectName;
   final String _projectName;
 
   String get projectName => _projectName;
-
 
   @override
   Future<void> create() async {
@@ -51,7 +50,8 @@ class MainBindings extends Bindings {
 """;
   }
 
-  Future<void> addService(String serviceName, {bool initialize = false, required String servicePath}) async {
+  Future<void> addService(String serviceName,
+      {bool initialize = false, required String servicePath}) async {
     final File file = File(path);
     final List<String> lines = (await file.readAsString()).split('\n');
     final List<String> newLines = <String>[];
@@ -62,9 +62,12 @@ class MainBindings extends Bindings {
       //   break;
       // }
       if (line.contains("import 'package:get/get.dart';") && initialize) {
-        String serviceFileName = servicePath.substring(0, servicePath.indexOf('.'));
-        serviceFileName = serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
-        newLines.add("\nimport 'package:$projectName/service/$serviceFileName.dart';");
+        String serviceFileName =
+            servicePath.substring(0, servicePath.indexOf('.'));
+        serviceFileName =
+            serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
+        newLines.add(
+            "\nimport 'package:$projectName/service/$serviceFileName.dart';");
       }
       if (line.contains('    //Services injection') && initialize) {
         newLines

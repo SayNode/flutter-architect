@@ -87,7 +87,8 @@ class Creator extends Command<dynamic> {
     deleteUnusedFolders();
 
     //Add Dependency Injection
-    final DependencyInjection dependencyInjection = DependencyInjection(projectName: projectName);
+    final DependencyInjection dependencyInjection =
+        DependencyInjection(projectName: projectName);
     await dependencyInjection.create();
 
     //Add constants
@@ -98,7 +99,8 @@ class Creator extends Command<dynamic> {
     final LoggerServiceManipulator loggerServiceManipulator =
         LoggerServiceManipulator();
     await loggerServiceManipulator.create(projectName: projectName);
-    await dependencyInjection.addService(loggerServiceManipulator.name, initialize: true, servicePath: loggerServiceManipulator.path);
+    await dependencyInjection.addService(loggerServiceManipulator.name,
+        initialize: true, servicePath: loggerServiceManipulator.path);
 
     //Add Logger Service
     final CustomScaffoldManipulator customScaffoldManipulator =
