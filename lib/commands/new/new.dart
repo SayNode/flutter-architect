@@ -100,7 +100,7 @@ class Creator extends Command<dynamic> {
         LoggerServiceManipulator();
     await loggerServiceManipulator.create(projectName: projectName);
     await dependencyInjection.addService(loggerServiceManipulator.name,
-        initialize: true, servicePath: loggerServiceManipulator.path);
+        initialize: true, servicePath: loggerServiceManipulator.path,);
 
     //Add Logger Service
     final CustomScaffoldManipulator customScaffoldManipulator =

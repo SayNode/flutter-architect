@@ -51,7 +51,7 @@ class MainBindings extends Bindings {
   }
 
   Future<void> addService(String serviceName,
-      {bool initialize = false, required String servicePath}) async {
+      {required String servicePath, bool initialize = false,}) async {
     final File file = File(path);
     final List<String> lines = (await file.readAsString()).split('\n');
     final List<String> newLines = <String>[];
@@ -67,7 +67,7 @@ class MainBindings extends Bindings {
         serviceFileName =
             serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
         newLines.add(
-            "\nimport 'package:$projectName/service/$serviceFileName.dart';");
+            "\nimport 'package:$projectName/service/$serviceFileName.dart';",);
       }
       if (line.contains('    //Services injection') && initialize) {
         newLines
