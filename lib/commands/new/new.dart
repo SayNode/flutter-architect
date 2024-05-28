@@ -8,9 +8,12 @@ import 'package:path/path.dart' as path;
 import '../../util/util.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/constant_manipulator.dart';
 import 'files/dependency_injection.dart';
+import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
+import 'files/custom_scaffold_manipulator.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -66,7 +69,9 @@ class Creator extends Command<dynamic> {
       'flutter',
       <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
       runInShell: true,
-    );
+    ).then((ProcessResult result) {
+      stderr.writeln(result.stdout);
+    });
     Directory.current = '${Directory.current.path}/$projectName';
     await addDependenciesToPubspec(<String>['get'], null);
     createCommonFolderStructure();
@@ -79,8 +84,32 @@ class Creator extends Command<dynamic> {
     await File(path.join('added_boilerplate.txt')).writeAsString('');
     await addWorkflow();
     deleteUnusedFolders();
+
+    //Add Dependency Injection
+    final DependencyInjection dependencyInjection =
+        DependencyInjection(projectName: projectName);
+    await dependencyInjection.create();
+
+    //Add constants
+    final ConstantManipulator constantManipulator = ConstantManipulator();
+    await constantManipulator.create();
+
+    //Add Logger Service
+    final LoggerServiceManipulator loggerServiceManipulator =
+        LoggerServiceManipulator();
+    await loggerServiceManipulator.create(projectName: projectName);
+    await dependencyInjection.addService(
+      loggerServiceManipulator.name,
+      initialize: true,
+      servicePath: loggerServiceManipulator.path,
+    );
+
+    //Add Logger Service
+    final CustomScaffoldManipulator customScaffoldManipulator =
+        CustomScaffoldManipulator();
+    await customScaffoldManipulator.create();
+
     await updateGradleFile();
-    await _addDepencyInjection();
   }
 
   void deleteUnusedFolders() {
@@ -151,12 +180,19 @@ class Creator extends Command<dynamic> {
     final String pubPath = path.join('pubspec.yaml');
     File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
+      bool isAssetsIncluded = false;
+      for (final String line in lines) {
+        if (line.contains('  assets:')) {
+          isAssetsIncluded = true;
+        }
+      }
 
       for (final String line in lines) {
         buffer.write('$line\n');
 
         if (line.contains('flutter:') &&
-            buffer.toString().contains('dev_dependencies:\n')) {
+            buffer.toString().contains('dev_dependencies:\n') &&
+            !isAssetsIncluded) {
           buffer
             ..write('  assets:\n')
             ..write('    - asset/\n')
@@ -174,25 +210,15 @@ class Creator extends Command<dynamic> {
 
   /// Update the gradle file with the CI/CD configuration & multidex
   Future<void> updateGradleFile() async {
-    final String pubPath =
-        path.join(projectName, 'android', 'app', 'build.gradle');
-    await replaceLineInFile(
-      pubPath,
-      'signingConfig = signingConfigs.debug',
-      '            signingConfig = signingConfigs.release',
-    );
+    final String pubPath = path.join('android', 'app', 'build.gradle');
     await File(pubPath).readAsLines().then((List<String> lines) {
       final StringBuffer buffer = StringBuffer();
       int lineNumber = 0;
       bool keystoreUpdated = false;
-      bool isPluginUpdated = false;
       bool isMultidexUpdated = false;
       bool isMultidexImplementationUpdated = false;
       bool isSigningConfigUpdated = false;
       for (final String line in lines) {
-        if (line.contains('com.google.firebase.firebase-perf')) {
-          isPluginUpdated = true;
-        }
         if (line.contains('keystoreProperties')) {
           keystoreUpdated = true;
         }
@@ -210,16 +236,6 @@ class Creator extends Command<dynamic> {
 
       for (final String line in lines) {
         buffer.write('$line\n');
-
-        if (line.contains('dev.flutter.flutter-gradle-plugin') &&
-            !isPluginUpdated) {
-          buffer
-            ..write('\n')
-            ..write('    id "com.google.firebase.firebase-perf"\n')
-            ..write('    id "com.google.firebase.crashlytics"\n')
-            ..write('    id "com.google.gms.google-services"\n')
-            ..write('\n');
-        }
 
         if (lineNumber == 15 && !keystoreUpdated) {
           buffer
@@ -296,6 +312,11 @@ class Creator extends Command<dynamic> {
 
       stderr.writeln('# config in build.gradle CREATED');
     });
+    await replaceLineInFile(
+      pubPath,
+      'signingConfig = signingConfigs.debug',
+      '            signingConfig = signingConfigs.release',
+    );
   }
 
   void createCommonFolderStructure() {
@@ -366,10 +387,5 @@ class Creator extends Command<dynamic> {
     ).then((File file) {
       stderr.writeln('-- /lib/main.dart ✔');
     });
-  }
-
-  Future<void> _addDepencyInjection() async {
-    final DependencyInjection dependencyInjection = DependencyInjection();
-    await dependencyInjection.create();
   }
 }
