@@ -9,11 +9,11 @@ import '../../util/util.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
 import 'files/constant_manipulator.dart';
+import 'files/custom_scaffold_manipulator.dart';
 import 'files/dependency_injection.dart';
 import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
-import 'files/custom_scaffold_manipulator.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -108,8 +108,9 @@ class Creator extends Command<dynamic> {
     final CustomScaffoldManipulator customScaffoldManipulator =
         CustomScaffoldManipulator();
     await customScaffoldManipulator.create();
-
-    await updateGradleFile();
+    if (argResults?['ios'] == true || argResults?['android'] == true) {
+      await updateGradleFile();
+    }
   }
 
   void deleteUnusedFolders() {
