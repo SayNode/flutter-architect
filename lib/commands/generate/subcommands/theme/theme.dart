@@ -56,7 +56,7 @@ class GenerateThemeService extends Command<dynamic> {
     final bool value = await checkIfAlreadyRunWithReturn('shared_storage');
     if (!value) {
       final GenerateStorageService storageService = GenerateStorageService();
-      await storageService.runShared();
+      await storageService.run();
     }
 
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('theme');
