@@ -4,16 +4,11 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/error_controller.dart' as error_controller;
-import 'code/error_page.dart' as error_page;
 import 'code/firebase_configuration.dart' as firebase_configuration;
-import 'code/lost_connection_page.dart' as lost_connection_page;
-import 'code/main/handle_error.dart' as handle_error;
 import 'code/main/imports.dart' as imports;
-import 'code/main/material_app_flag.dart' as material_app_flag;
-import 'code/main/wrapper.dart' as wrapper;
-import 'code/network_service.dart' as network_service;
-import 'code/util.dart' as util;
+import 'code/main/fatal_error.dart' as fatal_error;
+import 'code/main/non_fatal_error.dart' as non_fatal_error;
+import 'code/main/dev_error.dart' as dev_error;
 
 class GenerateCrashalyticsService extends Command<dynamic> {
   GenerateCrashalyticsService() {
@@ -43,7 +38,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('crashalytics');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
-    final String projectName = await getProjectName();
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
@@ -53,12 +47,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
         await addAlreadyRun('crashalytics');
         _printInitialInstructions();
         _addDependencies();
-        _createDirectories();
-        await _addErrorPage(projectName);
-        await _addErrorController();
-        await _addUtil();
-        await _addNetworkService(projectName);
-        await _addLostConnectionPage();
         await _addFirebaseConfigurationScript();
         await _addMainChanges();
         formatCode();
@@ -69,11 +57,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
         stderr.writeln('Removing Crashalytics...');
         await removeAlreadyRun('crashalytics');
         _removeDependencies();
-        await _removeErrorPage();
-        await _removeErrorController();
-        await _removeUtil();
-        await _removeNetworkService();
-        await _removeLostConnectionPage();
         await _removeFirebaseConfigurationScript();
         await _removeMainChanges();
         formatCode();
@@ -93,12 +76,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
       <String>[
         'firebase_core',
         'firebase_crashlytics',
-        'connectivity_plus',
-        'package_info_plus',
-        'flutter_svg',
-        'is_first_run',
-        'url_launcher',
-        'flutter_network_connectivity',
       ],
       null,
     );
@@ -109,12 +86,6 @@ class GenerateCrashalyticsService extends Command<dynamic> {
       <String>[
         'firebase_core',
         'firebase_crashlytics',
-        'connectivity_plus',
-        'package_info_plus',
-        'flutter_svg',
-        'is_first_run',
-        'url_launcher',
-        'flutter_network_connectivity',
       ],
       null,
     );
@@ -149,20 +120,12 @@ class GenerateCrashalyticsService extends Command<dynamic> {
 
   void _printFinalInstructions() {
     printColor(
-      'Added following dependencies: firebase_core, firebase_crashalitics, connectivity_plus, package_info_plus, flutter_svg, is_first_run',
+      'Added following dependencies: firebase_core, firebase_crashalitics',
       ColorText.green,
     );
     printColor('REMEMBER TO RUN', ColorText.green);
     printColor('chmod +x ./firebase_configuration.sh', ColorText.magenta);
     printColor('./firebase_configuration.sh', ColorText.magenta);
-  }
-
-  /// Create required directories, if they don't exist.
-  void _createDirectories() {
-    Directory(path.join('lib', 'util')).createSync();
-    Directory(path.join('lib', 'page', 'error')).createSync();
-    Directory(path.join('lib', 'page', 'lost_connection')).createSync();
-    Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
   }
 
   Future<void> _addMainChanges() async {
@@ -171,17 +134,14 @@ class GenerateCrashalyticsService extends Command<dynamic> {
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
-        'void main() async {': <String>[
-          wrapper.contentBefore(),
+        '// Error in Development:': <String>[
+          dev_error.content(),
         ],
-        'runApp(const MyApp());': <String>[
-          wrapper.contentAfter(),
+        '// Fatal error in Production:': <String>[
+          fatal_error.content(),
         ],
-        'Widget build(BuildContext context) {': <String>[
-          material_app_flag.content(),
-        ],
-        'bool isFirstRun = false;': <String>[
-          handle_error.content(),
+        '// Non-Fatal error in Production:': <String>[
+          non_fatal_error.content(),
         ],
         '// https://saynode.ch': <String>[
           imports.content(),
@@ -193,96 +153,14 @@ class GenerateCrashalyticsService extends Command<dynamic> {
   Future<void> _removeMainChanges() async {
     final String mainPath = path.join('lib', 'main.dart');
     await removeTextFromFile(mainPath, imports.content());
-    await removeTextFromFile(mainPath, wrapper.contentBefore());
-    await removeTextFromFile(mainPath, wrapper.contentAfter());
-    await removeTextFromFile(mainPath, material_app_flag.content());
-    await removeTextFromFile(mainPath, handle_error.content());
-  }
-
-  Future<void> _addErrorPage(String projectName) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'page', 'error', 'error_page.dart'),
-      error_page.content(projectName),
-    );
-  }
-
-  Future<void> _addErrorController() async {
-    await writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        'error',
-        'controller',
-        'error_controller.dart',
-      ),
-      error_controller.content(),
-    );
-  }
-
-  Future<void> _addUtil() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'util', 'util.dart'),
-      util.content(),
-    );
-  }
-
-  Future<void> _addNetworkService(String projectName) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'network_service.dart'),
-      network_service.content(projectName),
-    );
-  }
-
-  Future<void> _addLostConnectionPage() async {
-    await writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        'lost_connection',
-        'lost_connection_page.dart',
-      ),
-      lost_connection_page.content(),
-    );
+    await removeTextFromFile(mainPath, non_fatal_error.content());
+    await removeTextFromFile(mainPath, fatal_error.content());
+    await removeTextFromFile(mainPath, dev_error.content());
   }
 
   Future<void> _addFirebaseConfigurationScript() async {
     await File(path.join('firebase_configuration.sh'))
         .writeAsString(firebase_configuration.content());
-  }
-
-  Future<void> _removeErrorPage() async {
-    await File(path.join('lib', 'page', 'error', 'error_page.dart')).delete();
-  }
-
-  Future<void> _removeErrorController() async {
-    await File(
-      path.join(
-        'lib',
-        'page',
-        'error',
-        'controller',
-        'error_controller.dart',
-      ),
-    ).delete();
-  }
-
-  Future<void> _removeUtil() async {
-    await File(path.join('lib', 'util', 'util.dart')).delete();
-  }
-
-  Future<void> _removeNetworkService() async {
-    await File(path.join('lib', 'service', 'network_service.dart')).delete();
-  }
-
-  Future<void> _removeLostConnectionPage() async {
-    await File(
-      path.join(
-        'lib',
-        'page',
-        'lost_connection',
-        'lost_connection_page.dart',
-      ),
-    ).delete();
   }
 
   Future<void> _removeFirebaseConfigurationScript() async {

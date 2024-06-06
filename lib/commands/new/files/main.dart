@@ -1,17 +1,94 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings, unnecessary_string_escapes
 
 String content(String projectName) {
-  return """
+  return r"""
+import 'dart:async';
+import 'service/logger_service.dart';
+import 'package:is_first_run/is_first_run.dart';
+import 'page/error/error_page.dart';
+import 'package:flutter/services.dart';
+import 'util/constants.dart';
+import 'util/util.dart';
+import 'service/storage/storage_service.dart';
+import 'service/main_bindings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'page/splash_page.dart';
 
 bool isFirstRun = false;
 
+// Handle uncaught erros
+Future<void> handleError(
+  Object error,
+  StackTrace? stack, {
+  bool fatal = false,
+  Iterable<Object> information = const <Object>[],
+  bool async = false,
+}) async {
+  if (Constants.devMode) {
+    // Error in Development:
+    Get.find<LoggerService>().log(
+      'An error occurred in DEV: $error',
+    );
+  } else {
+    if (fatal) {
+      // Fatal error in Production:
+      if (getMaterialAppCalled) {
+        Get.find<LoggerService>().log(
+          'A fatal error occurred: $error',
+        );
+        await Get.to(() => ErrorPage(error: error));
+      } else {
+        Get.find<LoggerService>().log(
+          'A fatal error occurred before GetMaterialApp was called: $error',
+        );
+      }
+    } else {
+      // Non-Fatal error in Production:
+      Get.find<LoggerService>().log(
+        'An non-fatal error occurred: $error',
+      );
+    }
+  }
+}
+
+Future<void> initializeServices() async {
+  await Get.find<StorageService>().init();
+}
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await runZonedGuarded<Future<void>>(() async {
+    // Handle framework errors:
+    FlutterError.onError = (FlutterErrorDetails details) async {
+      await handleError(
+        details.exception,
+        details.stack,
+        fatal: true,
+      );
+    };
+
+    // Bind services:
+    final MainBindings mainBinding = MainBindings();
+    await mainBinding.dependencies();
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Initialize services:
+    await initializeServices();
+
+    // Set preferred orientations:
+    await SystemChrome.setPreferredOrientations(
+      <DeviceOrientation>[DeviceOrientation.portraitUp],
+    );
+
+    // Check if it's the first run:
+    isFirstRun = await IsFirstRun.isFirstRun();
+
+    // Run the app:
+    runApp(const MyApp());
+  }, (Object error, StackTrace stack) async {
+    // Handle uncaught errors:
+    await handleError(error, stack, fatal: true);
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -19,9 +96,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    //Start MaterialApp
+    getMaterialAppCalled = true;
+    // Start MaterialApp
     return GetMaterialApp(
-      title: '$projectName',
+      title: 'testing',
       initialRoute: '/',
       getPages: <GetPage<void>>[
         GetPage<void>(
@@ -31,41 +109,7 @@ class MyApp extends StatelessWidget {
       ],
       theme: ThemeData(),
     );
-    //End MaterialApp
+    // End MaterialApp
   }
-}
-""";
-
-  // 'import \'package:flutter\/material.dart\';\n'
-  //         'import \'package:get\/get.dart\';\n'
-  //         'import \'page\/splash_page.dart\';\n'
-  //         '\n'
-  //         'void main() async {\n'
-  //         'runApp(const MyApp());}'
-  //         '\n'
-  //         '\n'
-  //         '\n'
-  //         '\n'
-  //         'class MyApp extends StatelessWidget {\n'
-  //         '  const MyApp({super.key});\n'
-  //         '  \/\/ This widget is the root of your application.\n'
-  //         '  @override\n'
-  //         '  Widget build(BuildContext context) {\n'
-  //         '    //Start MaterialApp\n'
-  //         '    return GetMaterialApp(\n'
-  //         '      title: \'' +
-  //     projectName +
-  //     '\',\n' +
-  //     '      initialRoute: \'\/\',\n' +
-  //     'getPages: [' +
-  //     'GetPage(' +
-  //     "name: '/'," +
-  //     "page: () => const SplashPage()," +
-  //     ")," +
-  //     "]," +
-  //     '      theme: ThemeData(),\n' +
-  //     '    );\n' +
-  //     '    //End MaterialApp\n' +
-  //     '  }\n' +
-  //     '}';
+}""";
 }
