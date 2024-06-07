@@ -2,6 +2,7 @@ import 'package:args/command_runner.dart';
 
 import '../../../util/util.dart';
 import 'api/api.dart';
+import 'connectivity/connectivity.dart';
 import 'crashlytics/crashlytics.dart';
 import 'localization/localization.dart';
 import 'native_splash/splash.dart';
@@ -48,6 +49,9 @@ class AllGeneratorService extends Command<dynamic> {
     await crashlyticsService.run();
     final GenerateSplashService splashService = GenerateSplashService();
     await splashService.run();
+    final GenerateConnectivityService connectivityService =
+        GenerateConnectivityService();
+    await connectivityService.run();
     final GenerateAPIService apiService = GenerateAPIService();
     await apiService.run();
     final GenerateSigninService signinService = GenerateSigninService();

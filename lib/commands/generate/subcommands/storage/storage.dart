@@ -167,7 +167,7 @@ class GenerateStorageService extends Command<dynamic> {
 
   Future<void> _injectServices() async {
     await addLinesAfterLineInFile(
-      path.join('lib', 'service', 'service.dart'),
+      path.join('lib', 'service', 'main_bindings.dart'),
       <String, List<String>>{
         '//Services injection': <String>[
           'Get.lazyPut(StorageService.new);',
@@ -185,7 +185,7 @@ class GenerateStorageService extends Command<dynamic> {
 
   Future<void> _uninjectServices() async {
     await removeLinesFromFile(
-      path.join('lib', 'service', 'service.dart'),
+      path.join('lib', 'service', 'main_bindings.dart'),
       <String>[
         'Get.lazyPut(StorageService.new);',
         'Get.lazyPut(SharedStorageService.new);',
