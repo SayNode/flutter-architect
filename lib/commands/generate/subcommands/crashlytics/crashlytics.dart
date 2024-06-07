@@ -10,8 +10,8 @@ import 'code/main/fatal_error.dart' as fatal_error;
 import 'code/main/non_fatal_error.dart' as non_fatal_error;
 import 'code/main/dev_error.dart' as dev_error;
 
-class GenerateCrashalyticsService extends Command<dynamic> {
-  GenerateCrashalyticsService() {
+class GenerateCrashlyticsService extends Command<dynamic> {
+  GenerateCrashlyticsService() {
     // Add parser options or flag here
     argParser
       ..addFlag(
@@ -24,10 +24,10 @@ class GenerateCrashalyticsService extends Command<dynamic> {
       );
   }
   @override
-  String get description => 'Create crashalytics files and boilerplate code;';
+  String get description => 'Create crashlytics files and boilerplate code;';
 
   @override
-  String get name => 'crashalytics';
+  String get name => 'crashlytics';
 
   @override
   Future<void> run() async {
@@ -35,7 +35,7 @@ class GenerateCrashalyticsService extends Command<dynamic> {
   }
 
   Future<void> _run() async {
-    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('crashalytics');
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('crashlytics');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
@@ -43,8 +43,8 @@ class GenerateCrashalyticsService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Crashalytics...');
-        await addAlreadyRun('crashalytics');
+        stderr.writeln('Creating Crashlytics...');
+        await addAlreadyRun('crashlytics');
         _printInitialInstructions();
         _addDependencies();
         await _addFirebaseConfigurationScript();
@@ -54,8 +54,8 @@ class GenerateCrashalyticsService extends Command<dynamic> {
         _printFinalInstructions();
       },
       remove: () async {
-        stderr.writeln('Removing Crashalytics...');
-        await removeAlreadyRun('crashalytics');
+        stderr.writeln('Removing Crashlytics...');
+        await removeAlreadyRun('crashlytics');
         _removeDependencies();
         await _removeFirebaseConfigurationScript();
         await _removeMainChanges();
@@ -63,10 +63,10 @@ class GenerateCrashalyticsService extends Command<dynamic> {
         dartFixCode();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Crashalytics as it's already configured.");
+        stderr.writeln("Can't add Crashlytics as it's already configured.");
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove Crashalytics as it's not yet configured.");
+        stderr.writeln("Can't remove Crashlytics as it's not yet configured.");
       },
     );
   }
@@ -93,11 +93,11 @@ class GenerateCrashalyticsService extends Command<dynamic> {
 
   void _printInitialInstructions() {
     printColor(
-      'This script will add the code required to catch errors and send them to crashalytics.',
+      'This script will add the code required to catch errors and send them to crashlytics.',
       ColorText.yellow,
     );
     printColor(
-      'However, to use this feature, you need to first configure firebase and crashalytics for this project.',
+      'However, to use this feature, you need to first configure firebase and crashlytics for this project.',
       ColorText.yellow,
     );
     printColor(
