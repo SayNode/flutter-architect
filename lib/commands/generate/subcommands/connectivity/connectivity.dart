@@ -5,6 +5,8 @@ import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
 import '../storage/storage.dart';
+import 'code/splash.dart' as splash;
+import 'code/connectivity_service.dart' as connectivity_service;
 
 class GenerateConnectivityService extends Command<dynamic> {
   GenerateConnectivityService() {
@@ -32,14 +34,6 @@ class GenerateConnectivityService extends Command<dynamic> {
   }
 
   Future<void> _run() async {
-    // Check if Shared Storage has already been set up. Theme requires Shared Storage.
-    // If not, run GenerateStorageService.runShared().
-    final bool value = await checkIfAlreadyRunWithReturn('connectivity');
-    if (!value) {
-      final GenerateStorageService storageService = GenerateStorageService();
-      await storageService.run();
-    }
-
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('connectivity');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
@@ -52,11 +46,14 @@ class GenerateConnectivityService extends Command<dynamic> {
         await addAlreadyRun('connectivity');
         addDependenciesToPubspecSync(<String>['connectivity_plus'], null);
         await _createConnectivityService();
+        await _addSplashChanges();
       },
       remove: () async {
         stderr.writeln('Removing Connectivity Service...');
         await removeAlreadyRun('connectivity');
         removeDependenciesFromPubspecSync(<String>['connectivity_plus'], null);
+        await _removeSplashChanges();
+        await _removeConnectivityService();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -69,77 +66,79 @@ class GenerateConnectivityService extends Command<dynamic> {
     dartFixCode();
   }
 
-  Future<void> _removeMainChanges() async {
-    await removeLinesFromFile(
-      path.join('lib', 'main.dart'),
-      <String>['.devMode'],
+  Future<void> _removeSplashChanges() async {
+    await removeTextFromFile(
+      path.join('lib', 'page', 'splash_page.dart'),
+      splash.import(),
     );
-  }
-
-  Future<void> _removeConstants() async {
-    await File(path.join('lib', 'util', 'constants.dart')).delete();
-  }
-
-  Future<void> _removeAPIService() async {
-    await File(path.join('lib', 'service', 'api_service.dart')).delete();
-  }
-
-  Future<void> _removeAuthService() async {
-    await File(path.join('lib', 'service', 'auth_service.dart')).delete();
-  }
-
-  Future<void> _removeUserModel() async {
-    await File(path.join('lib', 'model', 'user.dart')).delete();
-  }
-
-  Future<void> _removeUserStateService() async {
-    await File(path.join('lib', 'service', 'user_state_service.dart')).delete();
-  }
-
-  Future<void> _addMainChanges(String projectName) async {
+    await removeTextFromFile(
+      path.join('lib', 'page', 'splash_page.dart'),
+      splash.content(),
+    );
     await addLinesAfterLineInFile(
-        path.join('lib', 'main.dart'), <String, List<String>>{
-      'return GetMaterialApp(': <String>[
-        'debugShowCheckedModeBanner: ${projectName.capitalize()}Constants.devMode,',
+      path.join('lib', 'page', 'splash_page.dart'),
+      <String, List<String>>{
+        'Widget build(BuildContext context) {': <String>[
+          'return CustomScaffold(body:Container());',
+        ],
+      },
+    );
+  }
+
+  Future<void> _addSplashChanges() async {
+    await removeLinesFromFile(
+      path.join('lib', 'page', 'splash_page.dart'),
+      <String>[
+        'return CustomScaffold(body:Container());',
       ],
-      '// https://saynode.ch': <String>[
-        "import './util/constants.dart';",
+    );
+    await addLinesAfterLineInFile(
+      path.join('lib', 'page', 'splash_page.dart'),
+      <String, List<String>>{
+        'Widget build(BuildContext context) {': <String>[
+          splash.content(),
+        ],
+        '// https://saynode.ch': <String>[
+          splash.import(),
+        ],
+      },
+    );
+  }
+
+  Future<void> _createConnectivityService() async {
+    await writeFileWithPrefix(
+      path.join('lib', 'service', 'connectivity_service.dart'),
+      connectivity_service.content(),
+    );
+  }
+
+  Future<void> _removeConnectivityService() async {
+    await File(
+      path.join('lib', 'service', 'connectivity_service.dart'),
+    ).delete();
+  }
+
+  Future<void> _injectServices() async {
+    await addLinesAfterLineInFile(
+      path.join('lib', 'service', 'main_bindings.dart'),
+      <String, List<String>>{
+        '//Services injection': <String>[
+          'Get.lazyPut(ConnectivityService.new);',
+        ],
+        "import 'package:get/get.dart';": <String>[
+          "import 'connectivity_service.dart';",
+        ],
+      },
+    );
+  }
+
+  Future<void> _uninjectServices() async {
+    await removeLinesFromFile(
+      path.join('lib', 'service', 'main_bindings.dart'),
+      <String>[
+        'Get.lazyPut(ConnectivityService.new);',
+        "import 'connectivity_service.dart';",
       ],
-    });
-  }
-
-  Future<void> _addConstants(String projectName) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'util', 'constants.dart'),
-      constants.content(projectName),
-    );
-  }
-
-  Future<void> _addAPIService(String projectName) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'api_service.dart'),
-      api_service.content(projectName),
-    );
-  }
-
-  Future<void> _addAuthService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'auth_service.dart'),
-      auth_service.content(),
-    );
-  }
-
-  Future<void> _addUserModel() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'user.dart'),
-      user_model.content(),
-    );
-  }
-
-  Future<void> _addUserStateService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'user_state_service.dart'),
-      user_state_service.content(),
     );
   }
 }
