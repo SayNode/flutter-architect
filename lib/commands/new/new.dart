@@ -415,7 +415,12 @@ class Creator extends Command<dynamic> {
     });
     writeFileWithPrefix(
       path.join(
-          'lib', 'page', 'error', 'controller', 'error_page_controller.dart'),
+        'lib',
+        'page',
+        'error',
+        'controller',
+        'error_page_controller.dart',
+      ),
       error_page_controller.content(),
     ).then((File file) {
       stderr.writeln('-- /lib/page/error/error_page_controller.dart ✔');
