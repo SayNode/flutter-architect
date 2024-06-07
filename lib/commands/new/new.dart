@@ -76,7 +76,7 @@ class Creator extends Command<dynamic> {
       stderr.writeln(result.stdout);
     });
     Directory.current = '${Directory.current.path}/$projectName';
-    await addDependenciesToPubspec(<String>['get'], null);
+    await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
     createCommonFolderStructure();
     _createSplashPage();
     _rewriteMain();
@@ -406,6 +406,7 @@ class Creator extends Command<dynamic> {
   // Create the error_page.dart file
   void _createErrorPage() {
     Directory(path.join('lib', 'page', 'error')).createSync();
+    Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
     writeFileWithPrefix(
       path.join('lib', 'page', 'error', 'error_page.dart'),
       error_page.content(),
@@ -413,10 +414,11 @@ class Creator extends Command<dynamic> {
       stderr.writeln('-- /lib/page/error/error_page.dart ✔');
     });
     writeFileWithPrefix(
-      path.join('lib', 'page', 'error', 'error_page.dart'),
+      path.join(
+          'lib', 'page', 'error', 'controller', 'error_page_controller.dart'),
       error_page_controller.content(),
     ).then((File file) {
-      stderr.writeln('-- /lib/page/error/error_page.dart ✔');
+      stderr.writeln('-- /lib/page/error/error_page_controller.dart ✔');
     });
   }
 }

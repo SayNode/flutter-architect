@@ -5,12 +5,6 @@
 //
 // https://saynode.ch
 
-class StorageException implements Exception {
-  StorageException(this.message);
-  final String message;
+import 'package:get/get.dart';
 
-  @override
-  String toString() {
-    return 'StorageException: $message';
-  }
-}
+class ErrorController extends GetxController {}

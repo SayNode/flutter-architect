@@ -5,7 +5,7 @@ await FirebaseCrashlytics.instance.recordError(
   fatal: true,
   information: <Object>[
     'Current Route: ${Get.currentRoute}',
-    'Previous Route:  $previousRoute',
+    'Previous Route: ${Get.previousRoute}',
     'Asynchronous: $async',
     'Production: ${!Constants.devMode}',
     'GetMaterialApp Called: $getMaterialAppCalled',

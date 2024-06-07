@@ -9,8 +9,6 @@ import 'page/error/error_page.dart';
 import 'package:flutter/services.dart';
 import 'util/constants.dart';
 import 'util/util.dart';
-import 'service/storage/storage_service.dart';
-import 'service/main_bindings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'page/splash_page.dart';
@@ -53,7 +51,7 @@ Future<void> handleError(
 }
 
 Future<void> initializeServices() async {
-  await Get.find<StorageService>().init();
+  // Initialize services:
 }
 
 void main() async {

@@ -4,24 +4,24 @@
 // Flutter Architect was created at SayNode Operations AG by Yann Marti, Francesco Romeo and Pedro Gonçalves.
 //
 // https://saynode.ch
-import 'dart:async';
-import 'page/lost_connection/lost_connection_page.dart';
 import 'firebase_options.dart';
-import 'service/network_service.dart';
-import 'package:is_first_run/is_first_run.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'page/error/error_page.dart';
-import 'package:flutter/services.dart';
-import 'util/util.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'service/main_bindings.dart';
 
+import 'dart:async';
+import 'service/logger_service.dart';
+import 'package:is_first_run/is_first_run.dart';
+import 'page/error/error_page.dart';
+import 'package:flutter/services.dart';
+import 'util/constants.dart';
+import 'util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'page/splash_page.dart';
 
 bool isFirstRun = false;
+
+// Handle uncaught erros
 Future<void> handleError(
   Object error,
   StackTrace? stack, {
@@ -29,106 +29,112 @@ Future<void> handleError(
   Iterable<Object> information = const <Object>[],
   bool async = false,
 }) async {
-  // Failed host lookup
-  if (error.toString().contains('Failed host lookup')) {
-    Get.put(NetworkService()).onInternetLostPage.value = true;
-    // ignore: inference_failure_on_function_invocation
-    await Get.to(() => const LostConnectionPage());
-    if (error.toString().contains('No host specified in URI file:///')) {
-      return;
-    }
-
-    // Check if the application is running on dev mode
-    final bool devMode = bool.tryParse(
-          const String.fromEnvironment(
-            'DEV_MODE',
-          ),
-        ) ??
-        false;
-
-    final GetMaterialController currentController = Get.rootController;
-
-    final String previousRoute = currentController.routing.previous;
-
-    // if (Get.put(UserStateService()).user.value.id != -1) {
-    //   FirebaseCrashlytics.instance.setUserIdentifier(
-    //       Get.put(UserStateService()).user.value.id.toString());
-    // }
-
-    if (!devMode) {
-      if (fatal) {
-        // If you see fatal on the crashlytics, it was registered here
-        await FirebaseCrashlytics.instance.recordError(
-          error,
-          stack,
-          fatal: true,
-          information: <Object>[
-            'Current Route: ${Get.currentRoute}',
-            'Previous Route:  $previousRoute',
-            'Asynchronous: $async',
-            // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
-            ...information,
-          ],
+  if (Constants.devMode) {
+    // Error in Development:
+    await FirebaseCrashlytics.instance.recordError(
+      error,
+      stack,
+      reason: 'a non-fatal error, this will be ignored',
+      information: <Object>[
+        'Current Route: ${Get.currentRoute}',
+        'Previous Route:  ${Get.previousRoute}',
+        'Asynchronous: $async',
+        'Production: ${!Constants.devMode}',
+        'GetMaterialApp Called: $getMaterialAppCalled',
+        // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
+        ...information,
+      ],
+    );
+    Get.find<LoggerService>().log(
+      'An error occurred in DEV: $error',
+    );
+  } else {
+    if (fatal) {
+      // Fatal error in Production:
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stack,
+        fatal: true,
+        information: <Object>[
+          'Current Route: ${Get.currentRoute}',
+          'Previous Route:  $previousRoute',
+          'Asynchronous: $async',
+          'Production: ${!Constants.devMode}',
+          'GetMaterialApp Called: $getMaterialAppCalled',
+          // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
+          ...information,
+        ],
+      );
+      if (getMaterialAppCalled) {
+        Get.find<LoggerService>().log(
+          'A fatal error occurred: $error',
         );
-
-        if (getMaterialAppCalled) {
-          // ignore: inference_failure_on_function_invocation
-          await Get.to(() => const ErrorPage());
-        } else {
-          // Try to exit app:
-          // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        }
+        await Get.to(() => ErrorPage(error: error));
       } else {
-        // If you see non fatal on the crashlytics, it was registered here
-        await FirebaseCrashlytics.instance.recordError(
-          error,
-          stack,
-          reason: 'a non-fatal error, this will be ignored',
-          information: <Object>[
-            'Current Route: ${Get.currentRoute}',
-            'Previous Route:  $previousRoute',
-            'Asynchronous: $async',
-            // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
-            ...information,
-          ],
+        Get.find<LoggerService>().log(
+          'A fatal error occurred before GetMaterialApp was called: $error',
         );
       }
+    } else {
+      // Non-Fatal error in Production:
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stack,
+        reason: 'a non-fatal error, this will be ignored',
+        information: <Object>[
+          'Current Route: ${Get.currentRoute}',
+          'Previous Route:  $previousRoute',
+          'Asynchronous: $async',
+          'Production: ${!Constants.devMode}',
+          'GetMaterialApp Called: $getMaterialAppCalled',
+          // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
+          ...information,
+        ],
+      );
+      Get.find<LoggerService>().log(
+        'An non-fatal error occurred: $error',
+      );
     }
   }
 }
 
-void main() async {
-  FlutterError.onError = (FlutterErrorDetails details) async {
-    await handleError(
-      details.exception,
-      details.stack,
-      fatal: true,
-    );
-  };
+Future<void> initializeServices() async {
+  // Initialize services:
+}
 
+void main() async {
+  final MainBindings mainBinding = MainBindings();
+  await mainBinding.dependencies();
   await runZonedGuarded<Future<void>>(() async {
+    // Handle framework errors:
+    FlutterError.onError = (FlutterErrorDetails details) async {
+      await handleError(
+        details.exception,
+        details.stack,
+        fatal: true,
+      );
+    };
+
+    // Bind services:
     final MainBindings mainBinding = MainBindings();
     await mainBinding.dependencies();
     WidgetsFlutterBinding.ensureInitialized();
-    runApp(const MyApp());
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-    }
 
-    // ignore: unused_local_variable
-    // await GetStorage.init('theme');
-    //await networkService.init();
+    // Initialize services:
+    await initializeServices();
+
+    // Set preferred orientations:
     await SystemChrome.setPreferredOrientations(
       <DeviceOrientation>[DeviceOrientation.portraitUp],
     );
-    isFirstRun = await IsFirstRun.isFirstRun();
-  }, (Object error, StackTrace stack) async {
-    debugPrint('Error caught by main zone');
-    debugPrint(error.toString());
-    debugPrint(stack.toString());
 
+    // Check if it's the first run:
+    isFirstRun = await IsFirstRun.isFirstRun();
+
+    // Run the app:
+    runApp(const MyApp());
+  }, (Object error, StackTrace stack) async {
+    // Handle uncaught errors:
     await handleError(error, stack, fatal: true);
   });
 }
@@ -139,7 +145,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     getMaterialAppCalled = true;
-    //Start MaterialApp
+    // Start MaterialApp
     return GetMaterialApp(
       title: 'testing',
       initialRoute: '/',
@@ -151,6 +157,6 @@ class MyApp extends StatelessWidget {
       ],
       theme: ThemeData(),
     );
-    //End MaterialApp
+    // End MaterialApp
   }
 }

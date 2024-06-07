@@ -7,19 +7,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'controller/error_controller.dart';
+import 'controller/error_page_controller.dart';
 
 class ErrorPage extends GetView<ErrorController> {
-  const ErrorPage({super.key});
+  const ErrorPage({required this.error, super.key});
+
+  final Object error;
 
   @override
   Widget build(BuildContext context) {
     Get.put(ErrorController());
 
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Text(
-          'This is the Error Page. You can customize it in error_page.dart.',
+          'This is the Error Page. You can customize it in error_page.dart.\n$error',
         ),
       ),
       backgroundColor: Colors.white,
