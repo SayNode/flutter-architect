@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 
 import 'subcommands/all.dart';
 import 'subcommands/api/api.dart';
+import 'subcommands/connectivity/connectivity.dart';
 import 'subcommands/crashalytics/crashalytics.dart';
 import 'subcommands/localization/localization.dart';
 import 'subcommands/native_splash/splash.dart';
@@ -25,6 +26,7 @@ class Generator extends Command<dynamic> {
     addSubcommand(GenerateWalletService());
     addSubcommand(GenerateCrashalyticsService());
     addSubcommand(GenerateSplashService());
+    addSubcommand(GenerateConnectivityService());
     addSubcommand(GenerateAPIService());
     addSubcommand(GenerateSigninService());
 
