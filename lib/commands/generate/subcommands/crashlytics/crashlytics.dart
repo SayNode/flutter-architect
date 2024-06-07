@@ -9,6 +9,7 @@ import 'code/main/imports.dart' as imports;
 import 'code/main/fatal_error.dart' as fatal_error;
 import 'code/main/non_fatal_error.dart' as non_fatal_error;
 import 'code/main/dev_error.dart' as dev_error;
+import 'code/main/initialize.dart' as initialize;
 
 class GenerateCrashlyticsService extends Command<dynamic> {
   GenerateCrashlyticsService() {
@@ -148,6 +149,16 @@ class GenerateCrashlyticsService extends Command<dynamic> {
         ],
       },
     );
+
+    await addLinesBeforeLineInFile(
+      mainPath,
+      <String, List<String>>{
+        '// Run the app:': <String>[
+          initialize.content(),
+          '',
+        ],
+      },
+    );
   }
 
   Future<void> _removeMainChanges() async {
@@ -156,6 +167,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
     await removeTextFromFile(mainPath, non_fatal_error.content());
     await removeTextFromFile(mainPath, fatal_error.content());
     await removeTextFromFile(mainPath, dev_error.content());
+    await removeTextFromFile(mainPath, initialize.content());
   }
 
   Future<void> _addFirebaseConfigurationScript() async {
