@@ -106,7 +106,6 @@ class GenerateSplashService extends Command<dynamic> {
   Future<void> _removeMainChanges() async {
     final String mainPath = path.join('lib', 'main.dart');
     await removeLinesFromFile(mainPath, <String>[
-      'await Future.delayed(const Duration(seconds: 2));',
       'FlutterNativeSplash.remove();',
       'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
       "import 'package:flutter_native_splash/flutter_native_splash.dart';",
@@ -120,7 +119,6 @@ class GenerateSplashService extends Command<dynamic> {
       mainPath,
       <String, List<String>>{
         'runApp(const MyApp());': <String>[
-          'await Future.delayed(const Duration(seconds: 2));',
           'FlutterNativeSplash.remove();',
         ],
       },

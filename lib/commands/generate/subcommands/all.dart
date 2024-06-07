@@ -3,7 +3,7 @@ import 'package:args/command_runner.dart';
 import '../../../util/util.dart';
 import 'api/api.dart';
 import 'connectivity/connectivity.dart';
-import 'crashalytics/crashalytics.dart';
+import 'crashlytics/crashlytics.dart';
 import 'localization/localization.dart';
 import 'native_splash/splash.dart';
 import 'signin/signin.dart';
@@ -44,8 +44,8 @@ class AllGeneratorService extends Command<dynamic> {
     await localizationService.run();
     final GenerateWalletService walletService = GenerateWalletService();
     await walletService.run();
-    final GenerateCrashalyticsService crashlyticsService =
-        GenerateCrashalyticsService();
+    final GenerateCrashlyticsService crashlyticsService =
+        GenerateCrashlyticsService();
     await crashlyticsService.run();
     final GenerateSplashService splashService = GenerateSplashService();
     await splashService.run();
