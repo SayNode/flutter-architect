@@ -18,7 +18,6 @@ class ErrorPage extends GetView<ErrorController> {
           'This is the Error Page. You can customize it in error_page.dart.\n$error',
         ),
       ),
-      backgroundColor: Colors.white,
     );
   }
 }""";

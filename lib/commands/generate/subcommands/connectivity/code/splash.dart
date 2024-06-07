@@ -4,18 +4,19 @@ String content() => '''
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) =>
           snapshot.connectionState == ConnectionState.waiting &&
                   snapshot.connectionState == ConnectionState.none &&
-                  snapshot.data == null &&
-                  !snapshot.data!
+                  snapshot.data == null
+                  
               ? const Scaffold(
                   body: Center(
                     child: CircularProgressIndicator(),
                   ),
                 )
-              : CustomScaffold(
+              : snapshot.data! ? CustomScaffold( // Replace this with your first screen
                   body: Container(),
-                ),
+                ) : LostConnectionPage(),
     );''';
 
 String import() => '''
 import 'package:get/get.dart';
-import '../service/connectivity_service.dart';''';
+import '../service/connectivity_service.dart';
+import 'lost_connection/lost_connection_page.dart';''';

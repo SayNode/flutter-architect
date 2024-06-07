@@ -4,9 +4,9 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import '../storage/storage.dart';
 import 'code/splash.dart' as splash;
 import 'code/connectivity_service.dart' as connectivity_service;
+import 'code/lost_connection.dart' as lost_connection;
 
 class GenerateConnectivityService extends Command<dynamic> {
   GenerateConnectivityService() {
@@ -46,14 +46,18 @@ class GenerateConnectivityService extends Command<dynamic> {
         await addAlreadyRun('connectivity');
         addDependenciesToPubspecSync(<String>['connectivity_plus'], null);
         await _createConnectivityService();
+        await _createLostConnectionPage();
         await _addSplashChanges();
+        await _injectServices();
       },
       remove: () async {
         stderr.writeln('Removing Connectivity Service...');
         await removeAlreadyRun('connectivity');
         removeDependenciesFromPubspecSync(<String>['connectivity_plus'], null);
         await _removeSplashChanges();
+        await _removeLostConnectionPage();
         await _removeConnectivityService();
+        await _uninjectServices();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -116,6 +120,23 @@ class GenerateConnectivityService extends Command<dynamic> {
     await File(
       path.join('lib', 'service', 'connectivity_service.dart'),
     ).delete();
+  }
+
+  Future<void> _createLostConnectionPage() async {
+    Directory(path.join('lib', 'page', 'lost_connection')).createSync();
+    await File(
+      path.join(
+        'lib',
+        'page',
+        'lost_connection',
+        'lost_connection_page.dart',
+      ),
+    ).writeAsString(lost_connection.content());
+  }
+
+  Future<void> _removeLostConnectionPage() async {
+    Directory(path.join('lib', 'page', 'lost_connection'))
+        .deleteSync(recursive: true);
   }
 
   Future<void> _injectServices() async {
