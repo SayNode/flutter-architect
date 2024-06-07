@@ -4,16 +4,17 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/secure_storage_service.dart' as secure_storage;
-import 'code/storage_service.dart' as shared_storage;
+import 'code/storage_exception.dart' as storage_exception;
+import 'code/storage_service_interface.dart' as storage_service_interface;
+import 'code/secure_storage_service.dart' as secure_storage_service;
+import 'code/shared_storage_service.dart' as shared_storage_service;
+import 'code/storage_service.dart' as storage_service;
 
 class GenerateStorageService extends Command<dynamic> {
   //-- Singleton
   GenerateStorageService() {
     // Add parser options or flag here
     argParser
-      ..addFlag('secure', help: 'Create secure storage service.')
-      ..addFlag('shared', help: 'Create shared storage service.')
       ..addFlag(
         'force',
         help: 'Force replace in case it already exists.',
@@ -26,7 +27,7 @@ class GenerateStorageService extends Command<dynamic> {
 
   @override
   String get description =>
-      'Create storage services for the project. --secure flag will create secure storage service. --shared flag will create shared storage service;';
+      'Create storage services for the project. Adds a StorageService with the option to use Secure or Shared device storage.;';
 
   @override
   String get name => 'storage';
@@ -37,23 +38,7 @@ class GenerateStorageService extends Command<dynamic> {
   }
 
   Future<void> _run() async {
-    if (argResults?['secure'] || argResults?['shared']) {
-      if (argResults?['secure'] == true) {
-        await runSecure();
-      }
-      if (argResults?['shared'] == true) {
-        await runShared();
-      }
-    } else {
-      stderr.writeln(
-        'Please specify which storage service you want to create. Use --help for more info.',
-      );
-    }
-  }
-
-  Future<void> runSecure() async {
-    final bool alreadyBuilt =
-        await checkIfAlreadyRunWithReturn('secure_storage');
+    final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('storage');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
     await componentBuilder(
@@ -61,61 +46,34 @@ class GenerateStorageService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Secure Storage service...');
-        await addAlreadyRun('secure_storage');
+        stderr.writeln('Creating Storage service...');
+        await addAlreadyRun('storage');
         addDependenciesToPubspecSync(<String>['flutter_secure_storage'], null);
-        await _addSecureStorageService();
+        addDependenciesToPubspecSync(<String>['shared_preferences'], null);
+        await _addStorageService();
+        await _injectServices();
+        await _addMainChanges();
       },
       remove: () async {
-        stderr.writeln('Removing Secure Storage service...');
-        await removeAlreadyRun('secure_storage');
+        stderr.writeln('Removing Storage service...');
+        await removeAlreadyRun('storage');
         removeDependenciesFromPubspecSync(
           <String>['flutter_secure_storage'],
           null,
         );
-        await _removeSecureStorageService();
-      },
-      rejectAdd: () async {
-        stderr.writeln("Can't add Secure Storage as it's already configured.");
-      },
-      rejectRemove: () async {
-        stderr
-            .writeln("Can't remove Secure Storage as it's not yet configured.");
-      },
-    );
-    formatCode();
-    dartFixCode();
-  }
-
-  Future<void> runShared() async {
-    final bool alreadyBuilt =
-        await checkIfAlreadyRunWithReturn('shared_storage');
-    final bool force = argResults?['force'] ?? false;
-    final bool remove = argResults?['remove'] ?? false;
-    await componentBuilder(
-      force: force,
-      alreadyBuilt: alreadyBuilt,
-      removeOnly: remove,
-      add: () async {
-        stderr.writeln('Creating Shared Storage service...');
-        addDependenciesToPubspecSync(<String>['shared_preferences'], null);
-        await addAlreadyRun('shared_storage');
-        await _addSharedStorageService();
-        await _addMainChanges();
-      },
-      remove: () async {
-        stderr.writeln('Removing Shared Storage service...');
-        removeDependenciesFromPubspecSync(<String>['shared_preferences'], null);
-        await removeAlreadyRun('shared_storage');
-        await _removeSharedStorageService();
+        removeDependenciesFromPubspecSync(
+          <String>['shared_preferences'],
+          null,
+        );
+        await _removeStorageService();
         await _removeMainChanges();
+        await _uninjectServices();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Shared Storage as it's already configured.");
+        stderr.writeln("Can't add Storage as it's already configured.");
       },
       rejectRemove: () async {
-        stderr
-            .writeln("Can't remove Shared Storage as it's not yet configured.");
+        stderr.writeln("Can't remove Storage as it's not yet configured.");
       },
     );
     formatCode();
@@ -126,7 +84,7 @@ class GenerateStorageService extends Command<dynamic> {
   Future<void> _removeMainChanges() async {
     final String mainPath = path.join('lib', 'main.dart');
     await removeLinesFromFile(mainPath, <String>[
-      "import 'service/storage_service.dart';",
+      "import 'service/storage/storage_service.dart';",
       'final StorageService storage = Get.put<StorageService>(StorageService());',
       'await storage.init();',
     ]);
@@ -141,32 +99,101 @@ class GenerateStorageService extends Command<dynamic> {
           'await Get.find<StorageService>().init();',
         ],
         '// https://saynode.ch': <String>[
-          "import 'service/storage_service.dart';",
+          "import 'service/storage/storage_service.dart';",
         ],
       },
     );
   }
 
-  Future<void> _removeSharedStorageService() async {
-    await File(path.join('lib', 'service', 'storage_service.dart')).delete();
-  }
-
-  Future<void> _removeSecureStorageService() async {
-    await File(path.join('lib', 'service', 'secure_storage_service.dart'))
+  Future<void> _removeStorageService() async {
+    await File(path.join('lib', 'service', 'storage', 'storage_exception.dart'))
         .delete();
+    await File(
+      path.join(
+        'lib',
+        'service',
+        'storage',
+        'storage_service_interface.dart',
+      ),
+    ).delete();
+    await File(
+      path.join(
+        'lib',
+        'service',
+        'storage',
+        'shared_storage_service.dart',
+      ),
+    ).delete();
+    await File(
+      path.join(
+        'lib',
+        'service',
+        'storage',
+        'secure_storage_service.dart',
+      ),
+    ).delete();
+    await File(path.join('lib', 'service', 'storage', 'storage_service.dart'))
+        .delete();
+    await Directory(path.join('lib', 'service', 'storage')).delete();
   }
 
-  Future<void> _addSharedStorageService() async {
+  Future<void> _addStorageService() async {
+    await Directory(path.join('lib', 'service', 'storage')).create();
     await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage_service.dart'),
-      shared_storage.content(),
+      path.join('lib', 'service', 'storage', 'storage_exception.dart'),
+      storage_exception.content(),
+    );
+
+    await writeFileWithPrefix(
+      path.join('lib', 'service', 'storage', 'storage_service_interface.dart'),
+      storage_service_interface.content(),
+    );
+
+    await writeFileWithPrefix(
+      path.join('lib', 'service', 'storage', 'shared_storage_service.dart'),
+      shared_storage_service.content(),
+    );
+
+    await writeFileWithPrefix(
+      path.join('lib', 'service', 'storage', 'secure_storage_service.dart'),
+      secure_storage_service.content(),
+    );
+
+    await writeFileWithPrefix(
+      path.join('lib', 'service', 'storage', 'storage_service.dart'),
+      storage_service.content(),
     );
   }
 
-  Future<void> _addSecureStorageService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'secure_storage_service.dart'),
-      secure_storage.content(),
+  Future<void> _injectServices() async {
+    await addLinesAfterLineInFile(
+      path.join('lib', 'service', 'service.dart'),
+      <String, List<String>>{
+        '//Services injection': <String>[
+          'Get.lazyPut(StorageService.new);',
+          'Get.lazyPut(SharedStorageService.new);',
+          'Get.lazyPut(SecureStorageService.new);',
+        ],
+        "import 'package:get/get.dart';": <String>[
+          "import 'storage/secure_storage_service.dart';",
+          "import 'storage/shared_storage_service.dart';",
+          "import 'storage/storage_service.dart';",
+        ],
+      },
+    );
+  }
+
+  Future<void> _uninjectServices() async {
+    await removeLinesFromFile(
+      path.join('lib', 'service', 'service.dart'),
+      <String>[
+        'Get.lazyPut(StorageService.new);',
+        'Get.lazyPut(SharedStorageService.new);',
+        'Get.lazyPut(SecureStorageService.new);',
+        "import 'storage/secure_storage_service.dart';",
+        "import 'storage/shared_storage_service.dart';",
+        "import 'storage/storage_service.dart';",
+      ],
     );
   }
 }

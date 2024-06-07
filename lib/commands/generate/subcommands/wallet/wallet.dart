@@ -25,7 +25,7 @@ class GenerateWalletService extends Command<dynamic> {
 
   @override
   String get description =>
-      'Create storage services for the project. --secure flag will create secure storage service. --shared flag will create shared storage service;';
+      'Create wallet service for the project. --secure flag will create wallet service. --shared flag will create wallet service;';
 
   @override
   String get name => 'wallet';
@@ -36,16 +36,15 @@ class GenerateWalletService extends Command<dynamic> {
   }
 
   Future<void> _run() async {
-    final bool storageIsSetUp =
-        await checkIfAlreadyRunWithReturn('shared_storage');
+    final bool storageIsSetUp = await checkIfAlreadyRunWithReturn('storage');
 
     // Check for required storage
     if (!storageIsSetUp) {
       stderr.writeln(
-        "Configuring Shared Storage, as it's requried for Wallet Service...",
+        "Configuring Storage, as it's requried for Wallet Service...",
       );
       final GenerateStorageService storageService = GenerateStorageService();
-      await storageService.runShared();
+      await storageService.run();
     }
 
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('wallet');
