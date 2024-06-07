@@ -53,7 +53,7 @@ class GenerateThemeService extends Command<dynamic> {
   Future<void> _run() async {
     // Check if Shared Storage has already been set up. Theme requires Shared Storage.
     // If not, run GenerateStorageService.runShared().
-    final bool value = await checkIfAlreadyRunWithReturn('shared_storage');
+    final bool value = await checkIfAlreadyRunWithReturn('storage');
     if (!value) {
       final GenerateStorageService storageService = GenerateStorageService();
       await storageService.run();
