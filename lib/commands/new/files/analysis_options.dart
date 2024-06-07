@@ -43,7 +43,6 @@ linter:
     - avoid_js_rounded_ints
     - avoid_multiple_declarations_per_line
     - avoid_null_checks_in_equality_operators
-    - avoid_positional_boolean_parameters
     - avoid_print
     - avoid_private_typedef_functions
     - avoid_redundant_argument_values
@@ -159,7 +158,6 @@ linter:
     - tighten_type_of_initializing_formals
     - type_annotate_public_apis
     - type_init_formals
-    - unawaited_futures
     - unnecessary_await_in_return
     - unnecessary_breaks
     - unnecessary_brace_in_string_interps

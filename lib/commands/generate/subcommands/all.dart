@@ -32,8 +32,7 @@ class AllGeneratorService extends Command<dynamic> {
 
   Future<void> _run() async {
     final GenerateStorageService storageService = GenerateStorageService();
-    await storageService.runShared();
-    await storageService.runSecure();
+    await storageService.run();
     final GenerateThemeService themeService = GenerateThemeService();
     await themeService.run();
     final GenerateTypographyService typographyService =
