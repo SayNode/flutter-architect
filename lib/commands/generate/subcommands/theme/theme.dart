@@ -149,7 +149,6 @@ class GenerateThemeService extends Command<dynamic> {
     await removeLinesFromFile(
       mainPath,
       <String>[
-        'Get.put<ThemeService>(ThemeService());',
         "import 'service/theme_service.dart';",
       ],
     );
@@ -340,9 +339,6 @@ class GenerateThemeService extends Command<dynamic> {
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
-        'await storage.init();': <String>[
-          'Get.put<ThemeService>(ThemeService());',
-        ],
         '// https://saynode.ch': <String>[
           "import 'service/theme_service.dart';",
         ],

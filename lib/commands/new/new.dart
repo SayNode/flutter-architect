@@ -14,6 +14,9 @@ import 'files/dependency_injection.dart';
 import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
+import 'files/util.dart' as util;
+import 'files/error_page.dart' as error_page;
+import 'files/error_page_controller.dart' as error_page_controller;
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -73,10 +76,12 @@ class Creator extends Command<dynamic> {
       stderr.writeln(result.stdout);
     });
     Directory.current = '${Directory.current.path}/$projectName';
-    await addDependenciesToPubspec(<String>['get'], null);
+    await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
     createCommonFolderStructure();
     _createSplashPage();
     _rewriteMain();
+    _createUtil();
+    _createErrorPage();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
     await addCodemagicYaml();
@@ -387,6 +392,38 @@ class Creator extends Command<dynamic> {
       main_file.content(projectName),
     ).then((File file) {
       stderr.writeln('-- /lib/main.dart ✔');
+    });
+  }
+
+  // Create the util.dart file
+  void _createUtil() {
+    writeFileWithPrefix(
+      path.join('lib', 'util', 'util.dart'),
+      util.content(),
+    );
+  }
+
+  // Create the error_page.dart file
+  void _createErrorPage() {
+    Directory(path.join('lib', 'page', 'error')).createSync();
+    Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
+    writeFileWithPrefix(
+      path.join('lib', 'page', 'error', 'error_page.dart'),
+      error_page.content(),
+    ).then((File file) {
+      stderr.writeln('-- /lib/page/error/error_page.dart ✔');
+    });
+    writeFileWithPrefix(
+      path.join(
+        'lib',
+        'page',
+        'error',
+        'controller',
+        'error_page_controller.dart',
+      ),
+      error_page_controller.content(),
+    ).then((File file) {
+      stderr.writeln('-- /lib/page/error/error_page_controller.dart ✔');
     });
   }
 }

@@ -95,9 +95,8 @@ class GenerateStorageService extends Command<dynamic> {
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
-        'WidgetsFlutterBinding.ensureInitialized();': <String>[
-          'final StorageService storage = Get.put<StorageService>(StorageService());',
-          'await storage.init();',
+        '// Initialize services:': <String>[
+          'await Get.find<StorageService>().init();',
         ],
         '// https://saynode.ch': <String>[
           "import 'service/storage/storage_service.dart';",

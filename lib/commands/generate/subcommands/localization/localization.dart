@@ -120,7 +120,7 @@ class GenerateLocalizationService extends Command<dynamic> {
 
     await removeLinesAfterFromFile(
       mainPath,
-      '//End MaterialApp',
+      '// End MaterialApp',
       2,
     );
   }
@@ -169,7 +169,7 @@ class GenerateLocalizationService extends Command<dynamic> {
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
-        '//End MaterialApp': <String>[
+        '// End MaterialApp': <String>[
           '},);',
         ],
         'return GetMaterialApp(': <String>[
@@ -187,7 +187,7 @@ class GenerateLocalizationService extends Command<dynamic> {
     await addLinesBeforeLineInFile(
       mainPath,
       <String, List<String>>{
-        '//Start MaterialApp': <String>[
+        '// Start MaterialApp': <String>[
           'return GetBuilder<LocalizationController>(',
           'builder: (LocalizationController localizationController) {',
         ],

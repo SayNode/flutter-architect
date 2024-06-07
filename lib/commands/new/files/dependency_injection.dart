@@ -110,8 +110,8 @@ class MainBindings extends Bindings {
       mainPath,
       <String, List<String>>{
         'void main() async {': <String>[
-          'final MainBindings mainBinding = MainBindings();',
-          'await mainBinding.dependencies();',
+          ' final MainBindings mainBinding = MainBindings();',
+          ' await mainBinding.dependencies();',
         ],
         '// https://saynode.ch': <String>[
           "import 'service/main_bindings.dart';",
