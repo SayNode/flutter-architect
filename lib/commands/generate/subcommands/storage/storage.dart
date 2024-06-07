@@ -51,6 +51,7 @@ class GenerateStorageService extends Command<dynamic> {
         addDependenciesToPubspecSync(<String>['flutter_secure_storage'], null);
         addDependenciesToPubspecSync(<String>['shared_preferences'], null);
         await _addStorageService();
+        await _injectServices();
         await _addMainChanges();
       },
       remove: () async {
@@ -66,6 +67,7 @@ class GenerateStorageService extends Command<dynamic> {
         );
         await _removeStorageService();
         await _removeMainChanges();
+        await _uninjectServices();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add Storage as it's already configured.");
@@ -179,6 +181,20 @@ class GenerateStorageService extends Command<dynamic> {
           "import 'storage/storage_service.dart';",
         ],
       },
+    );
+  }
+
+  Future<void> _uninjectServices() async {
+    await removeLinesFromFile(
+      path.join('lib', 'service', 'service.dart'),
+      <String>[
+        'Get.lazyPut(StorageService.new);',
+        'Get.lazyPut(SharedStorageService.new);',
+        'Get.lazyPut(SecureStorageService.new);',
+        "import 'storage/secure_storage_service.dart';",
+        "import 'storage/shared_storage_service.dart';",
+        "import 'storage/storage_service.dart';",
+      ],
     );
   }
 }
