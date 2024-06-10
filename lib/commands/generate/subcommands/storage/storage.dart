@@ -170,9 +170,9 @@ class GenerateStorageService extends Command<dynamic> {
       path.join('lib', 'service', 'main_bindings.dart'),
       <String, List<String>>{
         '//Services injection': <String>[
-          'Get.lazyPut(StorageService.new);',
           'Get.lazyPut(SharedStorageService.new);',
           'Get.lazyPut(SecureStorageService.new);',
+          'Get.lazyPut(StorageService.new);',
         ],
         "import 'package:get/get.dart';": <String>[
           "import 'storage/secure_storage_service.dart';",
