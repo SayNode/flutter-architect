@@ -11,12 +11,12 @@ import 'files/codemagic_yaml.dart' as codemagic_yaml;
 import 'files/constant_manipulator.dart';
 import 'files/custom_scaffold_manipulator.dart';
 import 'files/dependency_injection.dart';
+import 'files/error_page.dart' as error_page;
+import 'files/error_page_controller.dart' as error_page_controller;
 import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
 import 'files/splash_page.dart' as splash_page;
 import 'files/util.dart' as util;
-import 'files/error_page.dart' as error_page;
-import 'files/error_page_controller.dart' as error_page_controller;
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -116,6 +116,9 @@ class Creator extends Command<dynamic> {
     if (argResults?['ios'] == true || argResults?['android'] == true) {
       await updateGradleFile();
     }
+
+    dartFixCode();
+    formatCode();
   }
 
   void deleteUnusedFolders() {
