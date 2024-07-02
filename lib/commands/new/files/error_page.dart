@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'controller/error_page_controller.dart';
 
-class ErrorPage extends GetView<ErrorController> {
+class ErrorPage extends StatelessWidget {
   const ErrorPage({required this.error, super.key});
 
   final Object error;
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ErrorController());
 
     return Scaffold(
       body: Center(

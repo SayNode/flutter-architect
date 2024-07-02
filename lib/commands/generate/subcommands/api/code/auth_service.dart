@@ -28,10 +28,6 @@ class AuthResponse {
 
 class AuthService extends GetxService {
   String authenticationToken = '';
-  StorageService storageService = Get.put(StorageService());
-  UserStateService userStateService = Get.put(UserStateService());
-  APIService apiService = Get.put(APIService());
-  
   String verificationToken = '';
   String verificationUid = '';
 

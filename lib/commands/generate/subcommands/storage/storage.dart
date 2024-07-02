@@ -4,11 +4,11 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/storage_exception.dart' as storage_exception;
-import 'code/storage_service_interface.dart' as storage_service_interface;
 import 'code/secure_storage_service.dart' as secure_storage_service;
 import 'code/shared_storage_service.dart' as shared_storage_service;
+import 'code/storage_exception.dart' as storage_exception;
 import 'code/storage_service.dart' as storage_service;
+import 'code/storage_service_interface.dart' as storage_service_interface;
 
 class GenerateStorageService extends Command<dynamic> {
   //-- Singleton
@@ -85,7 +85,6 @@ class GenerateStorageService extends Command<dynamic> {
     final String mainPath = path.join('lib', 'main.dart');
     await removeLinesFromFile(mainPath, <String>[
       "import 'service/storage/storage_service.dart';",
-      'final StorageService storage = Get.put<StorageService>(StorageService());',
       'await storage.init();',
     ]);
   }

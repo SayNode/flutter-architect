@@ -8,7 +8,6 @@ class ${pascal}Page extends GetView<${pascal}Controller> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(${pascal}Controller());
     return Container();
   }
 }""";

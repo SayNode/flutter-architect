@@ -1,6 +1,6 @@
 String content() => '''
     return StreamBuilder<bool>(
-      stream: Get.put(ConnectivityService()).onConnectivityChanged,
+      stream: Get.find<ConnectivityService>().onConnectivityChanged,
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) =>
           snapshot.connectionState == ConnectionState.waiting &&
                   snapshot.connectionState == ConnectionState.none &&

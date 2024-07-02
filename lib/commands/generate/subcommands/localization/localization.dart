@@ -113,7 +113,6 @@ class GenerateLocalizationService extends Command<dynamic> {
         'translations:',
         'Messages(languages: localizationController.translations),',
         'final LocalizationController localizationController =',
-        'Get.put(LocalizationController());',
         'await localizationController.init();',
       ],
     );
@@ -192,7 +191,7 @@ class GenerateLocalizationService extends Command<dynamic> {
           'builder: (LocalizationController localizationController) {',
         ],
         'runApp(const MyApp());': <String>[
-          'final LocalizationController localizationController = Get.put(LocalizationController());',
+          'final LocalizationController localizationController = Get.find<LocalizationController>();',
           'await localizationController.init();',
         ],
       },

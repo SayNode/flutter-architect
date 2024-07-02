@@ -154,7 +154,7 @@ class GenerateThemeService extends Command<dynamic> {
     );
     await replaceLineInFile(
       mainPath,
-      'theme: Get.put<ThemeService>(ThemeService()).themeData,',
+      'theme: Get.find<ThemeService>().themeData,',
       'theme: ThemeData(),',
     );
   }
@@ -333,7 +333,7 @@ class GenerateThemeService extends Command<dynamic> {
     await replaceLineInFile(
       mainPath,
       'theme: ThemeData(),',
-      'theme: Get.put<ThemeService>(ThemeService()).themeData,',
+      'theme: Get.find<ThemeService>().themeData,',
     );
 
     await addLinesAfterLineInFile(
