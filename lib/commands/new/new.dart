@@ -6,16 +6,16 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../util/util.dart';
+import 'file_manipulators/constant_manipulator.dart';
+import 'file_manipulators/custom_scaffold_manipulator.dart';
+import 'file_manipulators/dependency_injection.dart';
 import 'file_manipulators/error_page.dart';
+import 'file_manipulators/logger_service_manipulator.dart';
 import 'file_manipulators/main_file_manipulator.dart';
 import 'file_manipulators/main_interface_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
-import 'files/constant_manipulator.dart';
-import 'files/custom_scaffold_manipulator.dart';
-import 'files/dependency_injection.dart';
-import 'files/logger_service_manipulator.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {

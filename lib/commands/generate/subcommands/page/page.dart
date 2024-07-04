@@ -4,7 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import '../../../new/files/dependency_injection.dart';
+import '../../../new/file_manipulators/dependency_injection.dart';
 import 'code/controller.dart' as controller;
 import 'code/page.dart' as page;
 

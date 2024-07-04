@@ -1,4 +1,4 @@
-import '../commands/new/files/dependency_injection.dart';
+import '../commands/new/file_manipulators/dependency_injection.dart';
 import 'file_manipulator.dart';
 
 ///Interface for Service Manipulators
