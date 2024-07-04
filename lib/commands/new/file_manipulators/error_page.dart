@@ -11,7 +11,6 @@ class ErrorPageManipulator extends FileManipulator {
   String content() => r"""
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'controller/error_page_controller.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({required this.error, super.key});
