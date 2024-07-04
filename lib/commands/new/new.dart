@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../util/util.dart';
+import 'file_manipulators/error_page.dart';
 import 'file_manipulators/main_file_manipulator.dart';
 import 'file_manipulators/main_interface_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
@@ -14,8 +15,6 @@ import 'files/codemagic_yaml.dart' as codemagic_yaml;
 import 'files/constant_manipulator.dart';
 import 'files/custom_scaffold_manipulator.dart';
 import 'files/dependency_injection.dart';
-import 'files/error_page.dart' as error_page;
-import 'files/error_page_controller.dart' as error_page_controller;
 import 'files/logger_service_manipulator.dart';
 
 class Creator extends Command<dynamic> {
@@ -79,28 +78,19 @@ class Creator extends Command<dynamic> {
     await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
     createCommonFolderStructure();
 
-    //Create dart files
+    //Create regular dart files
     await MainFileManipulator().create();
     await MainInterfaceFileManipulator().create();
     await UtilFileManipulator().create();
+    await ErrorPageManipulator().create();
+    await CustomScaffoldManipulator().create();
+    await ConstantManipulator().create();
 
-    _createErrorPage();
-    addAssetsToPubspec();
-    await rewriteAnalysisOptions();
-    await addCodemagicYaml();
-
-    await File(path.join('added_boilerplate.txt')).writeAsString('');
-    await addWorkflow();
-    deleteUnusedFolders();
-
+    //Create services
     //Add Dependency Injection
     final DependencyInjection dependencyInjection =
         DependencyInjection(projectName: projectName);
     await dependencyInjection.create();
-
-    //Add constants
-    final ConstantManipulator constantManipulator = ConstantManipulator();
-    await constantManipulator.create();
 
     //Add Logger Service
     final LoggerServiceManipulator loggerServiceManipulator =
@@ -112,10 +102,14 @@ class Creator extends Command<dynamic> {
       servicePath: loggerServiceManipulator.path,
     );
 
-    //Add Logger Service
-    final CustomScaffoldManipulator customScaffoldManipulator =
-        CustomScaffoldManipulator();
-    await customScaffoldManipulator.create();
+    addAssetsToPubspec();
+    await rewriteAnalysisOptions();
+    await addCodemagicYaml();
+
+    await File(path.join('added_boilerplate.txt')).writeAsString('');
+    await addWorkflow();
+    deleteUnusedFolders();
+
     if (argResults?['ios'] == true || argResults?['android'] == true) {
       await updateGradleFile();
     }
@@ -377,29 +371,5 @@ class Creator extends Command<dynamic> {
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
     stderr.writeln('- $directory/widget ✔');
-  }
-
-  // Create the error_page.dart file
-  void _createErrorPage() {
-    Directory(path.join('lib', 'page', 'error')).createSync();
-    Directory(path.join('lib', 'page', 'error', 'controller')).createSync();
-    writeFileWithPrefix(
-      path.join('lib', 'page', 'error', 'error_page.dart'),
-      error_page.content(),
-    ).then((File file) {
-      stderr.writeln('-- /lib/page/error/error_page.dart ✔');
-    });
-    writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        'error',
-        'controller',
-        'error_page_controller.dart',
-      ),
-      error_page_controller.content(),
-    ).then((File file) {
-      stderr.writeln('-- /lib/page/error/error_page_controller.dart ✔');
-    });
   }
 }

@@ -1,4 +1,14 @@
-String content() => r"""
+import '../../../interfaces/file_manipulator.dart';
+
+class ErrorPageManipulator extends FileManipulator {
+  @override
+  String get name => 'ErrorPage';
+
+  @override
+  String get path => 'lib/page/error/error_page.dart';
+
+  @override
+  String content() => r"""
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'controller/error_page_controller.dart';
@@ -20,3 +30,4 @@ class ErrorPage extends StatelessWidget {
     );
   }
 }""";
+}
