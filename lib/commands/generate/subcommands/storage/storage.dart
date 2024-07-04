@@ -82,7 +82,8 @@ class GenerateStorageService extends Command<dynamic> {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await removeLinesFromFile(mainPath, <String>[
       "import 'service/storage/storage_service.dart';",
       'await storage.init();',
@@ -90,7 +91,8 @@ class GenerateStorageService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
