@@ -15,7 +15,6 @@ import 'files/error_page.dart' as error_page;
 import 'files/error_page_controller.dart' as error_page_controller;
 import 'files/logger_service_manipulator.dart';
 import 'files/main.dart' as main_file;
-import 'files/splash_page.dart' as splash_page;
 import 'files/util.dart' as util;
 
 class Creator extends Command<dynamic> {
@@ -78,7 +77,6 @@ class Creator extends Command<dynamic> {
     Directory.current = '${Directory.current.path}/$projectName';
     await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
     createCommonFolderStructure();
-    _createSplashPage();
     _rewriteMain();
     _createUtil();
     _createErrorPage();
@@ -370,19 +368,6 @@ class Creator extends Command<dynamic> {
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
     stderr.writeln('- $directory/widget ✔');
-  }
-
-  void _createSplashPage() {
-    writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        'splash_page.dart',
-      ),
-      splash_page.content(),
-    ).then((File file) {
-      stderr.writeln('-- /lib/page/splash_page.dart ✔');
-    });
   }
 
   /// Create the main.dart file

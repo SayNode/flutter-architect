@@ -4,9 +4,8 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/splash.dart' as splash;
-import 'code/connectivity_service.dart' as connectivity_service;
 import 'code/lost_connection.dart' as lost_connection;
+import 'connectivity_service_manipulator.dart';
 
 class GenerateConnectivityService extends Command<dynamic> {
   GenerateConnectivityService() {
@@ -37,6 +36,8 @@ class GenerateConnectivityService extends Command<dynamic> {
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('connectivity');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
+    final ConnectivityServiceManipulator connectivityServiceFileManipulator =
+        ConnectivityServiceManipulator();
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
@@ -44,20 +45,15 @@ class GenerateConnectivityService extends Command<dynamic> {
       add: () async {
         stderr.writeln('Creating Connectivity Service...');
         await addAlreadyRun('connectivity');
-        addDependenciesToPubspecSync(<String>['connectivity_plus'], null);
-        await _createConnectivityService();
+        await connectivityServiceFileManipulator.create(initialize: true);
         await _createLostConnectionPage();
-        await _addSplashChanges();
-        await _injectServices();
       },
       remove: () async {
         stderr.writeln('Removing Connectivity Service...');
         await removeAlreadyRun('connectivity');
-        removeDependenciesFromPubspecSync(<String>['connectivity_plus'], null);
-        await _removeSplashChanges();
+
         await _removeLostConnectionPage();
-        await _removeConnectivityService();
-        await _uninjectServices();
+        await connectivityServiceFileManipulator.remove();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -68,58 +64,6 @@ class GenerateConnectivityService extends Command<dynamic> {
     );
     formatCode();
     dartFixCode();
-  }
-
-  Future<void> _removeSplashChanges() async {
-    await removeTextFromFile(
-      path.join('lib', 'page', 'splash_page.dart'),
-      splash.import(),
-    );
-    await removeTextFromFile(
-      path.join('lib', 'page', 'splash_page.dart'),
-      splash.content(),
-    );
-    await addLinesAfterLineInFile(
-      path.join('lib', 'page', 'splash_page.dart'),
-      <String, List<String>>{
-        'Widget build(BuildContext context) {': <String>[
-          'return CustomScaffold(body:Container());',
-        ],
-      },
-    );
-  }
-
-  Future<void> _addSplashChanges() async {
-    await removeLinesFromFile(
-      path.join('lib', 'page', 'splash_page.dart'),
-      <String>[
-        'return CustomScaffold(body:Container());',
-      ],
-    );
-    await addLinesAfterLineInFile(
-      path.join('lib', 'page', 'splash_page.dart'),
-      <String, List<String>>{
-        'Widget build(BuildContext context) {': <String>[
-          splash.content(),
-        ],
-        '// https://saynode.ch': <String>[
-          splash.import(),
-        ],
-      },
-    );
-  }
-
-  Future<void> _createConnectivityService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'connectivity_service.dart'),
-      connectivity_service.content(),
-    );
-  }
-
-  Future<void> _removeConnectivityService() async {
-    await File(
-      path.join('lib', 'service', 'connectivity_service.dart'),
-    ).delete();
   }
 
   Future<void> _createLostConnectionPage() async {
@@ -137,29 +81,5 @@ class GenerateConnectivityService extends Command<dynamic> {
   Future<void> _removeLostConnectionPage() async {
     Directory(path.join('lib', 'page', 'lost_connection'))
         .deleteSync(recursive: true);
-  }
-
-  Future<void> _injectServices() async {
-    await addLinesAfterLineInFile(
-      path.join('lib', 'service', 'main_bindings.dart'),
-      <String, List<String>>{
-        '//Services injection': <String>[
-          'Get.lazyPut(ConnectivityService.new);',
-        ],
-        "import 'package:get/get.dart';": <String>[
-          "import 'connectivity_service.dart';",
-        ],
-      },
-    );
-  }
-
-  Future<void> _uninjectServices() async {
-    await removeLinesFromFile(
-      path.join('lib', 'service', 'main_bindings.dart'),
-      <String>[
-        'Get.lazyPut(ConnectivityService.new);',
-        "import 'connectivity_service.dart';",
-      ],
-    );
   }
 }

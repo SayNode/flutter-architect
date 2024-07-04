@@ -102,7 +102,7 @@ class MyApp extends StatelessWidget {
       getPages: <GetPage<void>>[
         GetPage<void>(
           name: '/',
-          page: () => const SplashPage(),
+          page: Container.new,
         ),
       ],
       theme: ThemeData(),

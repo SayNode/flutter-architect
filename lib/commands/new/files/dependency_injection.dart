@@ -28,6 +28,7 @@ class DependencyInjection extends FileManipulator {
   @override
   String content() {
     return """
+// ignore_for_file: cascade_invocations
 import 'package:get/get.dart';
 import 'package:$projectName/util/constants.dart';
 
@@ -70,7 +71,7 @@ class MainBindings extends Bindings {
         serviceFileName =
             serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
         newLines.add(
-          "\nimport 'package:$projectName/service/$serviceFileName.dart';",
+          "\nimport '$serviceFileName.dart';",
         );
       }
       if (line.contains('    //Services injection') && initialize) {
@@ -117,6 +118,16 @@ class MainBindings extends Bindings {
           "import 'service/main_bindings.dart';",
         ],
       },
+    );
+  }
+
+  Future<void> removeService(String serviceName) async {
+    await removeLinesFromFile(
+      path,
+      <String>[
+        'Get.lazyPut(ConnectivityService.new);',
+        "import 'connectivity_service.dart';",
+      ],
     );
   }
 }
