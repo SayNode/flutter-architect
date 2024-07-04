@@ -6,6 +6,9 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../util/util.dart';
+import 'file_manipulators/main_file_manipulator.dart';
+import 'file_manipulators/main_interface_file_manipulator.dart';
+import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
 import 'files/constant_manipulator.dart';
@@ -14,8 +17,6 @@ import 'files/dependency_injection.dart';
 import 'files/error_page.dart' as error_page;
 import 'files/error_page_controller.dart' as error_page_controller;
 import 'files/logger_service_manipulator.dart';
-import 'files/main.dart' as main_file;
-import 'files/util.dart' as util;
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -77,8 +78,12 @@ class Creator extends Command<dynamic> {
     Directory.current = '${Directory.current.path}/$projectName';
     await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
     createCommonFolderStructure();
-    _rewriteMain();
-    _createUtil();
+
+    //Create dart files
+    await MainFileManipulator().create();
+    await MainInterfaceFileManipulator().create();
+    await UtilFileManipulator().create();
+
     _createErrorPage();
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
@@ -349,6 +354,10 @@ class Creator extends Command<dynamic> {
     Directory(path.join(directory, 'page')).createSync();
     stderr.writeln('- $directory/page ✔');
 
+    // interface
+    Directory(path.join(directory, 'interface')).createSync();
+    stderr.writeln('- $directory/interface ✔');
+
     // service
     Directory(path.join(directory, 'service')).createSync();
     stderr.writeln('- $directory/service ✔');
@@ -368,27 +377,6 @@ class Creator extends Command<dynamic> {
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
     stderr.writeln('- $directory/widget ✔');
-  }
-
-  /// Create the main.dart file
-  void _rewriteMain() {
-    writeFileWithPrefix(
-      path.join(
-        'lib',
-        'main.dart',
-      ),
-      main_file.content(projectName),
-    ).then((File file) {
-      stderr.writeln('-- /lib/main.dart ✔');
-    });
-  }
-
-  // Create the util.dart file
-  void _createUtil() {
-    writeFileWithPrefix(
-      path.join('lib', 'util', 'util.dart'),
-      util.content(),
-    );
   }
 
   // Create the error_page.dart file
