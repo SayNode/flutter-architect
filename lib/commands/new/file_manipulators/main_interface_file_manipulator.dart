@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:is_first_run/is_first_run.dart';
-
 import '../page/error/error_page.dart';
 import '../service/logger_service.dart';
 import '../service/main_bindings.dart';
@@ -116,6 +115,7 @@ class MyApp extends StatelessWidget {
     getMaterialAppCalled = true;
     // Start MaterialApp
     return GetMaterialApp(
+    debugShowCheckedModeBanner: Constants.devMode,
       title: 'testing',
       initialRoute: '/',
       getPages: <GetPage<void>>[
