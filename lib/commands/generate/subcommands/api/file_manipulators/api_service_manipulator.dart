@@ -5,7 +5,7 @@ class ApiServiceManipulator extends ServiceManipulator {
   String get name => 'APIService';
 
   @override
-  String get path => 'lib/services/api_service.dart';
+  String get path => 'lib/service/api_service.dart';
 
   @override
   String content() {

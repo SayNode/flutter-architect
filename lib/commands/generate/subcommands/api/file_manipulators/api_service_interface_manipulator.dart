@@ -2,15 +2,14 @@ import '../../../../../interfaces/file_manipulator.dart';
 
 class ApiServiceInterfaceManipulator extends FileManipulator {
   @override
-  // TODO: implement name
   String get name => 'ApiServiceInterface';
 
   @override
-  String get path => 'lib/services/api_service_interface.dart';
+  String get path => 'lib/interface/api_service_interface.dart';
 
   @override
   String content() {
-    return """
+    return r"""
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,7 +38,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - PATCH to queryParameters{body != null ? ' with body: \body' : ''}',
+        'API - PATCH to queryParameters{body != null ? ' with body: $body' : ''}',
       );
     }
     final http.Response response = await http.patch(
@@ -80,7 +79,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - PUT to queryParameters{body != null ? ' with body: \body' : ''}',
+        'API - PUT to queryParameters{body != null ? ' with body: $body' : ''}',
       );
     }
     final http.Response response = await http.put(
@@ -120,7 +119,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - POST to queryParameters{body != null ? ' with body: \body' : ''}',
+        'API - POST to queryParameters{body != null ? ' with body: $body' : ''}',
       );
     }
     final http.Response response = await http.post(
@@ -195,7 +194,7 @@ abstract class ApiServiceInterface extends GetxService {
 
     if (log) {
       loggerService.log(
-        'API - DELETE to queryParameters{body != null ? ' with body: \body' : ''}',
+        'API - DELETE to queryParameters{body != null ? ' with body: $body' : ''}',
       );
     }
     final http.Response response = await http.delete(

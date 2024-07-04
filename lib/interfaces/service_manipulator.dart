@@ -18,8 +18,9 @@ abstract class ServiceManipulator extends FileManipulator {
     return super.create();
   }
 
+  @override
   Future<void> remove() async {
     await dependencyInjection.removeService(name);
-    return super.deleteFile();
+    return super.remove();
   }
 }

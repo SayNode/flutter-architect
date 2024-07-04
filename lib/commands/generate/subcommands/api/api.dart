@@ -4,11 +4,10 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
+import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
 import 'code/auth_service.dart' as auth_service;
-import 'code/constants.dart' as constants;
-import 'code/user_model.dart' as user_model;
-import 'code/user_state_service.dart' as user_state_service;
+import 'file_manipulators/api_service_interface_manipulator.dart';
 import 'file_manipulators/api_service_manipulator.dart';
 
 class GenerateAPIService extends Command<dynamic> {
@@ -56,10 +55,11 @@ class GenerateAPIService extends Command<dynamic> {
         stderr.writeln('Creating API Service...');
         await addAlreadyRun('api');
         addDependenciesToPubspecSync(<String>['http'], null);
+
+        await ApiServiceInterfaceManipulator().create();
         await ApiServiceManipulator().create();
-        await _addUserModel();
-        await _addUserStateService();
-        await _addConstants();
+
+        await ConstantManipulator().create();
         await _addAuthService();
       },
       remove: () async {
@@ -67,10 +67,9 @@ class GenerateAPIService extends Command<dynamic> {
         await removeAlreadyRun('api');
         removeDependenciesFromPubspecSync(<String>['http'], null);
         await _removeAuthService();
+        await ApiServiceInterfaceManipulator().remove();
         await ApiServiceManipulator().remove();
-        await _removeConstants();
-        await _removeUserStateService();
-        await _removeUserModel();
+        await ConstantManipulator().remove();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -83,47 +82,14 @@ class GenerateAPIService extends Command<dynamic> {
     dartFixCode();
   }
 
-  Future<void> _removeConstants() async {
-    await File(path.join('lib', 'util', 'constants.dart')).delete();
-  }
-
   Future<void> _removeAuthService() async {
     await File(path.join('lib', 'service', 'auth_service.dart')).delete();
-  }
-
-  Future<void> _removeUserModel() async {
-    await File(path.join('lib', 'model', 'user.dart')).delete();
-  }
-
-  Future<void> _removeUserStateService() async {
-    await File(path.join('lib', 'service', 'user_state_service.dart')).delete();
-  }
-
-  Future<void> _addConstants() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'util', 'constants.dart'),
-      constants.content(),
-    );
   }
 
   Future<void> _addAuthService() async {
     await writeFileWithPrefix(
       path.join('lib', 'service', 'auth_service.dart'),
       auth_service.content(),
-    );
-  }
-
-  Future<void> _addUserModel() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'user.dart'),
-      user_model.content(),
-    );
-  }
-
-  Future<void> _addUserStateService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'user_state_service.dart'),
-      user_state_service.content(),
     );
   }
 }

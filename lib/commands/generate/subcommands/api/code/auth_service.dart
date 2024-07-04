@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import '../model/user.dart';
+
 import 'api_service.dart';
 import 'storage_service.dart';
 import 'user_state_service.dart';

@@ -21,13 +21,13 @@ abstract class FileManipulator {
   }
 
   ///Delete the file
-  Future<void> deleteFile() async {
+  Future<void> remove() async {
     await File(path).delete();
   }
 
   ///Update the file
   Future<void> updateFile() async {
-    await deleteFile();
+    await remove();
     await _createFile();
   }
 
