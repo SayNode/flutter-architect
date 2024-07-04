@@ -59,10 +59,9 @@ class GenerateAPIService extends Command<dynamic> {
         final String projectName = await getProjectName();
         await _addUserModel();
         await _addUserStateService();
-        await _addConstants(projectName);
+        await _addConstants();
         await _addAPIService(projectName);
         await _addAuthService();
-        await _addMainChanges(projectName);
       },
       remove: () async {
         stderr.writeln('Removing API Service...');
@@ -73,7 +72,6 @@ class GenerateAPIService extends Command<dynamic> {
         await _removeConstants();
         await _removeUserStateService();
         await _removeUserModel();
-        await _removeMainChanges();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -84,13 +82,6 @@ class GenerateAPIService extends Command<dynamic> {
     );
     formatCode();
     dartFixCode();
-  }
-
-  Future<void> _removeMainChanges() async {
-    await removeLinesFromFile(
-      path.join('lib', 'main.dart'),
-      <String>['.devMode'],
-    );
   }
 
   Future<void> _removeConstants() async {
@@ -113,22 +104,10 @@ class GenerateAPIService extends Command<dynamic> {
     await File(path.join('lib', 'service', 'user_state_service.dart')).delete();
   }
 
-  Future<void> _addMainChanges(String projectName) async {
-    await addLinesAfterLineInFile(
-        path.join('lib', 'main.dart'), <String, List<String>>{
-      'return GetMaterialApp(': <String>[
-        'debugShowCheckedModeBanner: ${projectName.capitalize()}Constants.devMode,',
-      ],
-      '// https://saynode.ch': <String>[
-        "import './util/constants.dart';",
-      ],
-    });
-  }
-
-  Future<void> _addConstants(String projectName) async {
+  Future<void> _addConstants() async {
     await writeFileWithPrefix(
       path.join('lib', 'util', 'constants.dart'),
-      constants.content(projectName),
+      constants.content(),
     );
   }
 

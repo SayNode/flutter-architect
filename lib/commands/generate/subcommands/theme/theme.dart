@@ -145,7 +145,8 @@ class GenerateThemeService extends Command<dynamic> {
 
   // Remove the Theme-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await removeLinesFromFile(
       mainPath,
       <String>[
@@ -154,7 +155,7 @@ class GenerateThemeService extends Command<dynamic> {
     );
     await replaceLineInFile(
       mainPath,
-      'theme: Get.put<ThemeService>(ThemeService()).themeData,',
+      'theme: Get.find<ThemeService>().themeData,',
       'theme: ThemeData(),',
     );
   }
@@ -328,12 +329,13 @@ class GenerateThemeService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
 
     await replaceLineInFile(
       mainPath,
       'theme: ThemeData(),',
-      'theme: Get.put<ThemeService>(ThemeService()).themeData,',
+      'theme: Get.find<ThemeService>().themeData,',
     );
 
     await addLinesAfterLineInFile(

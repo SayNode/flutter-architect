@@ -14,7 +14,6 @@ import '../util/constants.dart';
 import 'auth_service.dart';
 
 class APIService extends GetxService {
-  AuthService get authService => Get.put(AuthService());
 
   /// Patch request to $projectNameCapitaliezed backend.
   /// [path] the path to the endpoint.
