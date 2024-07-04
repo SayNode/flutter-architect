@@ -1,0 +1,34 @@
+{
+  "name": "flutter-architect",
+  "version": "1.0.2",
+  "description": "A bootstrap CLI for Flutter project initialisation. Supports the generation of multiple boilerplate features.",
+  "main": "index.js",
+  "bin": {
+    "architect": "./architect.exe"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SayNode/flutter-architect.git"
+  },
+  "keywords": [
+    "flutter",
+    "dart",
+    "cli",
+    "bootstrap",
+    "generation"
+  ],
+  "author": "Yann Marti, Francesco Romeo, Pedro Gonçalves",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SayNode/flutter-architect/issues"
+  },
+  "homepage": "https://github.com/SayNode/flutter-architect#readme"
+}
