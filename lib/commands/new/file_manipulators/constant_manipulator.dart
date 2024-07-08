@@ -36,4 +36,22 @@ class Constants {
 
     await file.writeAsString(newLines.join('\n'));
   }
+
+  Future<void> updateConstant(
+    String nameOfConstant,
+    String newConstantCode,
+  ) async {
+    await removeConstant(nameOfConstant);
+    await addConstant(newConstantCode);
+  }
+
+  Future<void> removeConstant(String constant) async {
+    final File file = File(path);
+    final List<String> lines = await file.readAsLines();
+    final String pattern = '^\\s*const\\s+$constant\\s*=';
+    final RegExp regExp = RegExp(pattern);
+
+    lines.removeWhere(regExp.hasMatch);
+    await file.writeAsString(lines.join('\n'));
+  }
 }

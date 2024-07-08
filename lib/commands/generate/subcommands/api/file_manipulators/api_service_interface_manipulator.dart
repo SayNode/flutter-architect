@@ -38,7 +38,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - PATCH to queryParameters{body != null ? ' with body: $body' : ''}',
+        'API - called PATCH at $url',
       );
     }
     final http.Response response = await http.patch(
@@ -58,7 +58,7 @@ abstract class ApiServiceInterface extends GetxService {
 
     if (log) {
       loggerService.log(
-        'API - PATCH to queryParameters - Got {response.statusCode} with body: {response.body}',
+        'API - PATCH to queryParameters - Got ${response.statusCode} with body: ${response.body}',
       );
     }
     return response;
@@ -79,7 +79,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - PUT to queryParameters{body != null ? ' with body: $body' : ''}',
+        'API - called PUT at $url',
       );
     }
     final http.Response response = await http.put(
@@ -98,7 +98,7 @@ abstract class ApiServiceInterface extends GetxService {
     );
     if (log) {
       loggerService.log(
-        'API - PUT to queryParameters - Got {response.statusCode} with body: {response.body}',
+        'API - PUT to queryParameters - Got ${response.statusCode} with body: ${response.body}',
       );
     }
     return response;
@@ -119,7 +119,7 @@ abstract class ApiServiceInterface extends GetxService {
     final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
     if (log) {
       loggerService.log(
-        'API - POST to queryParameters{body != null ? ' with body: $body' : ''}',
+        'API - called POST at $url',
       );
     }
     final http.Response response = await http.post(
@@ -138,7 +138,7 @@ abstract class ApiServiceInterface extends GetxService {
     );
     if (log) {
       loggerService.log(
-        'API - POST to queryParameters - Got {response.statusCode} with body: {response.body}',
+        'API - POST to queryParameters - Got ${response.statusCode} with body: ${response.body}',
       );
     }
     return response;
@@ -172,7 +172,7 @@ abstract class ApiServiceInterface extends GetxService {
     );
     if (log) {
       loggerService.log(
-        'API - GET to queryParameters - Got {response.statusCode} with body: {response.body}',
+        'API - called GET at $url - Got ${response.statusCode} with body: ${response.body}',
       );
     }
     return response;
@@ -194,7 +194,7 @@ abstract class ApiServiceInterface extends GetxService {
 
     if (log) {
       loggerService.log(
-        'API - DELETE to queryParameters{body != null ? ' with body: $body' : ''}',
+        'API - called DELETE at $url',
       );
     }
     final http.Response response = await http.delete(
@@ -213,13 +213,12 @@ abstract class ApiServiceInterface extends GetxService {
     );
     if (log) {
       loggerService.log(
-        'API - DELETE to queryParameters - Got {response.statusCode} with body: {response.body}',
+        'API - DELETE to queryParameters - Got ${response.statusCode} with body: ${response.body}',
       );
     }
     return response;
   }
 }
-
 """;
   }
 }
