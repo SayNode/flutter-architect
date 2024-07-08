@@ -58,16 +58,15 @@ class GenerateAPIService extends Command<dynamic> {
 
         await ApiServiceInterfaceManipulator().create();
         await ApiServiceManipulator().create();
-//  static const String apiDomain = const String.fromEnvironment('DATABASE_URL');
-        // static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');
-        // static bool get devMode => apiDomain.contains("dev-");
+
         await ConstantManipulator().addConstant(
           "static const String apiDomain = const String.fromEnvironment('DATABASE_URL');",
         );
         await ConstantManipulator().addConstant(
           "static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');",
         );
-        await ConstantManipulator().addConstant(
+        await ConstantManipulator().updateConstant(
+          'devMode',
           "static bool get devMode => apiDomain.contains('dev-');",
         );
         await _addAuthService();
