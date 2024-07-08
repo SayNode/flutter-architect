@@ -3,14 +3,10 @@ String content() {
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-
 import 'api_service.dart';
-import 'storage_service.dart';
-import 'user_state_service.dart';
 
 enum ProviderTypes {
   none,
@@ -30,6 +26,8 @@ class AuthService extends GetxService {
   String authenticationToken = '';
   String verificationToken = '';
   String verificationUid = '';
+
+  final APIService apiService = Get.find<APIService>();
 
   void init() {
     debugPrint('AuthService - initializing...');
@@ -84,15 +82,10 @@ class AuthService extends GetxService {
         try {
           final Map<String, dynamic> userMap =
               jsonDecode(response.body) as Map<String, dynamic>;
-          userStateService.user.value =
-              User.fromJson(userMap['user'] as Map<String, dynamic>);
 
           /// save the token
           authenticationToken = userMap['access_token'] as String;
           debugPrint('AuthService - authenticationToken: $authenticationToken');
-          debugPrint(
-            'AuthService - user logged in: ${userStateService.user.value.email}',
-          );
 
           // Disconnect other providers
           await _disconnectProviders();
@@ -131,7 +124,6 @@ class AuthService extends GetxService {
       );
       if (response.statusCode == 200) {
         authenticationToken = '';
-        userStateService.clear();
         // Disconnect other providers
         await _disconnectProviders();
         await storageService.setString('email', '');
@@ -177,15 +169,10 @@ class AuthService extends GetxService {
         try {
           final Map<String, dynamic> userMap =
               jsonDecode(response.body) as Map<String, dynamic>;
-          userStateService.user.value =
-              User.fromJson(userMap['user'] as Map<String, dynamic>);
 
           /// save the token
           authenticationToken = userMap['access_token'] as String;
           debugPrint('AuthService - authenticationToken: $authenticationToken');
-          debugPrint(
-            'AuthService - user registered in: ${userStateService.user.value.email}',
-          );
 
           // Disconnect other providers
           await _disconnectProviders();
@@ -332,13 +319,13 @@ class AuthService extends GetxService {
   }
 
   // Send email to user, to verify their email.
-  Future<bool> sendVerificationEmail() async {
+  Future<bool> sendVerificationEmail(String email) async {
     try {
       final http.Response response = await apiService.post(
         '/auth/registration/resend-email/',
         contentType: 'application/json',
         body: <String, dynamic>{
-          'email': userStateService.user.value.email,
+          'email': email,
         },
       );
 
@@ -354,5 +341,6 @@ class AuthService extends GetxService {
     debugPrint('AuthService - disconnecting providers');
   }
 }
+
 """;
 }
