@@ -96,7 +96,9 @@ class Creator extends Command<dynamic> {
     final LoggerServiceManipulator loggerServiceManipulator =
         LoggerServiceManipulator();
     await loggerServiceManipulator.create(
-        projectName: projectName, initialize: true);
+      projectName: projectName,
+      initialize: true,
+    );
 
     addAssetsToPubspec();
     await rewriteAnalysisOptions();
