@@ -85,7 +85,7 @@ class GenerateStorageService extends Command<dynamic> {
     final String mainPath =
         path.join('lib', 'interface', 'main_interface.dart');
     await removeLinesFromFile(mainPath, <String>[
-      "import 'service/storage/storage_service.dart';",
+      "import '../service/storage/storage_service.dart';",
       'await storage.init();',
     ]);
   }
@@ -100,7 +100,7 @@ class GenerateStorageService extends Command<dynamic> {
           'await Get.find<StorageService>().init();',
         ],
         '// https://saynode.ch': <String>[
-          "import 'service/storage/storage_service.dart';",
+          "import '../service/storage/storage_service.dart';",
         ],
       },
     );

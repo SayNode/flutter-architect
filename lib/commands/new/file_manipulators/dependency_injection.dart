@@ -61,11 +61,7 @@ class MainBindings extends Bindings {
     final List<String> newLines = <String>[];
     for (final String line in lines) {
       newLines.add(line);
-      // if (line.contains('_injectControllers();') && initialize) {
-      //   newLines.add('\nGet.lazyPut($serviceName.new);');
-      //   break;
-      // }
-      if (line.contains("import 'package:get/get.dart';") && initialize) {
+      if (line.contains("import 'package:get/get.dart';")) {
         String serviceFileName =
             servicePath.substring(0, servicePath.indexOf('.'));
         serviceFileName =
@@ -74,7 +70,7 @@ class MainBindings extends Bindings {
           "\nimport '$serviceFileName.dart';",
         );
       }
-      if (line.contains('    //Services injection') && initialize) {
+      if (line.contains('//Services injection')) {
         newLines
           ..add('\n')
           ..add('Get.lazyPut($serviceName.new);');

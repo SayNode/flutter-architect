@@ -4,12 +4,12 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
+import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
-import 'code/api_service.dart' as api_service;
-import 'code/auth_service.dart' as auth_service;
-import 'code/constants.dart' as constants;
-import 'code/user_model.dart' as user_model;
-import 'code/user_state_service.dart' as user_state_service;
+import 'file_manipulators/api_service_interface_manipulator.dart';
+import 'file_manipulators/api_service_manipulator.dart';
+import 'file_manipulators/auth_service_base_manipulator.dart';
+import 'file_manipulators/auth_service_manipulator.dart';
 
 class GenerateAPIService extends Command<dynamic> {
   GenerateAPIService() {
@@ -56,22 +56,17 @@ class GenerateAPIService extends Command<dynamic> {
         stderr.writeln('Creating API Service...');
         await addAlreadyRun('api');
         addDependenciesToPubspecSync(<String>['http'], null);
-        final String projectName = await getProjectName();
-        await _addUserModel();
-        await _addUserStateService();
+        await _createDartFiles();
         await _addConstants();
-        await _addAPIService(projectName);
-        await _addAuthService();
       },
       remove: () async {
         stderr.writeln('Removing API Service...');
         await removeAlreadyRun('api');
         removeDependenciesFromPubspecSync(<String>['http'], null);
         await _removeAuthService();
-        await _removeAPIService();
-        await _removeConstants();
-        await _removeUserStateService();
-        await _removeUserModel();
+        await ApiServiceInterfaceManipulator().remove();
+        await ApiServiceManipulator().remove();
+        await ConstantManipulator().remove();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -84,58 +79,27 @@ class GenerateAPIService extends Command<dynamic> {
     dartFixCode();
   }
 
-  Future<void> _removeConstants() async {
-    await File(path.join('lib', 'util', 'constants.dart')).delete();
-  }
-
-  Future<void> _removeAPIService() async {
-    await File(path.join('lib', 'service', 'api_service.dart')).delete();
-  }
-
   Future<void> _removeAuthService() async {
     await File(path.join('lib', 'service', 'auth_service.dart')).delete();
   }
 
-  Future<void> _removeUserModel() async {
-    await File(path.join('lib', 'model', 'user.dart')).delete();
-  }
-
-  Future<void> _removeUserStateService() async {
-    await File(path.join('lib', 'service', 'user_state_service.dart')).delete();
+  Future<void> _createDartFiles() async {
+    await ApiServiceInterfaceManipulator().create();
+    await ApiServiceManipulator().create();
+    await AuthServiceBaseManipulator().create();
+    await AuthServiceManipulator().create();
   }
 
   Future<void> _addConstants() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'util', 'constants.dart'),
-      constants.content(),
+    await ConstantManipulator().addConstant(
+      "static const String apiDomain = const String.fromEnvironment('DATABASE_URL');",
     );
-  }
-
-  Future<void> _addAPIService(String projectName) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'api_service.dart'),
-      api_service.content(projectName),
+    await ConstantManipulator().addConstant(
+      "static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');",
     );
-  }
-
-  Future<void> _addAuthService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'auth_service.dart'),
-      auth_service.content(),
-    );
-  }
-
-  Future<void> _addUserModel() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'user.dart'),
-      user_model.content(),
-    );
-  }
-
-  Future<void> _addUserStateService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'user_state_service.dart'),
-      user_state_service.content(),
+    await ConstantManipulator().updateConstant(
+      'devMode',
+      "static bool get devMode => apiDomain.contains('dev-');",
     );
   }
 }
