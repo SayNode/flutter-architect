@@ -48,10 +48,10 @@ class Constants {
   Future<void> removeConstant(String constant) async {
     final File file = File(path);
     final List<String> lines = await file.readAsLines();
-    final String pattern = '^\\s*const\\s+$constant\\s*=';
-    final RegExp regExp = RegExp(pattern);
 
-    lines.removeWhere(regExp.hasMatch);
+    lines.removeWhere(
+      (String line) => line.contains(' $constant ='),
+    );
     await file.writeAsString(lines.join('\n'));
   }
 }

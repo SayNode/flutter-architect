@@ -6,9 +6,10 @@ import 'package:path/path.dart' as path;
 import '../../../../util/util.dart';
 import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
-import 'code/auth_service.dart' as auth_service;
 import 'file_manipulators/api_service_interface_manipulator.dart';
 import 'file_manipulators/api_service_manipulator.dart';
+import 'file_manipulators/auth_service_base_manipulator.dart';
+import 'file_manipulators/auth_service_manipulator.dart';
 
 class GenerateAPIService extends Command<dynamic> {
   GenerateAPIService() {
@@ -58,6 +59,8 @@ class GenerateAPIService extends Command<dynamic> {
 
         await ApiServiceInterfaceManipulator().create();
         await ApiServiceManipulator().create();
+        await AuthServiceBaseManipulator().create();
+        await AuthServiceManipulator().create();
 
         await ConstantManipulator().addConstant(
           "static const String apiDomain = const String.fromEnvironment('DATABASE_URL');",
@@ -69,7 +72,6 @@ class GenerateAPIService extends Command<dynamic> {
           'devMode',
           "static bool get devMode => apiDomain.contains('dev-');",
         );
-        await _addAuthService();
       },
       remove: () async {
         stderr.writeln('Removing API Service...');
@@ -93,12 +95,5 @@ class GenerateAPIService extends Command<dynamic> {
 
   Future<void> _removeAuthService() async {
     await File(path.join('lib', 'service', 'auth_service.dart')).delete();
-  }
-
-  Future<void> _addAuthService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'auth_service.dart'),
-      auth_service.content(),
-    );
   }
 }
