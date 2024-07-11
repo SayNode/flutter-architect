@@ -145,8 +145,7 @@ class GenerateThemeService extends Command<dynamic> {
 
   // Remove the Theme-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
     await removeLinesFromFile(
       mainPath,
       <String>[
@@ -270,7 +269,7 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'theme', 'color.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✔');
+      stderr.writeln('- Colors added to Color.dart ✅');
     });
   }
 
@@ -296,7 +295,7 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'theme', 'theme.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✔');
+      stderr.writeln('- Colors added to Color.dart ✅');
     });
   }
 
@@ -324,13 +323,12 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'service', 'theme_service.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- theme added to theme_service.dart ✔');
+      stderr.writeln('- theme added to theme_service.dart ✅');
     });
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
 
     await replaceLineInFile(
       mainPath,

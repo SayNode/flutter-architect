@@ -130,8 +130,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
 
     await addLinesAfterLineInFile(
       mainPath,
@@ -163,8 +162,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
     await removeTextFromFile(mainPath, imports.content());
     await removeTextFromFile(mainPath, non_fatal_error.content());
     await removeTextFromFile(mainPath, fatal_error.content());

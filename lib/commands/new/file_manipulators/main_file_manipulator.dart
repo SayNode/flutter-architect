@@ -4,7 +4,7 @@ class MainFileManipulator extends FileManipulator {
   @override
   String content() {
     return """
-import 'interface/main_interface.dart';
+import 'base/main_interface.dart';
 
 void main() {
   Main().main();

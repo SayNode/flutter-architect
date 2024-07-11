@@ -100,8 +100,7 @@ class GenerateLocalizationService extends Command<dynamic> {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
 
     await removeLinesFromFile(
       mainPath,
@@ -164,8 +163,7 @@ class GenerateLocalizationService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
 
     await addLinesAfterLineInFile(
       mainPath,

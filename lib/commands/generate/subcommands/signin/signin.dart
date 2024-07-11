@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 import '../../../../util/util.dart';
 import '../api/api.dart';
 import '../api/file_manipulators/auth_service_base_manipulator.dart';
+import '../api/file_manipulators/auth_service_manipulator.dart';
 
 class GenerateSigninService extends Command<dynamic> {
   GenerateSigninService() {
@@ -83,7 +84,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Creating Google Signin Service...');
         await addAlreadyRun('signin-google');
         addDependenciesToPubspecSync(<String>['google_sign_in'], null);
-        await AuthServiceBaseManipulator().createGoogleSignIn();
+        await AuthServiceManipulator().createGoogleSignIn();
         formatCode();
         dartFixCode();
         printGoogleInstructions();
@@ -92,7 +93,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Removing Google Signin Service...');
         await removeAlreadyRun('signin-google');
         removeDependenciesFromPubspecSync(<String>['google_sign_in'], null);
-        await AuthServiceBaseManipulator().removeGoogleSignIn();
+        await AuthServiceManipulator().removeGoogleSignIn();
         formatCode();
         dartFixCode();
       },
@@ -121,7 +122,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Creating Apple Signin Service...');
         await addAlreadyRun('signin-apple');
         addDependenciesToPubspecSync(<String>['sign_in_with_apple'], null);
-        await AuthServiceBaseManipulator().createAppleSignIn();
+        await AuthServiceManipulator().createAppleSignIn();
         formatCode();
         dartFixCode();
         printAppleInstructions();
@@ -130,7 +131,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Removing Apple Signin Service...');
         await removeAlreadyRun('signin-apple');
         removeDependenciesFromPubspecSync(<String>['sign_in_with_apple'], null);
-        await AuthServiceBaseManipulator().removeAppleSignIn();
+        await AuthServiceManipulator().removeAppleSignIn();
         formatCode();
         dartFixCode();
       },

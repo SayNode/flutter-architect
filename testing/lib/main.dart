@@ -5,7 +5,7 @@
 //
 // https://saynode.ch
 
-import 'interface/main_interface.dart';
+import 'base/main_interface.dart';
 
 void main() {
   Main().main();

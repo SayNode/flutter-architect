@@ -100,6 +100,9 @@ class GenerateAPIService extends Command<dynamic> {
     await ConstantManipulator().addConstant(
       "static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');",
     );
+    await ConstantManipulator().removeConstant(
+      'devMode',
+    );
     await ConstantManipulator().addConstant(
       "static bool get devMode => apiDomain.contains('dev-');",
     );
@@ -114,6 +117,9 @@ class GenerateAPIService extends Command<dynamic> {
     );
     await ConstantManipulator().removeConstant(
       'devMode',
+    );
+    await ConstantManipulator().addConstant(
+      'static const bool devMode = true;',
     );
   }
 }
