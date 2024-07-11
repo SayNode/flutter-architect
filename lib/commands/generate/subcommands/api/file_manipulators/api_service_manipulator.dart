@@ -10,7 +10,7 @@ class ApiServiceManipulator extends ServiceManipulator {
   @override
   String content() {
     return """
-import '../interface/api_service_interface.dart';
+import '../base/api_service_interface.dart';
 
 class APIService extends ApiServiceInterface {}""";
   }

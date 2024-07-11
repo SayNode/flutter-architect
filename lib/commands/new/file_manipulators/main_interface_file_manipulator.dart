@@ -2,12 +2,10 @@ import '../../../interfaces/file_manipulator.dart';
 
 class MainInterfaceFileManipulator extends FileManipulator {
   @override
-  // TODO: implement name
   String get name => 'MainInterface';
 
   @override
-  // TODO: implement path
-  String get path => 'lib/interface/main_interface.dart';
+  String get path => 'lib/base/main_interface.dart';
 
   @override
   String content() {

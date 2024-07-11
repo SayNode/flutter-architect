@@ -10,7 +10,7 @@ class AuthServiceManipulator extends ServiceManipulator {
   @override
   String content() {
     return """
-import '../interface/auth_service_base.dart';
+import '../base/auth_service_base.dart';
 
 class AuthService extends AuthServiceBase {}
 """;
