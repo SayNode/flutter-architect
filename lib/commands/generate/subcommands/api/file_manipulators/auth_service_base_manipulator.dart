@@ -47,9 +47,15 @@ abstract class AuthServiceBase extends GetxService {
   Future<AuthResponse> silentLogin() async {
     //load auth token from storage
     apiService.authenticationToken = await _storageService.readString('token');
+
     try {
-      final http.Response response = await apiService.get(
-        '/auth//token/verify/',
+      final http.Response response = await apiService.post(
+        '/auth/token/verify/',
+        omitBearerToken: true,
+        body: <String, dynamic>{
+          'token': apiService.authenticationToken,
+        },
+        log: true,
       );
 
       final AuthResponse authResult = AuthResponse.fromJson(
