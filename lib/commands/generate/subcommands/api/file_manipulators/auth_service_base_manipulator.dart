@@ -6,7 +6,7 @@ class AuthServiceBaseManipulator extends FileManipulator {
   String get name => 'AuthServiceBase';
 
   @override
-  String get path => 'lib/interface/auth_service_base.dart';
+  String get path => 'lib/base/auth_service_base.dart';
 
   Future<void> createGoogleSignIn() async {
     await removeTextFromFile(
@@ -97,6 +97,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/auth_result.dart';
 import '../service/api_service.dart';
 import '../service/logger_service.dart';
 import '../service/storage/secure_storage_service.dart';
@@ -107,13 +108,6 @@ enum ProviderTypes {
   email,
   google,
   apple,
-}
-
-class AuthResponse {
-  AuthResponse(this.info, this.success);
-
-  final Map<String, dynamic> info;
-  final bool success;
 }
 
 abstract class AuthServiceBase extends GetxService {
@@ -127,42 +121,29 @@ abstract class AuthServiceBase extends GetxService {
 
   final LoggerService logger = Get.find<LoggerService>();
 
-  void init() {
-    logger.log('AuthService - initializing...');
-  }
-
-  String unexpectedError(http.Response response) {
-    return '[Status Code : ${response.statusCode}] ${response.body}';
-  }
-
   Map<String, dynamic> parseErrorMap(http.Response response) {
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   // Check if the user is logged in already.
   Future<AuthResponse> silentLogin() async {
-    try {
-      final http.Response response = await apiService.get(
-        '/auth//token/verify/',
-      );
-      if (response.statusCode == 200) {
-        return AuthResponse(
-          <String, dynamic>{'success': 'Authorized'},
-          true,
-        );
-      }
+    //load auth token from storage
+    apiService.authenticationToken = await _storageService.readString('token');
 
-      if (response.statusCode == 401) {
-        return AuthResponse(
-          <String, dynamic>{'error': 'Unauthorized'},
-          false,
-        );
-      } else {
-        // Unexpected status code:
-        throw Exception(
-          'AuthService - error while authenticaing user ${unexpectedError(response)}',
-        );
-      }
+    try {
+      final http.Response response = await apiService.post(
+        '/auth/token/verify/',
+        omitBearerToken: true,
+        body: <String, dynamic>{
+          'token': apiService.authenticationToken,
+        },
+        log: true,
+      );
+
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      return authResult;
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService error on silent login - $e');
@@ -183,37 +164,22 @@ abstract class AuthServiceBase extends GetxService {
         },
         omitBearerToken: true,
       );
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      if (authResult.status == 200) {
+        apiService.authenticationToken = authResult.accessToken;
 
-      if (response.statusCode == 200) {
-        try {
-          final Map<String, dynamic> userMap =
-              jsonDecode(response.body) as Map<String, dynamic>;
-
-          /// save the token
-          apiService.authenticationToken = userMap['access_token'] as String;
-          await _storageService.writeString(
-            'token',
-            userMap['access_token'] as String,
-          );
-
-          // Disconnect other providers
-          await _disconnectProviders();
-
-          return AuthResponse(
-            <String, dynamic>{'success': 'Successfully logged in.'},
-            true,
-          );
-        } catch (error) {
-          // Request parsing went wrong:
-          throw Exception('AuthService - error while parsing the user: $error');
-        }
-      } else {
-        // Unexpected status code:
-        logger.log(
-          'AuthService - ${response.statusCode} ${response.body}',
+        await _storageService.writeString(
+          'token',
+          authResult.accessToken,
         );
-        return AuthResponse(parseErrorMap(response), false);
+
+        // Disconnect other providers
+        await _disconnectProviders();
       }
+
+      return authResult;
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService login endpoint failed - $e');
@@ -227,21 +193,51 @@ abstract class AuthServiceBase extends GetxService {
         '/auth/logout/',
         contentType: 'application/json',
       );
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+
       if (response.statusCode == 200) {
         apiService.authenticationToken = '';
         // Disconnect other providers
         await _disconnectProviders();
         await _storageService.delete('token');
-        return AuthResponse(
-          <String, dynamic>{'success': 'Successful logout.'},
-          true,
-        );
       } else {
         // Unexpected status code:
         throw Exception(
-          'AuthService - error while logging out the user ${unexpectedError(response)}',
+          'AuthService - error while logging out the user $authResult',
         );
       }
+      return authResult;
+    } catch (e) {
+      // Endpoint failed:
+      throw Exception('AuthService logout endpoint failed - $e');
+    }
+  }
+
+  // Log the user out. This function is not responsible for any navigation.
+  Future<AuthResponse> deleteUser() async {
+    try {
+      final http.Response response = await apiService.delete(
+        '/users/delete/',
+        contentType: 'application/json',
+      );
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      if (response.statusCode == 200) {
+        apiService.authenticationToken = '';
+        await _storageService.delete('token');
+        // Disconnect other providers
+        await _disconnectProviders();
+      } else {
+        // Unexpected status code:
+        // await Get.to<void>(() => HtmlDebug(res: response.body));
+        throw Exception(
+          'AuthService - error while logging out the user $authResult',
+        );
+      }
+      return authResult;
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService logout endpoint failed - $e');
@@ -267,37 +263,20 @@ abstract class AuthServiceBase extends GetxService {
           'username': username,
         },
       );
-
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
       if (response.statusCode == 201) {
-        try {
-          final Map<String, dynamic> userMap =
-              jsonDecode(response.body) as Map<String, dynamic>;
-
-          /// save the token
-          apiService.authenticationToken = userMap['access_token'] as String;
-          await _storageService.writeString(
-            'token',
-            userMap['access_token'] as String,
-          );
-
-          // Disconnect other providers
-          await _disconnectProviders();
-
-          return AuthResponse(
-            <String, dynamic>{'success': 'Successfully signed up.'},
-            true,
-          );
-        } catch (error) {
-          // Request parsing went wrong:
-          throw Exception('AuthService - error while parsing the user: $error');
-        }
-      } else {
-        // Unexpected status code:
-        logger.log(
-          'AuthService - ${unexpectedError(response)}',
+        apiService.authenticationToken = authResult.accessToken;
+        await _storageService.writeString(
+          'token',
+          authResult.accessToken,
         );
-        return AuthResponse(parseErrorMap(response), false);
+
+        // Disconnect other providers
+        await _disconnectProviders();
       }
+      return authResult;
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService registration endpoint failed - $e');
@@ -315,20 +294,10 @@ abstract class AuthServiceBase extends GetxService {
           'email': email,
         },
       );
-
-      if (response.statusCode == 200) {
-        logger.log('AuthService - Reset Code Sent');
-        return AuthResponse(
-          <String, dynamic>{'success': 'Reset code sent.'},
-          true,
-        );
-      } else {
-        // Unexpected status code:
-        logger.log(
-          'AuthService - ${unexpectedError(response)}',
-        );
-        return AuthResponse(parseErrorMap(response), false);
-      }
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      return authResult;
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService reset password endpoint failed - $e');
@@ -346,7 +315,9 @@ abstract class AuthServiceBase extends GetxService {
           'code': code,
         },
       );
-
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
       if (response.statusCode == 200) {
         try {
           final Map<String, dynamic> userMap =
@@ -358,26 +329,50 @@ abstract class AuthServiceBase extends GetxService {
           logger.log(
             'AuthService - verification Token and UID: $verificationUid $verificationToken',
           );
-          return AuthResponse(
-            <String, dynamic>{'success': 'Verification code is valid.'},
-            true,
-          );
+          return authResult;
         } catch (error) {
-          return AuthResponse(
-            <String, dynamic>{'error': error.toString()},
-            false,
-          );
+          return authResult;
         }
       } else {
         // Unexpected status code:
         logger.log(
-          'AuthService - ${unexpectedError(response)}',
+          'AuthService - $authResult',
         );
-        return AuthResponse(parseErrorMap(response), false);
+        return authResult;
       }
     } catch (e) {
       // Endpoint failed:
       throw Exception('AuthService validate code endpoint failed - $e');
+    }
+  }
+
+  Future<AuthResponse> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    try {
+      final http.Response response = await apiService.post(
+        '/auth/password/change/',
+        contentType: 'application/json',
+        body: <String, dynamic>{
+          'old_password': currentPassword,
+          'new_password1': newPassword,
+          'new_password2': confirmNewPassword,
+        },
+      );
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+
+      if (response.statusCode == 200) {
+        return authResult;
+      } else {
+        return authResult;
+      }
+    } catch (e) {
+      // Endpoint failed:
+      throw Exception('AuthService change password endpoint failed - $e');
     }
   }
 
@@ -398,18 +393,17 @@ abstract class AuthServiceBase extends GetxService {
           'token': verificationToken,
         },
       );
-
+      final AuthResponse authResult = AuthResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
       if (response.statusCode == 200) {
-        return AuthResponse(
-          <String, dynamic>{'success': 'Password changed.'},
-          true,
-        );
+        return authResult;
       } else {
         // Unexpected status code:
         logger.log(
-          'AuthService - ${unexpectedError(response)}',
+          'AuthService - $authResult',
         );
-        return AuthResponse(parseErrorMap(response), false);
+        return authResult;
       }
     } catch (e) {
       // Endpoint failed:

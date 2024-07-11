@@ -5,7 +5,7 @@ class ApiServiceInterfaceManipulator extends FileManipulator {
   String get name => 'ApiServiceInterface';
 
   @override
-  String get path => 'lib/interface/api_service_interface.dart';
+  String get path => 'lib/base/api_service_interface.dart';
 
   @override
   String content() {

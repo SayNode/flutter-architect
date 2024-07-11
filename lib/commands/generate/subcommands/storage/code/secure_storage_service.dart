@@ -70,19 +70,17 @@ class SecureStorageService extends GetxService
   }
 
   Future<String> read(String key) async {
-    await storage.containsKey(key: key).then((bool value) async {
-      if (value) {
-        final String? storedValue = await storage.read(key: key);
-        if (storedValue != null) {
-          return storedValue;
-        } else {
-          throw StorageException('Key $key is null in Secure Storage');
-        }
+    final bool keyExists = await storage.containsKey(key: key);
+    if (keyExists) {
+      final String? storedValue = await storage.read(key: key);
+      if (storedValue != null) {
+        return storedValue;
       } else {
-        throw StorageException('Key $key not found in Secure Storage');
+        throw StorageException('Key $key is null in Secure Storage');
       }
-    });
-    throw StorageException('Critical Error in Secure Storage');
+    } else {
+      throw StorageException('Key $key not found in Secure Storage');
+    }
   }
 
   Future<void> write(String key, String value) async {

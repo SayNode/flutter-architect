@@ -8,6 +8,7 @@ import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
 import 'file_manipulators/api_service_interface_manipulator.dart';
 import 'file_manipulators/api_service_manipulator.dart';
+import 'file_manipulators/auth_response_manipulator.dart';
 import 'file_manipulators/auth_service_base_manipulator.dart';
 import 'file_manipulators/auth_service_manipulator.dart';
 
@@ -66,7 +67,8 @@ class GenerateAPIService extends Command<dynamic> {
         await _removeAuthService();
         await ApiServiceInterfaceManipulator().remove();
         await ApiServiceManipulator().remove();
-        await ConstantManipulator().remove();
+        await AuthResponseManipulator().remove();
+        await _removeConstants();
       },
       rejectAdd: () async {
         stderr.writeln("Can't add API Service as it's already configured.");
@@ -88,6 +90,7 @@ class GenerateAPIService extends Command<dynamic> {
     await ApiServiceManipulator().create();
     await AuthServiceBaseManipulator().create();
     await AuthServiceManipulator().create();
+    await AuthResponseManipulator().create();
   }
 
   Future<void> _addConstants() async {
@@ -97,9 +100,20 @@ class GenerateAPIService extends Command<dynamic> {
     await ConstantManipulator().addConstant(
       "static const String apiKey = const String.fromEnvironment('DATABASE_API_KEY');",
     );
-    await ConstantManipulator().updateConstant(
-      'devMode',
+    await ConstantManipulator().addConstant(
       "static bool get devMode => apiDomain.contains('dev-');",
+    );
+  }
+
+  Future<void> _removeConstants() async {
+    await ConstantManipulator().removeConstant(
+      'apiDomain',
+    );
+    await ConstantManipulator().removeConstant(
+      'apiKey',
+    );
+    await ConstantManipulator().removeConstant(
+      'devMode',
     );
   }
 }
