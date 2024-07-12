@@ -1,6 +1,6 @@
 {
   "name": "@saynode_ag/flutter-architect",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "A bootstrap CLI for Flutter project initialisation. Supports the generation of multiple boilerplate features.",
   "main": "index.js",
   "bin": {
