@@ -283,10 +283,12 @@ import 'dart:convert';""";
 
   String googleDisconnect() => r"""
     // Disconnect from Google.
-    try {
-      await _googleSignIn.disconnect();
-    } catch (e) {
-      throw Exception('AuthService - error while disconnecting from google: $e');
+    if (await _googleSignIn.isSignedIn()) {
+      try {
+        await _googleSignIn.disconnect();
+      } catch (e) {
+        throw Exception('AuthService - error while disconnecting from google: $e');
+      }
     }""";
 
   String appleDisconnect() => '''

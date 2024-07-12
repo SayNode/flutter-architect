@@ -1,4 +1,5 @@
 import '../../../interfaces/file_manipulator.dart';
+import '../../../util/util.dart';
 
 class MainFileManipulator extends FileManipulator {
   @override
@@ -10,8 +11,13 @@ void main() {
   Main().main();
 }
 
-class Main extends MainInterface {}
-""";
+class Main extends MainInterface {
+  @override
+  Future<void> initializeServices() async {
+    // Initialize services:
+    await super.initializeServices();
+  }
+}""";
   }
 
   @override
@@ -19,4 +25,18 @@ class Main extends MainInterface {}
 
   @override
   String get path => 'lib/main.dart';
+
+  Future<void> createAuthServiceInit() async {
+    await addLinesAfterLineInFile(
+      path,
+      <String, List<String>>{
+        '// https://saynode.ch': <String>[
+          "import 'service/auth_service.dart';",
+        ],
+        '// Initialize services:': <String>[
+          'Get.find<AuthService>().init();',
+        ],
+      },
+    );
+  }
 }
