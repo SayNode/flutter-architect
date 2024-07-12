@@ -4,7 +4,6 @@ import 'package:args/command_runner.dart';
 
 import '../../../../util/util.dart';
 import '../api/api.dart';
-import '../api/file_manipulators/auth_service_base_manipulator.dart';
 import '../api/file_manipulators/auth_service_manipulator.dart';
 
 class GenerateSigninService extends Command<dynamic> {

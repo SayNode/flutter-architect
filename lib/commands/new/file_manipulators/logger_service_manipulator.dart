@@ -1,5 +1,4 @@
 import '../../../interfaces/service_manipulator.dart';
-import 'constant_manipulator.dart';
 
 class LoggerServiceManipulator extends ServiceManipulator {
   @override
