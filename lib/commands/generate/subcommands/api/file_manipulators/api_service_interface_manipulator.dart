@@ -1,22 +1,29 @@
-import 'constants.dart';
+import '../../../../../interfaces/file_manipulator.dart';
 
-String content(String projectName) {
-  final String projectNameCapitaliezed = projectName.capitalize();
-  return """
+class ApiServiceInterfaceManipulator extends FileManipulator {
+  @override
+  String get name => 'ApiServiceInterface';
+
+  @override
+  String get path => 'lib/base/api_service_interface.dart';
+
+  @override
+  String content() {
+    return r"""
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../service/logger_service.dart';
 import '../util/constants.dart';
-import 'auth_service.dart';
 
-class APIService extends GetxService {
-  AuthService get authService => Get.put(AuthService());
+abstract class ApiServiceInterface extends GetxService {
+  String authenticationToken = '';
+  LoggerService loggerService = Get.find<LoggerService>();
 
-  /// Patch request to $projectNameCapitaliezed backend.
+  /// Patch request to the backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> patch(
@@ -26,34 +33,38 @@ class APIService extends GetxService {
     Encoding? encoding,
     Map<String, dynamic>? queryParameters,
     bool omitBearerToken = false,
+    bool log = false,
   }) async {
-    final Uri url =
-        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
-    debugPrint(
-      'API - PATCH to \$path\${body != null ? ' with body: \$body' : ''}',
-    );
+    final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
+    if (log) {
+      loggerService.log(
+        'API - called PATCH at $url',
+      );
+    }
     final http.Response response = await http.patch(
       url,
       headers: <String, String>{
-        'key': ${projectNameCapitaliezed}Constants.apiKey,
+        'key': Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader:
-                    'Bearer \${authService.authenticationToken}',
+                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
       encoding: encoding,
     );
-    debugPrint(
-      'API - PATCH to \$path - Got \${response.statusCode} with body: \${response.body}',
-    );
+
+    if (log) {
+      loggerService.log(
+        'API - PATCH to queryParameters - Got ${response.statusCode} with body: ${response.body}',
+      );
+    }
     return response;
   }
 
-  /// Put request to $projectNameCapitaliezed backend.
+  /// Put request to the backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> put(
@@ -63,34 +74,37 @@ class APIService extends GetxService {
     Encoding? encoding,
     Map<String, dynamic>? queryParameters,
     bool omitBearerToken = false,
+    bool log = false,
   }) async {
-    final Uri url =
-        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
-    debugPrint(
-      'API - PUT to \$path\${body != null ? ' with body: \$body' : ''}',
-    );
+    final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
+    if (log) {
+      loggerService.log(
+        'API - called PUT at $url',
+      );
+    }
     final http.Response response = await http.put(
       url,
       headers: <String, String>{
-        'key': ${projectNameCapitaliezed}Constants.apiKey,
+        'key': Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader:
-                    'Bearer \${authService.authenticationToken}',
+                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
       encoding: encoding,
     );
-    debugPrint(
-      'API - PUT to \$path - Got \${response.statusCode} with body: \${response.body}',
-    );
+    if (log) {
+      loggerService.log(
+        'API - PUT to queryParameters - Got ${response.statusCode} with body: ${response.body}',
+      );
+    }
     return response;
   }
 
-  /// Post request to $projectNameCapitaliezed backend.
+  /// Post request to the backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> post(
@@ -100,64 +114,71 @@ class APIService extends GetxService {
     Encoding? encoding,
     Map<String, dynamic>? queryParameters,
     bool omitBearerToken = false,
+    bool log = false,
   }) async {
-    final Uri url =
-        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
-    debugPrint(
-      'API - POST to \$path\${body != null ? ' with body: \$body' : ''}',
-    );
+    final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
+    if (log) {
+      loggerService.log(
+        'API - called POST at $url',
+      );
+    }
     final http.Response response = await http.post(
       url,
       headers: <String, String>{
-        'key': ${projectNameCapitaliezed}Constants.apiKey,
+        'key': Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader:
-                    'Bearer \${authService.authenticationToken}',
+                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
       encoding: encoding,
     );
-    debugPrint(
-      'API - POST to \$path - Got \${response.statusCode} with body: \${response.body}',
-    );
+    if (log) {
+      loggerService.log(
+        'API - POST to queryParameters - Got ${response.statusCode} with body: ${response.body}',
+      );
+    }
     return response;
   }
 
-  /// Get request to $projectNameCapitaliezed backend.
+  /// Get request to the backend.
   /// [path] the path to the endpoint.
   Future<http.Response> get(
     String path, {
     String? contentType,
     Map<String, dynamic>? queryParameters,
     bool omitBearerToken = false,
+    bool log = false,
   }) async {
-    final Uri url =
-        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
-    debugPrint('API - GET to \$path');
+    final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
+
+    if (log) {
+      loggerService.log('API - GET to queryParameters');
+    }
     final http.Response response = await http.get(
       url,
       headers: <String, String>{
-        'key': ${projectNameCapitaliezed}Constants.apiKey,
+        'key': Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader:
-                    'Bearer \${authService.authenticationToken}',
+                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
               }),
       },
     );
-    debugPrint(
-      'API - GET to \$path - Got \${response.statusCode} with body: \${response.body}',
-    );
+    if (log) {
+      loggerService.log(
+        'API - called GET at $url - Got ${response.statusCode} with body: ${response.body}',
+      );
+    }
     return response;
   }
 
-  /// Delete request to $projectNameCapitaliezed backend.
+  /// Delete request to the backend.
   /// [path] the path to the endpoint.
   /// [body] is the body of the request.
   Future<http.Response> delete(
@@ -167,31 +188,37 @@ class APIService extends GetxService {
     Encoding? encoding,
     Map<String, dynamic>? queryParameters,
     bool omitBearerToken = false,
+    bool log = false,
   }) async {
-    final Uri url =
-        Uri.https(${projectNameCapitaliezed}Constants.apiDomain, path, queryParameters);
-    debugPrint(
-      'API - DELETE to \$path\${body != null ? ' with body: \$body' : ''}',
-    );
+    final Uri url = Uri.https(Constants.apiDomain, path, queryParameters);
+
+    if (log) {
+      loggerService.log(
+        'API - called DELETE at $url',
+      );
+    }
     final http.Response response = await http.delete(
       url,
       headers: <String, String>{
-        'key': ${projectNameCapitaliezed}Constants.apiKey,
+        'key': Constants.apiKey,
         'Content-Type': contentType ?? 'application/json',
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader:
-                    'Bearer \${authService.authenticationToken}',
+                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
       encoding: encoding,
     );
-    debugPrint(
-      'API - DELETE to \$path - Got \${response.statusCode} with body: \${response.body}',
-    );
+    if (log) {
+      loggerService.log(
+        'API - DELETE to queryParameters - Got ${response.statusCode} with body: ${response.body}',
+      );
+    }
     return response;
   }
-}""";
+}
+""";
+  }
 }

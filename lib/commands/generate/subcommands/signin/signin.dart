@@ -172,7 +172,7 @@ class GenerateSigninService extends Command<dynamic> {
       authPath,
       <String, List<String>>{
         '// https://saynode.ch': <String>[google.imports()],
-        'APIService apiService = Get.put(APIService());': <String>[
+        'class AuthService extends GetxService {': <String>[
           google.initialization(),
         ],
         'void init() {': <String>[google.initContent()],

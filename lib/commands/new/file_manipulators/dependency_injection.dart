@@ -28,6 +28,7 @@ class DependencyInjection extends FileManipulator {
   @override
   String content() {
     return """
+// ignore_for_file: cascade_invocations
 import 'package:get/get.dart';
 import 'package:$projectName/util/constants.dart';
 
@@ -60,20 +61,16 @@ class MainBindings extends Bindings {
     final List<String> newLines = <String>[];
     for (final String line in lines) {
       newLines.add(line);
-      // if (line.contains('_injectControllers();') && initialize) {
-      //   newLines.add('\nGet.lazyPut($serviceName.new);');
-      //   break;
-      // }
-      if (line.contains("import 'package:get/get.dart';") && initialize) {
+      if (line.contains("import 'package:get/get.dart';")) {
         String serviceFileName =
             servicePath.substring(0, servicePath.indexOf('.'));
         serviceFileName =
             serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
         newLines.add(
-          "\nimport 'package:$projectName/service/$serviceFileName.dart';",
+          "\nimport '$serviceFileName.dart';",
         );
       }
-      if (line.contains('    //Services injection') && initialize) {
+      if (line.contains('//Services injection')) {
         newLines
           ..add('\n')
           ..add('Get.lazyPut($serviceName.new);');
@@ -117,6 +114,16 @@ class MainBindings extends Bindings {
           "import 'service/main_bindings.dart';",
         ],
       },
+    );
+  }
+
+  Future<void> removeService(String serviceName) async {
+    await removeLinesFromFile(
+      path,
+      <String>[
+        'Get.lazyPut(ConnectivityService.new);',
+        "import 'connectivity_service.dart';",
+      ],
     );
   }
 }

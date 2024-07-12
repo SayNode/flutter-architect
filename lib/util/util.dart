@@ -385,7 +385,14 @@ Future<String> getProjectName() async {
 String get getPrefix => prefix.content();
 
 Future<File> writeFileWithPrefix(String path, String content) async {
-  final File file = await File(path).writeAsString(prefix.content() + content);
+  File file;
+  try {
+    file = await File(path).writeAsString(prefix.content() + content);
+  } catch (e) {
+    File(path).createSync(recursive: true);
+    file = await File(path).writeAsString(prefix.content() + content);
+  }
+
   return file;
 }
 

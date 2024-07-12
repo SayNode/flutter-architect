@@ -9,7 +9,6 @@ await FirebaseCrashlytics.instance.recordError(
     'Asynchronous: $async',
     'Production: ${!Constants.devMode}',
     'GetMaterialApp Called: $getMaterialAppCalled',
-    // "User Id: ${Get.put(UserStateService()).user.value.id.toString()}",
     ...information,
   ],
 );""";

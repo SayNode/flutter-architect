@@ -5,11 +5,11 @@ import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
 import 'code/firebase_configuration.dart' as firebase_configuration;
-import 'code/main/imports.dart' as imports;
-import 'code/main/fatal_error.dart' as fatal_error;
-import 'code/main/non_fatal_error.dart' as non_fatal_error;
 import 'code/main/dev_error.dart' as dev_error;
+import 'code/main/fatal_error.dart' as fatal_error;
+import 'code/main/imports.dart' as imports;
 import 'code/main/initialize.dart' as initialize;
+import 'code/main/non_fatal_error.dart' as non_fatal_error;
 
 class GenerateCrashlyticsService extends Command<dynamic> {
   GenerateCrashlyticsService() {
@@ -130,7 +130,8 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
 
     await addLinesAfterLineInFile(
       mainPath,
@@ -162,7 +163,8 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await removeTextFromFile(mainPath, imports.content());
     await removeTextFromFile(mainPath, non_fatal_error.content());
     await removeTextFromFile(mainPath, fatal_error.content());

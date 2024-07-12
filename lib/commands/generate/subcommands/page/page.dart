@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
+import '../../../new/file_manipulators/dependency_injection.dart';
 import 'code/controller.dart' as controller;
 import 'code/page.dart' as page;
 
@@ -78,6 +79,8 @@ class GeneratePageService extends Command<dynamic> {
         stderr.writeln("Can't remove page $pascalCase as it's not yet added.");
       },
     );
+    await DependencyInjection(projectName: '')
+        .addController('${pascalCase}Controller');
     formatCode();
     dartFixCode();
   }

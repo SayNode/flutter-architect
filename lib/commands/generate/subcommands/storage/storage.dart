@@ -4,11 +4,11 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/storage_exception.dart' as storage_exception;
-import 'code/storage_service_interface.dart' as storage_service_interface;
 import 'code/secure_storage_service.dart' as secure_storage_service;
 import 'code/shared_storage_service.dart' as shared_storage_service;
+import 'code/storage_exception.dart' as storage_exception;
 import 'code/storage_service.dart' as storage_service;
+import 'code/storage_service_interface.dart' as storage_service_interface;
 
 class GenerateStorageService extends Command<dynamic> {
   //-- Singleton
@@ -82,16 +82,17 @@ class GenerateStorageService extends Command<dynamic> {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await removeLinesFromFile(mainPath, <String>[
-      "import 'service/storage/storage_service.dart';",
-      'final StorageService storage = Get.put<StorageService>(StorageService());',
+      "import '../service/storage/storage_service.dart';",
       'await storage.init();',
     ]);
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{
@@ -99,7 +100,7 @@ class GenerateStorageService extends Command<dynamic> {
           'await Get.find<StorageService>().init();',
         ],
         '// https://saynode.ch': <String>[
-          "import 'service/storage/storage_service.dart';",
+          "import '../service/storage/storage_service.dart';",
         ],
       },
     );

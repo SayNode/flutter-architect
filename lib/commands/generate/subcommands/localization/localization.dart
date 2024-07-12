@@ -100,7 +100,8 @@ class GenerateLocalizationService extends Command<dynamic> {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
 
     await removeLinesFromFile(
       mainPath,
@@ -113,7 +114,6 @@ class GenerateLocalizationService extends Command<dynamic> {
         'translations:',
         'Messages(languages: localizationController.translations),',
         'final LocalizationController localizationController =',
-        'Get.put(LocalizationController());',
         'await localizationController.init();',
       ],
     );
@@ -164,7 +164,8 @@ class GenerateLocalizationService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'main.dart');
+    final String mainPath =
+        path.join('lib', 'interface', 'main_interface.dart');
 
     await addLinesAfterLineInFile(
       mainPath,
@@ -192,7 +193,7 @@ class GenerateLocalizationService extends Command<dynamic> {
           'builder: (LocalizationController localizationController) {',
         ],
         'runApp(const MyApp());': <String>[
-          'final LocalizationController localizationController = Get.put(LocalizationController());',
+          'final LocalizationController localizationController = Get.find<LocalizationController>();',
           'await localizationController.init();',
         ],
       },
