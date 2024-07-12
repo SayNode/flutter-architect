@@ -165,7 +165,7 @@ class Creator extends Command<dynamic> {
         'analysis_options.yaml',
       ),
     ).writeAsString(analysis_option.content()).then((File file) {
-      stderr.writeln('-- /analysis_options.yaml ✔');
+      stderr.writeln('-- /analysis_options.yaml ✅');
     });
   }
 
@@ -175,7 +175,7 @@ class Creator extends Command<dynamic> {
         'codemagic.yaml',
       ),
     ).writeAsString(codemagic_yaml.content()).then((File file) {
-      stderr.writeln('-- /codemagic.yaml ✔');
+      stderr.writeln('-- /codemagic.yaml ✅');
     });
   }
 
@@ -205,7 +205,7 @@ class Creator extends Command<dynamic> {
       }
 
       File(pubPath).writeAsString(buffer.toString()).then((File file) {
-        stderr.writeln('- Assets added to pubspec.yaml ✔');
+        stderr.writeln('- Assets added to pubspec.yaml ✅');
       });
 
       stderr.writeln('# add assets to pubspec CREATED');
@@ -311,7 +311,7 @@ class Creator extends Command<dynamic> {
       }
 
       File(pubPath).writeAsString(buffer.toString()).then((File file) {
-        stderr.writeln('- Config updated in build.gradle ✔');
+        stderr.writeln('- Config updated in build.gradle ✅');
       });
 
       stderr.writeln('# config in build.gradle CREATED');
@@ -325,49 +325,49 @@ class Creator extends Command<dynamic> {
 
   void createCommonFolderStructure() {
     Directory(Directory.current.path).createSync();
-    stderr.writeln('- $projectName/ ✔');
+    stderr.writeln('- $projectName/ ✅');
 
     final String directory = path.join(
       'lib',
     );
 
     Directory(directory).createSync();
-    stderr.writeln('- $directory/ ✔');
+    stderr.writeln('- $directory/ ✅');
 
     // Asset
     Directory(path.join('asset')).createSync();
-    stderr.writeln('- $projectName/asset ✔');
+    stderr.writeln('- $projectName/asset ✅');
 
     // model
     Directory(path.join(directory, 'model')).createSync();
-    stderr.writeln('- $directory/model ✔');
+    stderr.writeln('- $directory/model ✅');
 
     // Page
     Directory(path.join(directory, 'page')).createSync();
-    stderr.writeln('- $directory/page ✔');
+    stderr.writeln('- $directory/page ✅');
 
-    // interface
-    Directory(path.join(directory, 'interface')).createSync();
-    stderr.writeln('- $directory/interface ✔');
+    // base
+    Directory(path.join(directory, 'base')).createSync();
+    stderr.writeln('- $directory/base ✅');
 
     // service
     Directory(path.join(directory, 'service')).createSync();
-    stderr.writeln('- $directory/service ✔');
+    stderr.writeln('- $directory/service ✅');
 
     // Theme
     Directory(path.join(directory, 'theme')).createSync();
-    stderr.writeln('- $directory/theme ✔');
+    stderr.writeln('- $directory/theme ✅');
 
     // Util
     Directory(path.join(directory, 'util')).createSync();
-    stderr.writeln('- $directory/util ✔');
+    stderr.writeln('- $directory/util ✅');
 
     // Helper
     Directory(path.join(directory, 'helper')).createSync();
-    stderr.writeln('- $directory/helper ✔');
+    stderr.writeln('- $directory/helper ✅');
 
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
-    stderr.writeln('- $directory/widget ✔');
+    stderr.writeln('- $directory/widget ✅');
   }
 }

@@ -13,6 +13,7 @@ class ConstantManipulator extends FileManipulator {
   String content() {
     return '''
 class Constants {
+  static const bool devMode = true;
   // Add your constants here. Do not remove this comment.
 }
 ''';
