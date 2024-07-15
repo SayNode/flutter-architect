@@ -46,7 +46,18 @@ abstract class AuthServiceBase extends GetxService {
   // Check if the user is logged in already.
   Future<AuthResponse> silentLogin() async {
     //load auth token from storage
-    apiService.authenticationToken = await storageService.readString('token');
+        apiService.authenticationToken =
+        await storageService.readString('token') ?? '';
+
+    if (apiService.authenticationToken.isEmpty) {
+      return AuthResponse(
+        result: <String, dynamic>{},
+        accessToken: '',
+        message: 'No stored token',
+        status: -1,
+        success: false,
+      );
+    }
 
     try {
       final http.Response response = await apiService.post(

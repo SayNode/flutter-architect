@@ -21,9 +21,9 @@ class SharedStorageService extends GetxService
   }
 
   @override
-  Future<String> readString(String key) async {
+  Future<String?> readString(String key) async {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key $key not found in Shared Storage');
+      return null;
     }
     final String? value = _prefs.getString(key);
     if (value == null) {
@@ -38,9 +38,9 @@ class SharedStorageService extends GetxService
   }
 
   @override
-  Future<int> readInt(String key) async {
+  Future<int?> readInt(String key) async {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key $key not found in Shared Storage');
+      return null;
     }
     final int? value = _prefs.getInt(key);
     if (value == null) {
@@ -55,9 +55,9 @@ class SharedStorageService extends GetxService
   }
 
   @override
-  Future<double> readDouble(String key) async {
+  Future<double?> readDouble(String key) async {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key $key not found in Shared Storage');
+      return null;
     }
     final double? value = _prefs.getDouble(key);
     if (value == null) {
@@ -72,9 +72,9 @@ class SharedStorageService extends GetxService
   }
 
   @override
-  Future<bool> readBool(String key) async {
+  Future<bool?> readBool(String key) async {
     if (!_prefs.containsKey(key)) {
-      throw StorageException('Key $key not found in Shared Storage');
+      return null;
     }
     final bool? value = _prefs.getBool(key);
     if (value == null) {
@@ -89,9 +89,9 @@ class SharedStorageService extends GetxService
   }
 
   @override
-  Future<List<String>> readStringList(String key) async {
+  Future<List<String>?> readStringList(String key) async {
     if (!_prefs.containsKey(key)) {
-      throw SecureStorageException('Key $key not found in Shared Storage');
+      return null;
     }
     final List<String>? value = _prefs.getStringList(key);
     if (value == null) {
