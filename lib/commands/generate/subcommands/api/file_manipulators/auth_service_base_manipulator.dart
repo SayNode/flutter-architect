@@ -15,7 +15,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import '../model/auth_result.dart';
+import '../model/auth_response.dart';
 import '../service/api_service.dart';
 import '../service/logger_service.dart';
 import '../service/storage/secure_storage_service.dart';
@@ -32,7 +32,7 @@ abstract class AuthServiceBase extends GetxService {
   String verificationToken = '';
   String verificationUid = '';
 
-  final SecureStorageService _storageService =
+  final SecureStorageService storageService =
       Get.find<StorageService>().secure;
 
   final APIService apiService = Get.find<APIService>();
@@ -46,7 +46,18 @@ abstract class AuthServiceBase extends GetxService {
   // Check if the user is logged in already.
   Future<AuthResponse> silentLogin() async {
     //load auth token from storage
-    apiService.authenticationToken = await _storageService.readString('token');
+        apiService.authenticationToken =
+        await storageService.readString('token') ?? '';
+
+    if (apiService.authenticationToken.isEmpty) {
+      return AuthResponse(
+        result: <String, dynamic>{},
+        accessToken: '',
+        message: 'No stored token',
+        status: -1,
+        success: false,
+      );
+    }
 
     try {
       final http.Response response = await apiService.post(
@@ -88,13 +99,13 @@ abstract class AuthServiceBase extends GetxService {
       if (authResult.status == 200) {
         apiService.authenticationToken = authResult.accessToken;
 
-        await _storageService.writeString(
+        await storageService.writeString(
           'token',
           authResult.accessToken,
         );
 
         // Disconnect other providers
-        await _disconnectProviders();
+        await disconnectProviders();
       }
 
       return authResult;
@@ -118,8 +129,8 @@ abstract class AuthServiceBase extends GetxService {
       if (response.statusCode == 200) {
         apiService.authenticationToken = '';
         // Disconnect other providers
-        await _disconnectProviders();
-        await _storageService.delete('token');
+        await disconnectProviders();
+        await storageService.delete('token');
       } else {
         // Unexpected status code:
         throw Exception(
@@ -145,9 +156,9 @@ abstract class AuthServiceBase extends GetxService {
       );
       if (response.statusCode == 200) {
         apiService.authenticationToken = '';
-        await _storageService.delete('token');
+        await storageService.delete('token');
         // Disconnect other providers
-        await _disconnectProviders();
+        await disconnectProviders();
       } else {
         // Unexpected status code:
         // await Get.to<void>(() => HtmlDebug(res: response.body));
@@ -186,13 +197,13 @@ abstract class AuthServiceBase extends GetxService {
       );
       if (response.statusCode == 201) {
         apiService.authenticationToken = authResult.accessToken;
-        await _storageService.writeString(
+        await storageService.writeString(
           'token',
           authResult.accessToken,
         );
 
         // Disconnect other providers
-        await _disconnectProviders();
+        await disconnectProviders();
       }
       return authResult;
     } catch (e) {
@@ -350,8 +361,8 @@ abstract class AuthServiceBase extends GetxService {
     }
   }
 
-  Future<void> _disconnectProviders() async {
-    logger.log('AuthService - disconnecting providers');
+  Future<void> disconnectProviders() async {
+    // Disconnect providers
   }
 }
 

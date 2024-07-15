@@ -49,7 +49,7 @@ abstract class ApiServiceInterface extends GetxService {
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
+                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
@@ -90,7 +90,7 @@ abstract class ApiServiceInterface extends GetxService {
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
+                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
@@ -130,7 +130,7 @@ abstract class ApiServiceInterface extends GetxService {
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
+                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,
@@ -166,7 +166,7 @@ abstract class ApiServiceInterface extends GetxService {
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
+                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
               }),
       },
     );
@@ -205,7 +205,7 @@ abstract class ApiServiceInterface extends GetxService {
         ...(omitBearerToken
             ? <String, String>{}
             : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer authenticationToken',
+                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
               }),
       },
       body: body != null ? json.encode(body) : null,

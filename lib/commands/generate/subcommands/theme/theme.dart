@@ -269,7 +269,7 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'theme', 'color.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✔');
+      stderr.writeln('- Colors added to Color.dart ✅');
     });
   }
 
@@ -295,7 +295,7 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'theme', 'theme.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✔');
+      stderr.writeln('- Colors added to Color.dart ✅');
     });
   }
 
@@ -323,7 +323,7 @@ class GenerateThemeService extends Command<dynamic> {
     await File(path.join('lib', 'service', 'theme_service.dart'))
         .writeAsString(buffer.toString())
         .then((File file) {
-      stderr.writeln('- theme added to theme_service.dart ✔');
+      stderr.writeln('- theme added to theme_service.dart ✅');
     });
   }
 

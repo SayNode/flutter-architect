@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
 import '../api/api.dart';
-import 'code/apple.dart' as apple;
-import 'code/google.dart' as google;
+import '../api/file_manipulators/auth_service_manipulator.dart';
 
 class GenerateSigninService extends Command<dynamic> {
   GenerateSigninService() {
@@ -85,7 +83,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Creating Google Signin Service...');
         await addAlreadyRun('signin-google');
         addDependenciesToPubspecSync(<String>['google_sign_in'], null);
-        await _addGoogleAuthChanges();
+        await AuthServiceManipulator().createGoogleSignIn();
         dartFormatCode();
         dartFixCode();
         printGoogleInstructions();
@@ -94,7 +92,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Removing Google Signin Service...');
         await removeAlreadyRun('signin-google');
         removeDependenciesFromPubspecSync(<String>['google_sign_in'], null);
-        await _removeGoogleAuthChanges();
+        await AuthServiceManipulator().removeGoogleSignIn();
         dartFormatCode();
         dartFixCode();
       },
@@ -123,7 +121,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Creating Apple Signin Service...');
         await addAlreadyRun('signin-apple');
         addDependenciesToPubspecSync(<String>['sign_in_with_apple'], null);
-        await _addAppleAuthChanges();
+        await AuthServiceManipulator().createAppleSignIn();
         dartFormatCode();
         dartFixCode();
         printAppleInstructions();
@@ -132,7 +130,7 @@ class GenerateSigninService extends Command<dynamic> {
         stderr.writeln('Removing Apple Signin Service...');
         await removeAlreadyRun('signin-apple');
         removeDependenciesFromPubspecSync(<String>['sign_in_with_apple'], null);
-        await _removeAppleAuthChanges();
+        await AuthServiceManipulator().removeAppleSignIn();
         dartFormatCode();
         dartFixCode();
       },
@@ -161,115 +159,5 @@ class GenerateSigninService extends Command<dynamic> {
       '! Make sure you follow the steps in https://pub.dev/packages/sign_in_with_apple to complete the Apple Sign In configuration',
       ColorText.green,
     );
-  }
-
-  Future<void> _addGoogleAuthChanges() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await _removeDefaultSwitchCaseGoogle();
-
-    await addLinesAfterLineInFile(
-      authPath,
-      <String, List<String>>{
-        '// https://saynode.ch': <String>[google.imports()],
-        'class AuthService extends GetxService {': <String>[
-          google.initialization(),
-        ],
-        'void init() {': <String>[google.initContent()],
-        'Future<void> _disconnectProviders() async {': <String>[
-          google.disconnect(),
-        ],
-      },
-    );
-
-    await addLinesBeforeLineInFile(
-      authPath,
-      <String, List<String>>{
-        'Future<void> _disconnectProviders() async {': <String>[
-          google.signIn(),
-        ],
-        'case ProviderTypes.none:': <String>[google.switchCase()],
-      },
-    );
-  }
-
-  Future<void> _addAppleAuthChanges() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await _removeDefaultSwitchCaseApple();
-
-    await addLinesAfterLineInFile(
-      authPath,
-      <String, List<String>>{
-        '// https://saynode.ch': <String>[apple.imports()],
-        'Future<void> _disconnectProviders() async {': <String>[
-          apple.disconnect(),
-        ],
-      },
-    );
-
-    await addLinesBeforeLineInFile(
-      authPath,
-      <String, List<String>>{
-        'Future<void> _disconnectProviders() async {': <String>[apple.signIn()],
-        'case ProviderTypes.none:': <String>[apple.switchCase()],
-      },
-    );
-  }
-
-  Future<void> _removeGoogleAuthChanges() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await removeTextFromFile(authPath, google.imports());
-    await removeTextFromFile(authPath, google.initialization());
-    await removeTextFromFile(authPath, google.initContent());
-    await removeTextFromFile(authPath, google.disconnect());
-    await removeTextFromFile(authPath, google.signIn());
-    await removeTextFromFile(authPath, google.switchCase());
-    await _addDefaultSwitchCaseGoogle();
-  }
-
-  Future<void> _removeAppleAuthChanges() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await removeTextFromFile(authPath, apple.imports());
-    await removeTextFromFile(authPath, apple.disconnect());
-    await removeTextFromFile(authPath, apple.signIn());
-    await removeTextFromFile(authPath, apple.switchCase());
-    await _addDefaultSwitchCaseApple();
-  }
-
-  Future<void> _addDefaultSwitchCaseApple() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await addLinesBeforeLineInFile(
-      authPath,
-      <String, List<String>>{
-        'case ProviderTypes.none:': <String>[defaultSwitchCaseApple],
-      },
-    );
-  }
-
-  Future<void> _removeDefaultSwitchCaseApple() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await removeTextFromFile(authPath, defaultSwitchCaseApple);
-  }
-
-  Future<void> _addDefaultSwitchCaseGoogle() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await addLinesBeforeLineInFile(
-      authPath,
-      <String, List<String>>{
-        'case ProviderTypes.none:': <String>[defaultSwitchCaseGoogle],
-      },
-    );
-  }
-
-  Future<void> _removeDefaultSwitchCaseGoogle() async {
-    final String authPath = path.join('lib', 'service', 'auth_service.dart');
-
-    await removeTextFromFile(authPath, defaultSwitchCaseGoogle);
   }
 }
