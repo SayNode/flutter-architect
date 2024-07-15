@@ -44,14 +44,14 @@ class GenerateUpgraderService extends Command<dynamic> {
         stderr.writeln('Creating Connectivity Service...');
         await addAlreadyRun('upgrader');
         await upgraderServiceManipulator.create(initialize: true);
-        formatCode();
+        dartFormatCode();
         dartFixCode();
       },
       remove: () async {
         stderr.writeln('Removing Connectivity Service...');
         await removeAlreadyRun('upgrader');
         await upgraderServiceManipulator.remove();
-        formatCode();
+        dartFormatCode();
         dartFixCode();
       },
       rejectAdd: () async {
