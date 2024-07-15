@@ -50,7 +50,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
         _addDependencies();
         await _addFirebaseConfigurationScript();
         await _addMainChanges();
-        formatCode();
+        dartFormatCode();
         dartFixCode();
         _printFinalInstructions();
       },
@@ -60,7 +60,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
         _removeDependencies();
         await _removeFirebaseConfigurationScript();
         await _removeMainChanges();
-        formatCode();
+        dartFormatCode();
         dartFixCode();
       },
       rejectAdd: () async {
@@ -130,8 +130,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
 
     await addLinesAfterLineInFile(
       mainPath,
@@ -163,8 +162,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
   }
 
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
     await removeTextFromFile(mainPath, imports.content());
     await removeTextFromFile(mainPath, non_fatal_error.content());
     await removeTextFromFile(mainPath, fatal_error.content());

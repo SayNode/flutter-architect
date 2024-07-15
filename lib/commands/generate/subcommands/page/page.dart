@@ -81,7 +81,7 @@ class GeneratePageService extends Command<dynamic> {
     );
     await DependencyInjection(projectName: '')
         .addController('${pascalCase}Controller');
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 

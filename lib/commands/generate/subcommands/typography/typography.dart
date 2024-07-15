@@ -7,14 +7,6 @@ import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
 
-extension StringCapitalize on String {
-  String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
-}
-
-extension StringDecapitalize on String {
-  String get decapitalize => '${this[0].toLowerCase()}${substring(1)}';
-}
-
 class GenerateTypographyService extends Command<dynamic> {
   //-- Singleton
   GenerateTypographyService() {
@@ -78,7 +70,7 @@ class GenerateTypographyService extends Command<dynamic> {
         stderr.writeln("Can't remove Typography as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 

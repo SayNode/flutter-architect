@@ -76,7 +76,7 @@ class GenerateWalletService extends Command<dynamic> {
             .writeln("Can't remove Wallet Service as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 

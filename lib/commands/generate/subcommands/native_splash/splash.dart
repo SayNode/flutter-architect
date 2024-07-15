@@ -66,7 +66,7 @@ class GenerateSplashService extends Command<dynamic> {
             .writeln("Can't remove Native Splash as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 
@@ -104,8 +104,7 @@ class GenerateSplashService extends Command<dynamic> {
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
     await removeLinesFromFile(mainPath, <String>[
       'FlutterNativeSplash.remove();',
       'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
@@ -114,8 +113,7 @@ class GenerateSplashService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
 
     await addLinesBeforeLineInFile(
       mainPath,

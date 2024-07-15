@@ -12,10 +12,11 @@ import 'file_manipulators/dependency_injection.dart';
 import 'file_manipulators/error_page.dart';
 import 'file_manipulators/logger_service_manipulator.dart';
 import 'file_manipulators/main_file_manipulator.dart';
-import 'file_manipulators/main_interface_file_manipulator.dart';
+import 'file_manipulators/main_base_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/lint_action.dart' as lint_action;
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -30,14 +31,14 @@ class Creator extends Command<dynamic> {
         'name',
         abbr: 'n',
         help:
-            '--name is mandatory(name of the project). Add flags for whatever platform you want to support.',
+            '--name is mandatory (name of the project). Add flags for whatever platform you want the project to support.',
         mandatory: true,
       )
       ..addOption(
         'org',
         abbr: 'o',
         help:
-            '--org is mandatory(domain of the project). Organise the domain so that it is owned by SayNode or the customer before initializing the project.',
+            '--org is mandatory (domain of the project). Organise the domain so that it is owned by SayNode or the customer before initializing the project.',
         mandatory: true,
       );
   }
@@ -55,6 +56,7 @@ class Creator extends Command<dynamic> {
   }
 
   Future<void> _run() async {
+    // Check if at least one platform was specified
     if (!argResults?['ios'] &&
         !argResults?['android'] &&
         !argResults?['web'] &&
@@ -66,7 +68,11 @@ class Creator extends Command<dynamic> {
       );
       exit(0);
     }
+
+    // Get name
     projectName = argResults?['name'];
+
+    // Create project
     await Process.run(
       'flutter',
       <String>['create', '--org=${argResults?['org']}', projectName, '-e'],
@@ -74,48 +80,69 @@ class Creator extends Command<dynamic> {
     ).then((ProcessResult result) {
       stderr.writeln(result.stdout);
     });
+
+    // Set current directory to new project directory
     Directory.current = '${Directory.current.path}/$projectName';
-    await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
+
+    // Create common folder structure
     createCommonFolderStructure();
 
-    //Create regular dart files
+    // Add common dependencies
+    await addDependenciesToPubspec(<String>['get', 'is_first_run'], null);
+
+    // Create common dart files
     await MainFileManipulator().create();
-    await MainInterfaceFileManipulator().create();
+    printColor('Main created ✔', ColorText.green);
+    await MainBaseFileManipulator().create();
+    printColor('Main Base file created ✔', ColorText.green);
     await UtilFileManipulator().create();
+    printColor('Util file created ✔', ColorText.green);
     await ErrorPageManipulator().create();
+    printColor('Error Page file created ✔', ColorText.green);
     await CustomScaffoldManipulator().create();
+    printColor('Custom Scaffold file created ✔', ColorText.green);
     await ConstantManipulator().create();
-
-    //Create services
-    //Add Dependency Injection
-    final DependencyInjection dependencyInjection =
-        DependencyInjection(projectName: projectName);
-    await dependencyInjection.create();
-
-    //Add Logger Service
-    final LoggerServiceManipulator loggerServiceManipulator =
-        LoggerServiceManipulator();
-    await loggerServiceManipulator.create(
+    printColor('Constants file created ✔', ColorText.green);
+    await DependencyInjection(projectName: projectName).create();
+    printColor('Dependency Injection file created ✔', ColorText.green);
+    await LoggerServiceManipulator().create(
       projectName: projectName,
       initialize: true,
     );
+    printColor('Logger Service created ✔', ColorText.green);
+    printColor('', ColorText.black);
 
-    addAssetsToPubspec();
+    // Add analysis options with custom rules
     await rewriteAnalysisOptions();
+
+    // Add assets paths to pubspec.yaml
+    await addAssetsToPubspec();
+
+    // Add codemagic.yaml for CI/CD
     await addCodemagicYaml();
 
+    // Create "added boilerplate" file for generate commands
     await File(path.join('added_boilerplate.txt')).writeAsString('');
-    await addWorkflow();
+
+    // Add git workflow
+    await addGitWorkflow();
+
+    // Delete unused folders for non-supproted platforms
     deleteUnusedFolders();
 
-    if (argResults?['ios'] == true || argResults?['android'] == true) {
+    // Update gradle file for android only
+    if (argResults?['android'] == true) {
       await updateGradleFile();
     }
 
+    printColor('', ColorText.black);
+
+    // Fix and format dart code
     dartFixCode();
-    formatCode();
+    dartFormatCode();
   }
 
+  /// Deleted directories for non-supported platforms
   void deleteUnusedFolders() {
     if (argResults?['ios'] == false) {
       if (Directory(path.join('ios')).existsSync()) {
@@ -149,66 +176,66 @@ class Creator extends Command<dynamic> {
     }
   }
 
-  Future<void> addWorkflow() async {
+  /// Add git workflow and linting
+  Future<void> addGitWorkflow() async {
     Directory(path.join('.github')).createSync();
     Directory(path.join('.github', 'workflows')).createSync();
     await File(
       path.join('.github', 'workflows', 'lint_action.yaml'),
     ).writeAsString(
-      " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos",
+      lint_action.content(),
     );
   }
 
+  /// Rewrite analysis options with the
+  /// custom rules in [analysis_option]
   Future<void> rewriteAnalysisOptions() async {
     await File(
       path.join(
         'analysis_options.yaml',
       ),
     ).writeAsString(analysis_option.content()).then((File file) {
-      stderr.writeln('-- /analysis_options.yaml ✔');
+      printColor('-- /analysis_options.yaml ✔', ColorText.green);
     });
   }
 
+  /// Add CI/CD configuration to codemagic.yaml
   Future<void> addCodemagicYaml() async {
     await File(
       path.join(
         'codemagic.yaml',
       ),
     ).writeAsString(codemagic_yaml.content()).then((File file) {
-      stderr.writeln('-- /codemagic.yaml ✔');
+      printColor('-- /codemagic.yaml ✔', ColorText.green);
     });
   }
 
-  /// Add assets folder to pubspec.yaml
-  void addAssetsToPubspec() {
+  /// Add assets paths to pubspec.yaml
+  Future<void> addAssetsToPubspec() async {
     final String pubPath = path.join('pubspec.yaml');
-    File(pubPath).readAsLines().then((List<String> lines) {
-      final StringBuffer buffer = StringBuffer();
-      bool isAssetsIncluded = false;
-      for (final String line in lines) {
-        if (line.contains('  assets:')) {
-          isAssetsIncluded = true;
-        }
+    final List<String> lines = await File(pubPath).readAsLines();
+    // Find out if assets is already included
+    for (final String line in lines) {
+      if (line.contains('  assets:')) {
+        return;
       }
+    }
 
-      for (final String line in lines) {
-        buffer.write('$line\n');
-
-        if (line.contains('flutter:') &&
-            buffer.toString().contains('dev_dependencies:\n') &&
-            !isAssetsIncluded) {
-          buffer
-            ..write('  assets:\n')
-            ..write('    - asset/\n')
-            ..write('\n');
-        }
+    // Add assets to pubspec.yaml
+    final StringBuffer buffer = StringBuffer();
+    for (final String line in lines) {
+      buffer.write('$line\n');
+      if (line.contains('flutter:') &&
+          buffer.toString().contains('dev_dependencies:\n')) {
+        buffer
+          ..write('  assets:\n')
+          ..write('    - asset/\n')
+          ..write('\n');
       }
+    }
 
-      File(pubPath).writeAsString(buffer.toString()).then((File file) {
-        stderr.writeln('- Assets added to pubspec.yaml ✔');
-      });
-
-      stderr.writeln('# add assets to pubspec CREATED');
+    await File(pubPath).writeAsString(buffer.toString()).then((File file) {
+      printColor('Assets added to pubspec.yaml ✔', ColorText.green);
     });
   }
 
@@ -311,10 +338,8 @@ class Creator extends Command<dynamic> {
       }
 
       File(pubPath).writeAsString(buffer.toString()).then((File file) {
-        stderr.writeln('- Config updated in build.gradle ✔');
+        printColor('Config in build.gradle ✔', ColorText.green);
       });
-
-      stderr.writeln('# config in build.gradle CREATED');
     });
     await replaceLineInFile(
       pubPath,
@@ -323,51 +348,55 @@ class Creator extends Command<dynamic> {
     );
   }
 
+  /// Create common folder structure for an
+  /// MVC (Model-View-Controller) architecture
   void createCommonFolderStructure() {
-    Directory(Directory.current.path).createSync();
-    stderr.writeln('- $projectName/ ✔');
+    printColor('Creating MVC directories:', ColorText.white);
 
-    final String directory = path.join(
-      'lib',
-    );
+    Directory(Directory.current.path).createSync();
+    printColor('-- $projectName/ ✔', ColorText.green);
+
+    final String directory = path.join('lib');
 
     Directory(directory).createSync();
-    stderr.writeln('- $directory/ ✔');
+    printColor('-- $directory/ ✔', ColorText.green);
 
     // Asset
     Directory(path.join('asset')).createSync();
-    stderr.writeln('- $projectName/asset ✔');
+    printColor('-- $projectName/asset ✔', ColorText.green);
 
     // model
     Directory(path.join(directory, 'model')).createSync();
-    stderr.writeln('- $directory/model ✔');
+    printColor('-- $directory/model ✔', ColorText.green);
 
     // Page
     Directory(path.join(directory, 'page')).createSync();
-    stderr.writeln('- $directory/page ✔');
+    printColor('-- $directory/page ✔', ColorText.green);
 
     // interface
     Directory(path.join(directory, 'interface')).createSync();
-    stderr.writeln('- $directory/interface ✔');
+    printColor('-- $directory/interface ✔', ColorText.green);
 
     // service
     Directory(path.join(directory, 'service')).createSync();
-    stderr.writeln('- $directory/service ✔');
+    printColor('-- $directory/service ✔', ColorText.green);
 
     // Theme
     Directory(path.join(directory, 'theme')).createSync();
-    stderr.writeln('- $directory/theme ✔');
+    printColor('-- $directory/theme ✔', ColorText.green);
 
     // Util
     Directory(path.join(directory, 'util')).createSync();
-    stderr.writeln('- $directory/util ✔');
+    printColor('-- $directory/util ✔', ColorText.green);
 
     // Helper
     Directory(path.join(directory, 'helper')).createSync();
-    stderr.writeln('- $directory/helper ✔');
+    printColor('-- $directory/helper ✔', ColorText.green);
 
     // Widget
     Directory(path.join(directory, 'widget')).createSync();
-    stderr.writeln('- $directory/widget ✔');
+    printColor('-- $directory/widget ✔', ColorText.green);
+
+    printColor('', ColorText.black);
   }
 }

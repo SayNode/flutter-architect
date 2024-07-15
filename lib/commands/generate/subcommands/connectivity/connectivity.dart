@@ -62,7 +62,7 @@ class GenerateConnectivityService extends Command<dynamic> {
         stderr.writeln("Can't remove API Service as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 

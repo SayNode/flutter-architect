@@ -76,14 +76,13 @@ class GenerateStorageService extends Command<dynamic> {
         stderr.writeln("Can't remove Storage as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 
   // Remove the Storage-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
     await removeLinesFromFile(mainPath, <String>[
       "import '../service/storage/storage_service.dart';",
       'await storage.init();',
@@ -91,8 +90,7 @@ class GenerateStorageService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
     await addLinesAfterLineInFile(
       mainPath,
       <String, List<String>>{

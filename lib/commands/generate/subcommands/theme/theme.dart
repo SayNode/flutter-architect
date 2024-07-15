@@ -97,7 +97,7 @@ class GenerateThemeService extends Command<dynamic> {
         stderr.writeln("Can't remove Theme as it's not yet configured.");
       },
     );
-    formatCode();
+    dartFormatCode();
     dartFixCode();
   }
 
@@ -145,8 +145,7 @@ class GenerateThemeService extends Command<dynamic> {
 
   // Remove the Theme-related lines from main.
   Future<void> _removeMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
     await removeLinesFromFile(
       mainPath,
       <String>[
@@ -329,8 +328,7 @@ class GenerateThemeService extends Command<dynamic> {
   }
 
   Future<void> _addMainChanges() async {
-    final String mainPath =
-        path.join('lib', 'interface', 'main_interface.dart');
+    final String mainPath = path.join('lib', 'base', 'main_base.dart');
 
     await replaceLineInFile(
       mainPath,
