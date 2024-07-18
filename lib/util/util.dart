@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import '../commands/new/files/prefix.dart' as prefix;
 
 /// Logic for building a component.
@@ -31,6 +33,14 @@ Future<void> componentBuilder({
       }
     }
   }
+}
+
+Future<void> addWorkflow(String workflow) async {
+  Directory(path.join('.github')).createSync();
+  Directory(path.join('.github', 'workflows')).createSync();
+  await File(
+    path.join('.github', 'workflows', 'lint_action.yaml'),
+  ).writeAsString(workflow);
 }
 
 /// Add dependencies to pubspec.yaml

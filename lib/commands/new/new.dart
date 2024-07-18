@@ -16,6 +16,7 @@ import 'file_manipulators/main_interface_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
+import 'files/workflows.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -105,7 +106,8 @@ class Creator extends Command<dynamic> {
     await addCodemagicYaml();
 
     await File(path.join('added_boilerplate.txt')).writeAsString('');
-    await addWorkflow();
+    await addWorkflow(prAgent);
+    await addWorkflow(lintingWorkflow);
     deleteUnusedFolders();
 
     if (argResults?['ios'] == true || argResults?['android'] == true) {
@@ -147,16 +149,6 @@ class Creator extends Command<dynamic> {
         Directory(path.join('linux')).deleteSync(recursive: true);
       }
     }
-  }
-
-  Future<void> addWorkflow() async {
-    Directory(path.join('.github')).createSync();
-    Directory(path.join('.github', 'workflows')).createSync();
-    await File(
-      path.join('.github', 'workflows', 'lint_action.yaml'),
-    ).writeAsString(
-      " \n \nname: Linting Workflow \n \non: pull_request \n \njobs: \n  build: \n    name: Linting \n    runs-on: ubuntu-latest \n    steps: \n      - name: Setup Repository \n        uses: actions/checkout@v2 \n \n      - name: Set up Flutter \n        uses: subosito/flutter-action@v2 \n        with: \n          channel: 'stable' \n      - run: flutter --version \n \n      - name: Install Pub Dependencies \n        run: flutter pub get \n \n      - name: Verify Formatting \n        run: dart format --output=none --set-exit-if-changed . \n      - name: Analyze Project Source \n        run: dart analyze --fatal-infos",
-    );
   }
 
   Future<void> rewriteAnalysisOptions() async {
