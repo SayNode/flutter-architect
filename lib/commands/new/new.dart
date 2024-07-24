@@ -16,7 +16,7 @@ import 'file_manipulators/main_base_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
-import 'files/lint_action.dart' as lint_action;
+import 'files/workflows.dart';
 
 class Creator extends Command<dynamic> {
   Creator() {
@@ -122,11 +122,8 @@ class Creator extends Command<dynamic> {
 
     // Create "added boilerplate" file for generate commands
     await File(path.join('added_boilerplate.txt')).writeAsString('');
-
-    // Add git workflow
-    await addGitWorkflow();
-
-    // Delete unused folders for non-supproted platforms
+    await addWorkflow(prAgent);
+    await addWorkflow(lintingWorkflow);
     deleteUnusedFolders();
 
     // Update gradle file for android only
@@ -175,19 +172,6 @@ class Creator extends Command<dynamic> {
     }
   }
 
-  /// Add git workflow and linting
-  Future<void> addGitWorkflow() async {
-    Directory(path.join('.github')).createSync();
-    Directory(path.join('.github', 'workflows')).createSync();
-    await File(
-      path.join('.github', 'workflows', 'lint_action.yaml'),
-    ).writeAsString(
-      lint_action.content(),
-    );
-  }
-
-  /// Rewrite analysis options with the
-  /// custom rules in [analysis_option]
   Future<void> rewriteAnalysisOptions() async {
     await File(
       path.join(
