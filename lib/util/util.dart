@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -6,6 +7,10 @@ import 'package:path/path.dart' as path;
 import '../commands/new/files/prefix.dart' as prefix;
 
 /// Logic for building a component.
+/// Receives the command-line arguments [force], [removeOnly].
+/// Receives the [alreadyBuilt] boolean.
+/// [add] and [remove] will be called if the component is not already built.
+/// [rejectAdd] and [rejectRemove] will be called if the component is already built.
 Future<void> componentBuilder({
   required bool force,
   required bool alreadyBuilt,
@@ -16,19 +21,36 @@ Future<void> componentBuilder({
   Future<dynamic> Function()? rejectRemove,
 }) async {
   if (removeOnly) {
+    // If removeOnly is true, remove the component.
     if (alreadyBuilt) {
+      // If the component is already built, remove it.
       await remove?.call();
+      emptyLine();
+      dartFormatCode();
+      dartFixCode();
     } else {
+      // If the component is not built, reject the removal.
       await rejectRemove?.call();
     }
   } else {
+    // If removeOnly is false, add the component.
     if (!alreadyBuilt) {
+      // If the component is not already built, add it.
       await add?.call();
+      emptyLine();
+      dartFormatCode();
+      dartFixCode();
     } else {
+      // If the component is already built, check if should force the addition.
       if (force) {
+        // If force is true, remove the component and add it again.
         await remove?.call();
         await add?.call();
+        emptyLine();
+        dartFormatCode();
+        dartFixCode();
       } else {
+        // If force is false, reject the addition.
         await rejectAdd?.call();
       }
     }
@@ -48,6 +70,15 @@ Future<ProcessResult> addDependenciesToPubspec(
   List<String> dependencies,
   String? workingDirectory,
 ) async {
+  printColor(
+    'Adding the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
+    ColorText.blue,
+  );
   final ProcessResult result = await Process.run(
     'flutter',
     <String>['pub', 'add', ...dependencies],
@@ -60,6 +91,8 @@ Future<ProcessResult> addDependenciesToPubspec(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
+  printColor('Dependencies added ✔\n', ColorText.green);
   return result;
 }
 
@@ -68,11 +101,22 @@ ProcessResult addDependenciesToPubspecSync(
   List<String> dependencies,
   String? workingDirectory,
 ) {
+  printColor(
+    'Adding the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
+    ColorText.blue,
+  );
   final ProcessResult result = Process.runSync(
     'flutter',
     <String>['pub', 'add', ...dependencies],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -80,6 +124,8 @@ ProcessResult addDependenciesToPubspecSync(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
+  printColor('Dependencies added ✔\n', ColorText.green);
   return result;
 }
 
@@ -88,6 +134,15 @@ Future<ProcessResult> removeDependenciesFromPubspec(
   List<String> dependencies,
   String? workingDirectory,
 ) async {
+  printColor(
+    'Removing the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
+    ColorText.blue,
+  );
   final ProcessResult result = await Process.run(
     'flutter',
     <String>['pub', 'remove', ...dependencies],
@@ -100,6 +155,8 @@ Future<ProcessResult> removeDependenciesFromPubspec(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
+  printColor('Dependencies removed ✔\n', ColorText.green);
   return result;
 }
 
@@ -108,11 +165,22 @@ ProcessResult removeDependenciesFromPubspecSync(
   List<String> dependencies,
   String? workingDirectory,
 ) {
+  printColor(
+    'Removing the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
+    ColorText.blue,
+  );
   final ProcessResult result = Process.runSync(
     'flutter',
     <String>['pub', 'remove', ...dependencies],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -120,11 +188,17 @@ ProcessResult removeDependenciesFromPubspecSync(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
+  printColor('Dependencies removed ✔\n', ColorText.green);
   return result;
 }
 
 /// Run flutter_native_splash command
 ProcessResult runNativeSplash(String? workingDirectory) {
+  printColor(
+    '----- Native Splash Screen Output -----',
+    ColorText.cyan,
+  );
   final ProcessResult result = Process.runSync(
     'dart',
     <String>[
@@ -134,6 +208,8 @@ ProcessResult runNativeSplash(String? workingDirectory) {
     ],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -141,15 +217,22 @@ ProcessResult runNativeSplash(String? workingDirectory) {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
   return result;
 }
 
 /// Run dart format
-void formatCode() {
+void dartFormatCode() {
+  printColor(
+    '------------ Dart Format ------------',
+    ColorText.blue,
+  );
   final ProcessResult result = Process.runSync(
     'dart',
     <String>['format', '.'],
     runInShell: true,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -157,14 +240,21 @@ void formatCode() {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
 }
 
 // Run dart fix
 void dartFixCode() {
+  printColor(
+    '-------------- Dart Fix --------------',
+    ColorText.blue,
+  );
   final ProcessResult result = Process.runSync(
     'dart',
     <String>['fix', '--apply'],
     runInShell: true,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -172,6 +262,7 @@ void dartFixCode() {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
+  emptyLine();
 }
 
 /// Mark [command] as already ran.
@@ -379,6 +470,7 @@ Future<void> addLinesBeforeLineInFile(
   await File(file).writeAsString(newFileLines.join('\n'));
 }
 
+/// Get project name from pubspec.yaml
 Future<String> getProjectName() async {
   String name = '';
   await File('pubspec.yaml').readAsLines().then((List<String> lines) {
@@ -392,20 +484,34 @@ Future<String> getProjectName() async {
   return name;
 }
 
+/// Get pre-built file prefix
 String get getPrefix => prefix.content();
 
-Future<File> writeFileWithPrefix(String path, String content) async {
+/// Write file
+Future<File> writeFile(String path, String content) async {
   File file;
   try {
-    file = await File(path).writeAsString(prefix.content() + content);
+    file = await File(path).writeAsString(content);
   } catch (e) {
     File(path).createSync(recursive: true);
-    file = await File(path).writeAsString(prefix.content() + content);
+    file = await File(path).writeAsString(content);
   }
-
   return file;
 }
 
+/// Write file with prefix
+Future<File> writeFileWithPrefix(String path, String content) async {
+  File file;
+  try {
+    file = await File(path).writeAsString(getPrefix + content);
+  } catch (e) {
+    File(path).createSync(recursive: true);
+    file = await File(path).writeAsString(getPrefix + content);
+  }
+  return file;
+}
+
+/// Show spinner loading animation in Command Line
 Future<void> spinnerLoading(Function function) async {
   final List<String> P = <String>[r'\', '|', '/', '-'];
   int x = 0;
@@ -419,32 +525,40 @@ Future<void> spinnerLoading(Function function) async {
   timer.cancel();
 }
 
-String capitalizeFirstLetter(String s) {
-  return s[0].toUpperCase() + s.substring(1);
+void emptyLine() {
+  emptyLine();
 }
 
-//function to turn string to lower camel case
+extension StringCapitalize on String {
+  String get capitalize => '${this[0].toUpperCase()}${substring(1)}';
+}
+
+extension StringDecapitalize on String {
+  String get decapitalize => '${this[0].toLowerCase()}${substring(1)}';
+}
+
+// Convert snake_case to lowerCamelCase
 String lowerCamelCase(String s) {
   final List<String> words = s.split(RegExp(r'[_\s-]'));
   final StringBuffer buffer = StringBuffer()..write(words[0].toLowerCase());
   for (int i = 1; i < words.length; i++) {
-    buffer.write(capitalizeFirstLetter(words[i]));
+    buffer.write(words[i].capitalize);
   }
   return buffer.toString();
 }
 
-// Black:   \x1B[30m
-// Red:     \x1B[31m
-// Green:   \x1B[32m
-// Yellow:  \x1B[33m
-// Blue:    \x1B[34m
-// Magenta: \x1B[35m
-// Cyan:    \x1B[36m
-// White:   \x1B[37m
-// Reset:   \x1B[0m
-
-// \x1B  [31m  Hello  \x1B  [0m
-
+/// Print colored text to the console
+/// Color memo:
+/// Black:   \x1B[30m
+/// Red:     \x1B[31m
+/// Green:   \x1B[32m
+/// Yellow:  \x1B[33m
+/// Blue:    \x1B[34m
+/// Magenta: \x1B[35m
+/// Cyan:    \x1B[36m
+/// White:   \x1B[37m
+/// Reset:   \x1B[0m
+/// \x1B  [31m  Hello  \x1B  [0m
 void printColor(String textToPrint, ColorText colorText) {
   // generate a switch on the colorText enum
   switch (colorText) {

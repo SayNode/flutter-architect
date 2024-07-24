@@ -4,9 +4,8 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import '../../../new/file_manipulators/dependency_injection.dart';
-import 'code/controller.dart' as controller;
-import 'code/page.dart' as page;
+import 'file_manipulators/controller_manipulator.dart';
+import 'file_manipulators/page_manipulator.dart';
 
 class GeneratePageService extends Command<dynamic> {
   GeneratePageService() {
@@ -36,7 +35,7 @@ class GeneratePageService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -52,7 +51,10 @@ class GeneratePageService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating lib/$snakeCase...');
+        printColor(
+          '---- Creating View-Controller $pascalCase ----\n',
+          ColorText.cyan,
+        );
         Directory(
           path.join('lib', 'page', snakeCase),
         ).createSync();
@@ -62,27 +64,42 @@ class GeneratePageService extends Command<dynamic> {
         Directory(
           path.join('lib', 'page', snakeCase, 'widget'),
         ).createSync();
-        await _createController(pascalCase, snakeCase);
-        await _createPage(pascalCase, snakeCase);
-        await _handleTheme(pascalCase, snakeCase);
+        await PageManipulator(
+          snakeCase,
+          pascalCase,
+          'lib/page/$snakeCase/${snakeCase}_page.dart',
+        ).create();
+        await ControllerManipulator(
+          pascalCase,
+          'lib/page/$snakeCase/controller/${snakeCase}_controller.dart',
+        ).create();
       },
       remove: () async {
-        stderr.writeln('Removing API Service...');
+        printColor(
+          '---- Removing View-Controller $pascalCase ----\n',
+          ColorText.cyan,
+        );
         Directory(
           path.join('lib', 'page', snakeCase),
         ).deleteSync(recursive: true);
+        printColor(
+          '${path.join('lib', 'page', snakeCase)} - successfully removed ✔',
+          ColorText.green,
+        );
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add page $pascalCase as it's already added.");
+        printColor(
+          "Can't add page $pascalCase as it's already added.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove page $pascalCase as it's not yet added.");
+        printColor(
+          "Can't remove page $pascalCase as it's not yet added.",
+          ColorText.red,
+        );
       },
     );
-    await DependencyInjection(projectName: '')
-        .addController('${pascalCase}Controller');
-    formatCode();
-    dartFixCode();
   }
 
   String pascalCaseToSnakeCase(String input) {
@@ -93,68 +110,5 @@ class GeneratePageService extends Command<dynamic> {
           (Match m) => '_${m.group(0)}',
         )
         .toLowerCase();
-  }
-
-  Future<void> _createController(String pascalCase, String snakeCase) async {
-    await writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        snakeCase,
-        'controller',
-        '${snakeCase}_controller.dart',
-      ),
-      controller.content(pascalCase, snakeCase),
-    );
-  }
-
-  Future<void> _createPage(String pascalCase, String snakeCase) async {
-    await writeFileWithPrefix(
-      path.join(
-        'lib',
-        'page',
-        snakeCase,
-        '${snakeCase}_page.dart',
-      ),
-      page.content(pascalCase, snakeCase),
-    );
-  }
-
-  Future<void> _handleTheme(String pascalCase, String snakeCase) async {
-    if (File(
-          path.join(
-            'lib',
-            'service',
-            'theme_service.dart',
-          ),
-        ).existsSync() &&
-        File(
-          path.join(
-            'lib',
-            'theme',
-            'theme.dart',
-          ),
-        ).existsSync()) {
-      final String file = path.join(
-        'lib',
-        'page',
-        snakeCase,
-        '${snakeCase}_page.dart',
-      );
-      await addLinesBeforeLineInFile(file, <String, List<String>>{
-        'return Container();': <String>[
-          'final CustomTheme theme = ThemeService().theme;',
-        ],
-      });
-      await addLinesAfterLineInFile(
-        file,
-        <String, List<String>>{
-          '// https://saynode.ch': <String>[
-            "import '../../service/theme_service.dart';",
-            "import '../../theme/theme.dart';",
-          ],
-        },
-      );
-    }
   }
 }

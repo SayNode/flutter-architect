@@ -4,9 +4,11 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/language_model.dart' as language_model;
-import 'code/localization_controller.dart' as localization_controller;
-import 'code/message.dart' as message;
+import '../../../new/file_manipulators/main_base_file_manipulator.dart';
+import 'file_manipulators/english_json_manipulator.dart';
+import 'file_manipulators/language_manipulator.dart';
+import 'file_manipulators/localization_controller_manipulator.dart';
+import 'file_manipulators/message_manipulator.dart';
 
 class GenerateLocalizationService extends Command<dynamic> {
   GenerateLocalizationService() {
@@ -41,24 +43,36 @@ class GenerateLocalizationService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Localization...');
+        printColor('-------- Creating Localization -------\n', ColorText.cyan);
         await addAlreadyRun('localization');
-        await _addLanguageModel();
-        await _addMessageFile();
-        await _addLocalizationController();
-        await _addLanguageJson();
-        await _addAssetToPubspec();
-        await _addMainChanges();
+        await LanguageManipulator().create();
+        await MessageManipulator().create();
+        await LocalizationControllerManipulator().create();
+        await EnglishJsonManipulator().create();
+        await MainBaseFileManipulator().addLocalization();
+        printColor(
+          'Adding /locale to assets in pubspec.yaml...',
+          ColorText.white,
+        );
+        await addAssetToPubspec();
+        printColor('Added ✔', ColorText.white);
       },
       remove: () async {
-        stderr.writeln('Removing Localization...');
+        printColor('-------- Removing Localization -------\n', ColorText.cyan);
         await removeAlreadyRun('localization');
-        await _removeMainChanges();
-        await _removeLanguageModel();
-        await _removeMessageFile();
-        await _removeLocalizationController();
-        await _removeLanguageJson();
-        await _removeAssetFromPubspec();
+        printColor('Removing changes from main...', ColorText.white);
+        await MainBaseFileManipulator().removeLocalization();
+        printColor('Changes removed ✔\n', ColorText.green);
+        await LanguageManipulator().remove();
+        await MessageManipulator().remove();
+        await LocalizationControllerManipulator().remove();
+        await EnglishJsonManipulator().remove();
+        printColor(
+          '\nRemoving /locale to assets in pubspec.yaml...',
+          ColorText.white,
+        );
+        await removeAssetFromPubspec();
+        printColor('Removed ✔', ColorText.white);
       },
       rejectAdd: () async {
         stderr.writeln("Can't add Localization as it's already configured.");
@@ -67,28 +81,9 @@ class GenerateLocalizationService extends Command<dynamic> {
         stderr.writeln("Can't remove Localization as it's not yet configured.");
       },
     );
-    formatCode();
-    dartFixCode();
   }
 
-  Future<void> _removeLanguageModel() async {
-    await File(path.join('lib', 'model', 'language_model.dart')).delete();
-  }
-
-  Future<void> _removeLanguageJson() async {
-    await Directory(path.join('asset', 'locale')).delete(recursive: true);
-  }
-
-  Future<void> _removeMessageFile() async {
-    await File(path.join('lib', 'model', 'message.dart')).delete();
-  }
-
-  Future<void> _removeLocalizationController() async {
-    await File(path.join('lib', 'service', 'localization_controller.dart'))
-        .delete();
-  }
-
-  Future<void> _removeAssetFromPubspec() async {
+  Future<void> removeAssetFromPubspec() async {
     final String pubspecPath = path.join('pubspec.yaml');
     await removeLinesFromFile(
       pubspecPath,
@@ -98,101 +93,13 @@ class GenerateLocalizationService extends Command<dynamic> {
     );
   }
 
-  // Remove the Storage-related lines from main.
-  Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
-
-    await removeLinesFromFile(
-      mainPath,
-      <String>[
-        "import 'service/localization_controller.dart';",
-        "import 'model/message.dart';",
-        'return GetBuilder<LocalizationController>(',
-        'builder: (LocalizationController localizationController) {',
-        'locale: localizationController.locale,',
-        'translations:',
-        'Messages(languages: localizationController.translations),',
-        'final LocalizationController localizationController =',
-        'await localizationController.init();',
-      ],
-    );
-
-    await removeLinesAfterFromFile(
-      mainPath,
-      '// End MaterialApp',
-      2,
-    );
-  }
-
-  Future<void> _addLanguageModel() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'language_model.dart'),
-      language_model.content(),
-    );
-  }
-
-  Future<void> _addLanguageJson() async {
-    Directory(path.join('asset', 'locale')).createSync();
-    await File(path.join('asset', 'locale', 'en.json')).writeAsString('{}');
-  }
-
-  Future<void> _addMessageFile() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'message.dart'),
-      message.content(),
-    );
-  }
-
-  Future<void> _addLocalizationController() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'localization_controller.dart'),
-      localization_controller.content(),
-    );
-  }
-
-  Future<void> _addAssetToPubspec() async {
+  Future<void> addAssetToPubspec() async {
     final String pubspecPath = path.join('pubspec.yaml');
     await addLinesAfterLineInFile(
       pubspecPath,
       <String, List<String>>{
         '- asset/': <String>[
           '    - asset/locale/',
-        ],
-      },
-    );
-  }
-
-  Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
-
-    await addLinesAfterLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// End MaterialApp': <String>[
-          '},);',
-        ],
-        'return GetMaterialApp(': <String>[
-          'locale: localizationController.locale,',
-          'translations:',
-          'Messages(languages: localizationController.translations),',
-        ],
-        '// https://saynode.ch': <String>[
-          "import 'service/localization_controller.dart';",
-          "import 'model/message.dart';",
-        ],
-      },
-    );
-
-    await addLinesBeforeLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// Start MaterialApp': <String>[
-          'return GetBuilder<LocalizationController>(',
-          'builder: (LocalizationController localizationController) {',
-        ],
-        'runApp(const MyApp());': <String>[
-          'final LocalizationController localizationController = Get.find<LocalizationController>();',
-          'await localizationController.init();',
         ],
       },
     );

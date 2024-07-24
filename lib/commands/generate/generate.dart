@@ -15,9 +15,9 @@ import 'subcommands/theme/theme.dart';
 import 'subcommands/typography/typography.dart';
 import 'subcommands/wallet/wallet.dart';
 
-class Generator extends Command<dynamic> {
+class Architect extends Command<dynamic> {
   //-- Singleton
-  Generator._privateConstructor() {
+  Architect._privateConstructor() {
     // Add Sub Commands here (for project components)
     addSubcommand(GenerateStorageService());
     addSubcommand(GenerateThemeService());
@@ -31,11 +31,11 @@ class Generator extends Command<dynamic> {
     addSubcommand(GenerateSigninService());
 
     // Utilitary commands
-    addSubcommand(AllGeneratorService());
+    addSubcommand(AllServices());
     addSubcommand(GeneratePageService());
   }
 
-  static final Generator instance = Generator._privateConstructor();
+  static final Architect instance = Architect._privateConstructor();
 
   @override
   String get description => 'Generate a boilerplate code for the project;';

@@ -10,15 +10,15 @@ Use Git Bash to run the following commands. If you're using VSCode, open View > 
 
 ```bash
 
-dart compile exe lib/project_initialization_tool.dart -o generator.exe
-alias generator="./generator.exe"
+dart compile exe lib/architect.dart -o architect.exe
+alias architect="./architect.exe"
     
 ```
 
 or with full path
 
 ```bash
-alias generator="/Users/saynode/Documents/GitHub/flutter-architect/generator.exe"
+alias architect="/Users/saynode/Documents/GitHub/flutter-architect/architect.exe"
 ```
 
 "/Users/saynode/Documents/GitHub/flutter-architect/" is an example and is probably not the same as yours.
@@ -28,11 +28,11 @@ alias generator="/Users/saynode/Documents/GitHub/flutter-architect/generator.exe
 On Mac and Linux add the following to your .bashrc file
 
 ```bash
-    alias generator="*absolute path to exe*"
+    alias architect="*absolute path to exe*"
 ```
 
 On windows edit the aliases file in C:\Program Files\Git\etc\profile.d\aliases.sh (as administrator)
 
 ```bash
-    alias generator="*absolute path to exe*"
+    alias architect="*absolute path to exe*"
 ```

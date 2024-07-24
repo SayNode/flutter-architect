@@ -12,8 +12,8 @@ import 'theme/theme.dart';
 import 'typography/typography.dart';
 import 'wallet/wallet.dart';
 
-class AllGeneratorService extends Command<dynamic> {
-  AllGeneratorService() {
+class AllServices extends Command<dynamic> {
+  AllServices() {
     // Add parser options or flag here
     argParser.addFlag(
       'force',

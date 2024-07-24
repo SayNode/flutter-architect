@@ -1,15 +1,11 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
-
 import '../../../../util/util.dart';
 import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
-import 'file_manipulators/api_service_interface_manipulator.dart';
+import 'file_manipulators/api_base_service_manipulator.dart';
 import 'file_manipulators/api_service_manipulator.dart';
 import 'file_manipulators/auth_response_manipulator.dart';
-import 'file_manipulators/auth_service_base_manipulator.dart';
+import 'file_manipulators/auth_base_service_manipulator.dart';
 import 'file_manipulators/auth_service_manipulator.dart';
 
 class GenerateAPIService extends Command<dynamic> {
@@ -34,7 +30,7 @@ class GenerateAPIService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -54,43 +50,44 @@ class GenerateAPIService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating API Service...');
+        printColor('-------- Creating API service --------\n', ColorText.cyan);
         await addAlreadyRun('api');
         addDependenciesToPubspecSync(<String>['http'], null);
-        await _createDartFiles();
+        await ApiBaseServiceManipulator().create();
+        await ApiServiceManipulator().create();
+        await AuthBaseServiceManipulator().create();
+        await AuthServiceManipulator().create();
+        await AuthResponseManipulator().create();
+        printColor('Adding constants...', ColorText.white);
         await _addConstants();
+        printColor('Constants added ✔', ColorText.green);
       },
       remove: () async {
-        stderr.writeln('Removing API Service...');
+        printColor('-------- Removing API service --------\n', ColorText.cyan);
         await removeAlreadyRun('api');
         removeDependenciesFromPubspecSync(<String>['http'], null);
-        await _removeAuthService();
-        await ApiServiceInterfaceManipulator().remove();
+        await ApiBaseServiceManipulator().remove();
         await ApiServiceManipulator().remove();
+        await AuthBaseServiceManipulator().remove();
+        await AuthServiceManipulator().remove();
         await AuthResponseManipulator().remove();
+        printColor('Removing constants...', ColorText.white);
         await _removeConstants();
+        printColor('Constants removed ✔', ColorText.green);
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add API Service as it's already configured.");
+        printColor(
+          "Can't add API/Auth Service as it's already configured.\n",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove API Service as it's not yet configured.");
+        printColor(
+          "Can't remove API/Auth Service as it's not yet configured.\n",
+          ColorText.red,
+        );
       },
     );
-    formatCode();
-    dartFixCode();
-  }
-
-  Future<void> _removeAuthService() async {
-    await File(path.join('lib', 'service', 'auth_service.dart')).delete();
-  }
-
-  Future<void> _createDartFiles() async {
-    await ApiServiceInterfaceManipulator().create();
-    await ApiServiceManipulator().create();
-    await AuthServiceBaseManipulator().create();
-    await AuthServiceManipulator().create();
-    await AuthResponseManipulator().create();
   }
 
   Future<void> _addConstants() async {

@@ -1,14 +1,15 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/secure_storage_service.dart' as secure_storage_service;
-import 'code/shared_storage_service.dart' as shared_storage_service;
-import 'code/storage_exception.dart' as storage_exception;
-import 'code/storage_service.dart' as storage_service;
-import 'code/storage_service_interface.dart' as storage_service_interface;
+import '../../../new/file_manipulators/main_file_manipulator.dart';
+import 'file_manipulators/secure_storage/secure_storage_base_service_manipulator.dart';
+import 'file_manipulators/secure_storage/secure_storage_service_manipulator.dart';
+import 'file_manipulators/shared_storage/shared_storage_base_service_manipulator.dart';
+import 'file_manipulators/shared_storage/shared_storage_service_manipulator.dart';
+import 'file_manipulators/storage_base_service_manipulator.dart';
+import 'file_manipulators/storage_exception_manipulator.dart';
+import 'file_manipulators/storage_service_interface_manipulator.dart';
+import 'file_manipulators/storage_service_manipulator.dart';
 
 class GenerateStorageService extends Command<dynamic> {
   //-- Singleton
@@ -27,14 +28,14 @@ class GenerateStorageService extends Command<dynamic> {
 
   @override
   String get description =>
-      'Create storage services for the project. Adds a StorageService with the option to use Secure or Shared device storage.;';
+      'Create storage services for the project. Adds a StorageService with functions for a secure or shared option.;';
 
   @override
   String get name => 'storage';
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -46,153 +47,57 @@ class GenerateStorageService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Storage service...');
+        printColor('------ Creating Storage service ------\n', ColorText.cyan);
         await addAlreadyRun('storage');
-        addDependenciesToPubspecSync(<String>['flutter_secure_storage'], null);
-        addDependenciesToPubspecSync(<String>['shared_preferences'], null);
-        await _addStorageService();
-        await _injectServices();
-        await _addMainChanges();
+        addDependenciesToPubspecSync(
+          <String>[
+            'flutter_secure_storage',
+            'shared_preferences',
+          ],
+          null,
+        );
+        await SecureStorageServiceManipulator().create();
+        await SharedStorageServiceManipulator().create();
+        await SecureStorageBaseServiceManipulator().create();
+        await SharedStorageBaseServiceManipulator().create();
+        await StorageBaseServiceManipulator().create();
+        await StorageExceptionManipulator().create();
+        await StorageServiceInterfaceManipulator().create();
+        await StorageServiceManipulator().create();
+        await MainFileManipulator().addStorageInitialization();
       },
       remove: () async {
-        stderr.writeln('Removing Storage service...');
+        printColor('------ Removing Storage service ------\n', ColorText.cyan);
         await removeAlreadyRun('storage');
         removeDependenciesFromPubspecSync(
-          <String>['flutter_secure_storage'],
+          <String>[
+            'flutter_secure_storage',
+            'shared_preferences',
+          ],
           null,
         );
-        removeDependenciesFromPubspecSync(
-          <String>['shared_preferences'],
-          null,
-        );
-        await _removeStorageService();
-        await _removeMainChanges();
-        await _uninjectServices();
+        await SecureStorageServiceManipulator().remove();
+        await SharedStorageServiceManipulator().remove();
+        await SecureStorageBaseServiceManipulator().remove();
+        await SharedStorageBaseServiceManipulator().remove();
+        await StorageBaseServiceManipulator().remove();
+        await StorageExceptionManipulator().remove();
+        await StorageServiceInterfaceManipulator().remove();
+        await StorageServiceManipulator().remove();
+        await MainFileManipulator().removeStorageInitialization();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Storage as it's already configured.");
+        printColor(
+          "Can't add Storage as it's already configured.\n",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove Storage as it's not yet configured.");
+        printColor(
+          "Can't remove Storage as it's not yet configured.\n",
+          ColorText.red,
+        );
       },
-    );
-    formatCode();
-    dartFixCode();
-  }
-
-  // Remove the Storage-related lines from main.
-  Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
-    await removeLinesFromFile(mainPath, <String>[
-      "import '../service/storage/storage_service.dart';",
-      'await storage.init();',
-    ]);
-  }
-
-  Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_interface.dart');
-    await addLinesAfterLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// Initialize services:': <String>[
-          'await Get.find<StorageService>().init();',
-        ],
-        '// https://saynode.ch': <String>[
-          "import '../service/storage/storage_service.dart';",
-        ],
-      },
-    );
-  }
-
-  Future<void> _removeStorageService() async {
-    await File(path.join('lib', 'service', 'storage', 'storage_exception.dart'))
-        .delete();
-    await File(
-      path.join(
-        'lib',
-        'service',
-        'storage',
-        'storage_service_interface.dart',
-      ),
-    ).delete();
-    await File(
-      path.join(
-        'lib',
-        'service',
-        'storage',
-        'shared_storage_service.dart',
-      ),
-    ).delete();
-    await File(
-      path.join(
-        'lib',
-        'service',
-        'storage',
-        'secure_storage_service.dart',
-      ),
-    ).delete();
-    await File(path.join('lib', 'service', 'storage', 'storage_service.dart'))
-        .delete();
-    await Directory(path.join('lib', 'service', 'storage')).delete();
-  }
-
-  Future<void> _addStorageService() async {
-    await Directory(path.join('lib', 'service', 'storage')).create();
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage', 'storage_exception.dart'),
-      storage_exception.content(),
-    );
-
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage', 'storage_service_interface.dart'),
-      storage_service_interface.content(),
-    );
-
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage', 'shared_storage_service.dart'),
-      shared_storage_service.content(),
-    );
-
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage', 'secure_storage_service.dart'),
-      secure_storage_service.content(),
-    );
-
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'storage', 'storage_service.dart'),
-      storage_service.content(),
-    );
-  }
-
-  Future<void> _injectServices() async {
-    await addLinesAfterLineInFile(
-      path.join('lib', 'service', 'main_bindings.dart'),
-      <String, List<String>>{
-        '//Services injection': <String>[
-          'Get.lazyPut(SharedStorageService.new);',
-          'Get.lazyPut(SecureStorageService.new);',
-          'Get.lazyPut(StorageService.new);',
-        ],
-        "import 'package:get/get.dart';": <String>[
-          "import 'storage/secure_storage_service.dart';",
-          "import 'storage/shared_storage_service.dart';",
-          "import 'storage/storage_service.dart';",
-        ],
-      },
-    );
-  }
-
-  Future<void> _uninjectServices() async {
-    await removeLinesFromFile(
-      path.join('lib', 'service', 'main_bindings.dart'),
-      <String>[
-        'Get.lazyPut(StorageService.new);',
-        'Get.lazyPut(SharedStorageService.new);',
-        'Get.lazyPut(SecureStorageService.new);',
-        "import 'storage/secure_storage_service.dart';",
-        "import 'storage/shared_storage_service.dart';",
-        "import 'storage/storage_service.dart';",
-      ],
     );
   }
 }

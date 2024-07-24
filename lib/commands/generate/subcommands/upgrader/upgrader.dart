@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
 
 import '../../../../util/util.dart';
-import 'upgrader_service_manipulator.dart';
+import 'file_manipulators/upgrader_service_manipulator.dart';
 
 class GenerateUpgraderService extends Command<dynamic> {
   GenerateUpgraderService() {
@@ -27,40 +25,45 @@ class GenerateUpgraderService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('upgrader');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
-    final UpgraderServiceManipulator upgraderServiceManipulator =
-        UpgraderServiceManipulator();
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Connectivity Service...');
+        printColor('------- Creating Upgrader -------\n', ColorText.cyan);
         await addAlreadyRun('upgrader');
-        await upgraderServiceManipulator.create(initialize: true);
-        formatCode();
-        dartFixCode();
+        addDependenciesToPubspecSync(
+          <String>['package_info_plus', 'html', 'upgrader'],
+          null,
+        );
+        await UpgraderServiceManipulator().create();
       },
       remove: () async {
-        stderr.writeln('Removing Connectivity Service...');
+        printColor('------- Removing Upgrader -------\n', ColorText.cyan);
         await removeAlreadyRun('upgrader');
-        await upgraderServiceManipulator.remove();
-        formatCode();
-        dartFixCode();
+        removeDependenciesFromPubspecSync(
+          <String>['package_info_plus', 'html', 'upgrader'],
+          null,
+        );
+        await UpgraderServiceManipulator().remove();
       },
       rejectAdd: () async {
-        stderr
-            .writeln("Can't add Upgrader Service as it's already configured.");
+        printColor(
+          "Can't add Upgrader Service as it's already configured.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln(
+        printColor(
           "Can't remove Upgrader Service as it's not yet configured.",
+          ColorText.red,
         );
       },
     );

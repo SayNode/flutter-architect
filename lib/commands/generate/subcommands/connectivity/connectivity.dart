@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
-
 import '../../../../util/util.dart';
-import 'code/lost_connection.dart' as lost_connection;
-import 'connectivity_service_manipulator.dart';
+import 'file_manipulators/connectivity_base_service_manipulator.dart';
+import 'file_manipulators/connectivity_service_manipulator.dart';
+import 'file_manipulators/lost_connection_page_manipulator.dart';
 
 class GenerateConnectivityService extends Command<dynamic> {
   GenerateConnectivityService() {
@@ -29,57 +26,45 @@ class GenerateConnectivityService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('connectivity');
     final bool force = argResults?['force'] ?? false;
     final bool remove = argResults?['remove'] ?? false;
-    final ConnectivityServiceManipulator connectivityServiceFileManipulator =
-        ConnectivityServiceManipulator();
     await componentBuilder(
       force: force,
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Connectivity Service...');
+        printColor('---- Creating Connectivity Service ----\n', ColorText.cyan);
         await addAlreadyRun('connectivity');
-        await connectivityServiceFileManipulator.create(initialize: true);
-        await _createLostConnectionPage();
+        addDependenciesToPubspecSync(<String>['connectivity_plus'], null);
+        await ConnectivityBaseServiceManipulator().create();
+        await ConnectivityServiceManipulator().create();
+        await LostConnectionPageManipulator().create();
       },
       remove: () async {
-        stderr.writeln('Removing Connectivity Service...');
+        printColor('---- Removing Connectivity Service ----\n', ColorText.cyan);
         await removeAlreadyRun('connectivity');
-
-        await _removeLostConnectionPage();
-        await connectivityServiceFileManipulator.remove();
+        removeDependenciesFromPubspecSync(<String>['connectivity_plus'], null);
+        await LostConnectionPageManipulator().remove();
+        await ConnectivityBaseServiceManipulator().remove();
+        await ConnectivityServiceManipulator().remove();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add API Service as it's already configured.");
+        printColor(
+          "Can't add Connectivity Service as it's already configured.\n",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove API Service as it's not yet configured.");
+        printColor(
+          "Can't remove Connectivity Service as it's not yet configured.\n",
+          ColorText.red,
+        );
       },
     );
-    formatCode();
-    dartFixCode();
-  }
-
-  Future<void> _createLostConnectionPage() async {
-    Directory(path.join('lib', 'page', 'lost_connection')).createSync();
-    await File(
-      path.join(
-        'lib',
-        'page',
-        'lost_connection',
-        'lost_connection_page.dart',
-      ),
-    ).writeAsString(lost_connection.content());
-  }
-
-  Future<void> _removeLostConnectionPage() async {
-    Directory(path.join('lib', 'page', 'lost_connection'))
-        .deleteSync(recursive: true);
   }
 }
