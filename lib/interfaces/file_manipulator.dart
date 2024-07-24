@@ -18,11 +18,19 @@ abstract class FileManipulator {
       path,
       content(),
     );
+    printColor(
+      '$path - successfully created ✔',
+      ColorText.green,
+    );
   }
 
   ///Delete the file
   Future<void> remove() async {
     await File(path).delete();
+    printColor(
+      '$path - successfully removed ✔',
+      ColorText.green,
+    );
   }
 
   ///Update the file

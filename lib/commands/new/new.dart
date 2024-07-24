@@ -107,10 +107,9 @@ class Creator extends Command<dynamic> {
     printColor('Dependency Injection file created ✔', ColorText.green);
     await LoggerServiceManipulator().create(
       projectName: projectName,
-      initialize: true,
     );
     printColor('Logger Service created ✔', ColorText.green);
-    printColor('', ColorText.black);
+    emptyLine();
 
     // Add analysis options with custom rules
     await rewriteAnalysisOptions();
@@ -135,7 +134,7 @@ class Creator extends Command<dynamic> {
       await updateGradleFile();
     }
 
-    printColor('', ColorText.black);
+    emptyLine();
 
     // Fix and format dart code
     dartFixCode();
@@ -397,6 +396,6 @@ class Creator extends Command<dynamic> {
     Directory(path.join(directory, 'widget')).createSync();
     printColor('-- $directory/widget ✔', ColorText.green);
 
-    printColor('', ColorText.black);
+    emptyLine();
   }
 }

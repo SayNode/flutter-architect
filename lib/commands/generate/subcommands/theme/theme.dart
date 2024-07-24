@@ -5,11 +5,13 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
+import '../../../new/file_manipulators/main_base_file_manipulator.dart';
 import '../storage/storage.dart';
-import 'code/theme_service.dart' as theme_service;
+import 'file_manipulators/color_manipulator.dart';
+import 'file_manipulators/theme_manipulator.dart';
+import 'file_manipulators/theme_service_manipulator.dart';
 
 class GenerateThemeService extends Command<dynamic> {
   //-- Singleton
@@ -45,9 +47,9 @@ class GenerateThemeService extends Command<dynamic> {
       figmaFileKey = stdin.readLineSync() ?? '';
       stdout.writeln('Enter your Figma personal access token:');
       figmaToken = stdin.readLineSync() ?? '';
-      await _setThemeName();
+      await setThemeName();
     }
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -67,38 +69,42 @@ class GenerateThemeService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Theme...');
+        printColor('----- Creating Theme $themeName -----\n', ColorText.cyan);
         final List<dynamic> styles = await getFigmaStyles();
         final List<dynamic> colorList = await getColorsFromStyles(styles);
         await addAlreadyRun('theme-$themeName');
-        await _addColorFile(colorList);
-        await _addThemeFile(colorList);
-        await _addThemeServiceFile(themeName);
-        await _addMainChanges();
+        await ColorManipulator(colorName, colorList).create();
+        await ThemeManipulator(colorName, themeName, colorList).create();
+        await ThemeServiceManipulator(themeName).create();
+        await MainBaseFileManipulator().addTheme();
       },
       remove: () async {
-        stderr.writeln('Removing Theme...');
+        printColor(
+          '------- Removing Theme $themeName -------\n',
+          ColorText.cyan,
+        );
         await removeAlreadyRunStartingWith('theme');
-        await _removeColorFile();
-        await _removeThemeFile();
-        await _removeThemeServiceFile();
-        await _removeMainChanges();
+        await ColorManipulator(colorName, <dynamic>[]).remove();
+        await ThemeManipulator(colorName, themeName, <dynamic>[]).remove();
+        await ThemeServiceManipulator(themeName).remove();
+        await MainBaseFileManipulator().removeTheme();
       },
       rejectAdd: () async {
-        stderr.writeln('Modifying Theme... (adding $themeName)');
+        printColor('------ Updating Theme $themeName ------\n', ColorText.cyan);
         final List<dynamic> styles = await getFigmaStyles();
         final List<dynamic> colorList = await getColorsFromStyles(styles);
         await addAlreadyRun('theme-$themeName');
-        await _modifyColorFile(colorList);
-        await _modifyThemeFile(colorList);
-        await _modifyThemeServiceFile(themeName);
+        await ColorManipulator(colorName, colorList).update();
+        await ThemeManipulator(colorName, themeName, colorList).update();
+        await ThemeServiceManipulator(themeName).update();
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove Theme as it's not yet configured.");
+        printColor(
+          "Can't remove Theme as it's not yet configured.",
+          ColorText.red,
+        );
       },
     );
-    dartFormatCode();
-    dartFixCode();
   }
 
   /// Check if [s] is camelCase.
@@ -108,7 +114,7 @@ class GenerateThemeService extends Command<dynamic> {
 
   /// Waits for the user to enter a valid camelCase theme name.
   /// Sets the [themeName] and [colorName] variables.
-  Future<void> _setThemeName() async {
+  Future<void> setThemeName() async {
     String tempThemeName = '';
     for (int i = 0; i < 10; i++) {
       stdout.writeln('Enter the name of your new theme:');
@@ -129,221 +135,6 @@ class GenerateThemeService extends Command<dynamic> {
     themeName = tempThemeName;
     colorName = '${themeName[0].toUpperCase()}${themeName.substring(1)}Color';
     stdout.writeln('Success!');
-  }
-
-  Future<void> _removeColorFile() async {
-    await File(path.join('lib', 'theme', 'color.dart')).delete();
-  }
-
-  Future<void> _removeThemeFile() async {
-    await File(path.join('lib', 'theme', 'theme.dart')).delete();
-  }
-
-  Future<void> _removeThemeServiceFile() async {
-    await File(path.join('lib', 'service', 'theme_service.dart')).delete();
-  }
-
-  // Remove the Theme-related lines from main.
-  Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-    await removeLinesFromFile(
-      mainPath,
-      <String>[
-        "import 'service/theme_service.dart';",
-      ],
-    );
-    await replaceLineInFile(
-      mainPath,
-      'theme: Get.find<ThemeService>().themeData,',
-      'theme: ThemeData(),',
-    );
-  }
-
-  Future<void> _addColorFile(List<dynamic> colorList) async {
-    final StringBuffer buffer = StringBuffer()
-      ..write("import 'package:flutter/material.dart';\n class $colorName {\n");
-    for (final Map<String, dynamic> color in colorList) {
-      buffer.write(
-        "static const Color ${color['name']} = Color.fromRGBO(${color['r']}, ${color['g']}, ${color['b']}, ${color['a']});\n\n",
-      );
-    }
-    buffer.write('}');
-    await writeFileWithPrefix(
-      path.join('lib', 'theme', 'color.dart'),
-      buffer.toString(),
-    );
-  }
-
-  Future<void> _addThemeFile(List<dynamic> colorList) async {
-    final StringBuffer content = StringBuffer()
-      ..writeln("import 'package:flutter/material.dart';")
-      ..writeln("import 'color.dart';")
-      ..writeln('class CustomTheme extends ThemeExtension<CustomTheme> {')
-      ..writeln('const CustomTheme({');
-
-    for (final Map<String, dynamic> color in colorList) {
-      content.writeln("required this.${color['name']},");
-    }
-
-    content
-      ..writeln('});')
-      ..writeln();
-
-    for (final Map<String, dynamic> color in colorList) {
-      content
-        ..writeln("final Color ${color['name']};")
-        ..writeln();
-    }
-
-    content
-      ..writeln('@override')
-      ..writeln('CustomTheme copyWith({');
-
-    for (final Map<String, dynamic> color in colorList) {
-      content.writeln("Color? ${color['name']},");
-    }
-
-    content
-      ..writeln('}) {')
-      ..writeln('return CustomTheme(');
-
-    for (final Map<String, dynamic> color in colorList) {
-      content.writeln(
-        "${color['name']}: ${color['name']} ?? this.${color['name']},",
-      );
-    }
-
-    content
-      ..writeln(');}')
-      ..writeln()
-      ..writeln('//list of themes')
-      ..writeln('static const $themeName = CustomTheme(');
-
-    for (final Map<String, dynamic> color in colorList) {
-      content.writeln("${color['name']}: $colorName.${color['name']},");
-    }
-
-    content
-      ..writeln(');')
-      ..writeln()
-      ..writeln('@override')
-      ..writeln(
-        'ThemeExtension<CustomTheme> lerp(ThemeExtension<CustomTheme>? other, double t) {',
-      )
-      ..writeln('// TODO: implement lerp')
-      ..writeln('throw UnimplementedError();')
-      ..writeln('}}');
-
-    await writeFileWithPrefix(
-      path.join('lib', 'theme', 'theme.dart'),
-      content.toString(),
-    );
-  }
-
-  Future<void> _addThemeServiceFile(String name) async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'theme_service.dart'),
-      theme_service.content(name),
-    );
-  }
-
-  Future<void> _modifyColorFile(List<dynamic> colorList) async {
-    final List<String> lines =
-        await File(path.join('lib', 'theme', 'color.dart')).readAsLines();
-
-    final StringBuffer buffer = StringBuffer();
-    for (final String line in lines) {
-      buffer.write('$line\n');
-
-      if (line.contains("import 'package:flutter/material.dart';")) {
-        buffer.write('class $colorName {\n');
-        for (final Map<String, dynamic> color in colorList) {
-          buffer.write(
-            "static const Color ${color['name']} = Color.fromRGBO(${color['r']}, ${color['g']}, ${color['b']}, ${color['a']});\n\n",
-          );
-        }
-        buffer.write('}');
-      }
-    }
-
-    await File(path.join('lib', 'theme', 'color.dart'))
-        .writeAsString(buffer.toString())
-        .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✅');
-    });
-  }
-
-  Future<void> _modifyThemeFile(List<dynamic> colorList) async {
-    final List<String> lines =
-        await File(path.join('lib', 'theme', 'theme.dart')).readAsLines();
-
-    final StringBuffer buffer = StringBuffer();
-    for (final String line in lines) {
-      buffer.write('$line\n');
-
-      if (line.contains('//list of themes')) {
-        buffer.write('  static const $themeName = CustomTheme(\n');
-        for (final Map<String, dynamic> color in colorList) {
-          buffer.write("${color['name']}: $colorName.${color['name']},\n");
-        }
-        buffer.write(
-          '${buffer.toString().substring(0, buffer.toString().length - 1)});\n\n',
-        );
-      }
-    }
-
-    await File(path.join('lib', 'theme', 'theme.dart'))
-        .writeAsString(buffer.toString())
-        .then((File file) {
-      stderr.writeln('- Colors added to Color.dart ✅');
-    });
-  }
-
-  Future<void> _modifyThemeServiceFile(String name) async {
-    final String content = '''
-      case '$name':
-        return ThemeData(
-          extensions: const <ThemeExtension<CustomTheme>>[
-            CustomTheme.$name,
-          ],
-        );
-        ''';
-    final List<String> lines =
-        await File(path.join('lib', 'service', 'theme_service.dart'))
-            .readAsLines();
-    final StringBuffer buffer = StringBuffer();
-    for (final String line in lines) {
-      buffer.write('$line\n');
-
-      if (line.contains('//List of themes')) {
-        buffer.write(content);
-      }
-    }
-
-    await File(path.join('lib', 'service', 'theme_service.dart'))
-        .writeAsString(buffer.toString())
-        .then((File file) {
-      stderr.writeln('- theme added to theme_service.dart ✅');
-    });
-  }
-
-  Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-
-    await replaceLineInFile(
-      mainPath,
-      'theme: ThemeData(),',
-      'theme: Get.find<ThemeService>().themeData,',
-    );
-
-    await addLinesAfterLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// https://saynode.ch': <String>[
-          "import 'service/theme_service.dart';",
-        ],
-      },
-    );
   }
 
   Future<dynamic> getFigmaStyles() async {
@@ -369,7 +160,7 @@ class GenerateThemeService extends Command<dynamic> {
       stderr.writeln('got styles');
       return (data['meta'] as Map<String, dynamic>)['styles'];
     } catch (e) {
-      stderr.writeln(e);
+      printColor(e.toString(), ColorText.red);
       exit(1);
     }
   }
@@ -417,7 +208,7 @@ class GenerateThemeService extends Command<dynamic> {
 
       return colors;
     } catch (e) {
-      stderr.writeln(e);
+      printColor(e.toString(), ColorText.red);
       exit(1);
     }
   }

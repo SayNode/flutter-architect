@@ -1,15 +1,9 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
-
 import '../../../../util/util.dart';
-import 'code/firebase_configuration.dart' as firebase_configuration;
-import 'code/main/dev_error.dart' as dev_error;
-import 'code/main/fatal_error.dart' as fatal_error;
-import 'code/main/imports.dart' as imports;
-import 'code/main/initialize.dart' as initialize;
-import 'code/main/non_fatal_error.dart' as non_fatal_error;
+import '../../../new/file_manipulators/main_file_manipulator.dart';
+import 'file_manipulators/firebase_configuration_manipulator.dart';
 
 class GenerateCrashlyticsService extends Command<dynamic> {
   GenerateCrashlyticsService() {
@@ -32,7 +26,7 @@ class GenerateCrashlyticsService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -44,57 +38,50 @@ class GenerateCrashlyticsService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Crashlytics...');
+        printColor('--------- Adding Crashlytics ---------\n', ColorText.cyan);
         await addAlreadyRun('crashlytics');
-        _printInitialInstructions();
-        _addDependencies();
-        await _addFirebaseConfigurationScript();
-        await _addMainChanges();
-        dartFormatCode();
-        dartFixCode();
-        _printFinalInstructions();
+        addDependenciesToPubspecSync(
+          <String>[
+            'firebase_core',
+            'firebase_crashlytics',
+          ],
+          null,
+        );
+        await FirebaseConfigurationManipulator().create();
+        await MainFileManipulator().addCrashlytics();
+        printFinalInstructions();
       },
       remove: () async {
         stderr.writeln('Removing Crashlytics...');
         await removeAlreadyRun('crashlytics');
-        _removeDependencies();
-        await _removeFirebaseConfigurationScript();
-        await _removeMainChanges();
-        dartFormatCode();
-        dartFixCode();
+        removeDependenciesFromPubspecSync(
+          <String>[
+            'firebase_core',
+            'firebase_crashlytics',
+          ],
+          null,
+        );
+        await FirebaseConfigurationManipulator().remove();
+        await MainFileManipulator().removeCrashlytics();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Crashlytics as it's already configured.");
+        printColor(
+          "Can't add Crashlytics as it's already configured.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove Crashlytics as it's not yet configured.");
+        printColor(
+          "Can't remove Crashlytics as it's not yet configured.",
+          ColorText.red,
+        );
       },
     );
   }
 
-  void _addDependencies() {
-    addDependenciesToPubspecSync(
-      <String>[
-        'firebase_core',
-        'firebase_crashlytics',
-      ],
-      null,
-    );
-  }
-
-  void _removeDependencies() {
-    removeDependenciesFromPubspecSync(
-      <String>[
-        'firebase_core',
-        'firebase_crashlytics',
-      ],
-      null,
-    );
-  }
-
-  void _printInitialInstructions() {
+  void printFinalInstructions() {
     printColor(
-      'This script will add the code required to catch errors and send them to crashlytics.',
+      'Crashlytics was successfully added to your project.',
       ColorText.yellow,
     );
     printColor(
@@ -117,65 +104,5 @@ class GenerateCrashlyticsService extends Command<dynamic> {
       'You can follow the official guide for flutter at https://firebase.google.com/docs/crashlytics/get-started?platform=flutter',
       ColorText.yellow,
     );
-  }
-
-  void _printFinalInstructions() {
-    printColor(
-      'Added following dependencies: firebase_core, firebase_crashalitics',
-      ColorText.green,
-    );
-    printColor('REMEMBER TO RUN', ColorText.green);
-    printColor('chmod +x ./firebase_configuration.sh', ColorText.magenta);
-    printColor('./firebase_configuration.sh', ColorText.magenta);
-  }
-
-  Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-
-    await addLinesAfterLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// Error in Development:': <String>[
-          dev_error.content(),
-        ],
-        '// Fatal error in Production:': <String>[
-          fatal_error.content(),
-        ],
-        '// Non-Fatal error in Production:': <String>[
-          non_fatal_error.content(),
-        ],
-        '// https://saynode.ch': <String>[
-          imports.content(),
-        ],
-      },
-    );
-
-    await addLinesBeforeLineInFile(
-      mainPath,
-      <String, List<String>>{
-        '// Run the app:': <String>[
-          initialize.content(),
-          '',
-        ],
-      },
-    );
-  }
-
-  Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-    await removeTextFromFile(mainPath, imports.content());
-    await removeTextFromFile(mainPath, non_fatal_error.content());
-    await removeTextFromFile(mainPath, fatal_error.content());
-    await removeTextFromFile(mainPath, dev_error.content());
-    await removeTextFromFile(mainPath, initialize.content());
-  }
-
-  Future<void> _addFirebaseConfigurationScript() async {
-    await File(path.join('firebase_configuration.sh'))
-        .writeAsString(firebase_configuration.content());
-  }
-
-  Future<void> _removeFirebaseConfigurationScript() async {
-    await File(path.join('firebase_configuration.sh')).delete();
   }
 }

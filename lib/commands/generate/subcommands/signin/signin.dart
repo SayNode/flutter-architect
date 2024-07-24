@@ -84,8 +84,6 @@ class GenerateSigninService extends Command<dynamic> {
         await addAlreadyRun('signin-google');
         addDependenciesToPubspecSync(<String>['google_sign_in'], null);
         await AuthServiceManipulator().createGoogleSignIn();
-        dartFormatCode();
-        dartFixCode();
         printGoogleInstructions();
       },
       remove: () async {
@@ -93,8 +91,6 @@ class GenerateSigninService extends Command<dynamic> {
         await removeAlreadyRun('signin-google');
         removeDependenciesFromPubspecSync(<String>['google_sign_in'], null);
         await AuthServiceManipulator().removeGoogleSignIn();
-        dartFormatCode();
-        dartFixCode();
       },
       rejectAdd: () async {
         stderr.writeln(

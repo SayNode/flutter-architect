@@ -1,4 +1,5 @@
 import '../../../interfaces/file_manipulator.dart';
+import '../../../util/util.dart';
 
 class MainBaseFileManipulator extends FileManipulator {
   @override
@@ -21,6 +22,8 @@ import '../service/logger_service.dart';
 import '../service/main_bindings.dart';
 import '../util/constants.dart';
 import '../util/util.dart';
+import 'package:get/get.dart';
+
 
 abstract class MainBase {
   bool isFirstRun = false;
@@ -40,6 +43,11 @@ abstract class MainBase {
 
   Future<void> guarded() async {
     await runZonedGuarded<Future<void>>(() async {
+      final WidgetsBinding widgetsBinding =
+          WidgetsFlutterBinding.ensureInitialized();
+
+      await onRunZonedGuarded(widgetsBinding);
+
       // Handle framework errors:
       FlutterError.onError = (FlutterErrorDetails details) async {
         await handleError(
@@ -48,9 +56,8 @@ abstract class MainBase {
           fatal: true,
         );
       };
-      WidgetsFlutterBinding.ensureInitialized();
 
-      // Initialize services:
+      // Initialize all services:
       await initializeServices();
 
       // Set preferred orientations:
@@ -61,6 +68,8 @@ abstract class MainBase {
       // Check if it's the first run:
       isFirstRun = await IsFirstRun.isFirstRun();
 
+      await beforeRunApp();
+
       // Run the app:
       runApp(const MyApp());
     }, (Object error, StackTrace stack) async {
@@ -69,7 +78,13 @@ abstract class MainBase {
     });
   }
 
-  // Handle uncaught erros
+  /// This is called before runApp()
+  Future<void> beforeRunApp() async {}
+
+  /// This is called first thing inside runZonedGuarded()
+  Future<void> onRunZonedGuarded(WidgetsBinding widgetsBinding) async {}
+
+  /// Handle uncaught erros
   Future<void> handleError(
     Object error,
     StackTrace? stack, {
@@ -129,5 +144,111 @@ class MyApp extends StatelessWidget {
 }
 
 """;
+  }
+
+  Future<void> addLocalization() async {
+    printColor(
+      'Adding Localization to main...\n',
+      ColorText.white,
+    );
+    await addLinesAfterLineInFile(
+      path,
+      <String, List<String>>{
+        '// End MaterialApp': <String>[
+          '},);',
+        ],
+        'return GetMaterialApp(': <String>[
+          'locale: localizationController.locale,',
+          'translations:',
+          'Messages(languages: localizationController.translations),',
+        ],
+        '// https://saynode.ch': <String>[
+          "import '../service/localization_controller.dart';",
+          "import '../model/message.dart';",
+        ],
+      },
+    );
+
+    await addLinesBeforeLineInFile(
+      path,
+      <String, List<String>>{
+        '// Start MaterialApp': <String>[
+          'return GetBuilder<LocalizationController>(',
+          'builder: (LocalizationController localizationController) {',
+        ],
+        'runApp(const MyApp());': <String>[
+          'final LocalizationController localizationController = Get.find<LocalizationController>();',
+          'await localizationController.init();',
+        ],
+      },
+    );
+    printColor(
+      'Localization added to main ✔\n',
+      ColorText.green,
+    );
+  }
+
+  // Remove the Storage-related lines from main.
+  Future<void> removeLocalization() async {
+    printColor(
+      'Removing Localization from main...\n',
+      ColorText.white,
+    );
+    await removeLinesFromFile(
+      path,
+      <String>[
+        "import '../service/localization_controller.dart';",
+        "import '../model/message.dart';",
+        'return GetBuilder<LocalizationController>(',
+        'builder: (LocalizationController localizationController) {',
+        'locale: localizationController.locale,',
+        'translations:',
+        'Messages(languages: localizationController.translations),',
+        'final LocalizationController localizationController =',
+        'await localizationController.init();',
+      ],
+    );
+
+    await removeLinesAfterFromFile(
+      path,
+      '// End MaterialApp',
+      2,
+    );
+    printColor(
+      'Localization removed from main ✔\n',
+      ColorText.green,
+    );
+  }
+
+  Future<void> addTheme() async {
+    await replaceLineInFile(
+      path,
+      'theme: ThemeData(),',
+      'theme: Get.find<ThemeService>().themeData,',
+    );
+
+    await addLinesAfterLineInFile(
+      path,
+      <String, List<String>>{
+        '// https://saynode.ch': <String>[
+          "import 'service/theme_service.dart';",
+        ],
+      },
+    );
+  }
+
+  Future<void> removeTheme() async {
+    await replaceLineInFile(
+      path,
+      'theme: Get.find<ThemeService>().themeData,',
+      'theme: ThemeData(),',
+    );
+
+    await removeLinesFromFile(
+      path,
+      <String>[
+        "import 'service/theme_service.dart';",
+      ],
+    );
   }
 }

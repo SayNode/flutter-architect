@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
-import 'code/flutter_native_splash.dart' as flutter_native_splash;
+import '../../../new/file_manipulators/main_file_manipulator.dart';
+import 'file_manipulators/flutter_native_splash_manipulator.dart';
 
 class GenerateSplashService extends Command<dynamic> {
   GenerateSplashService() {
@@ -27,8 +27,11 @@ class GenerateSplashService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
+
+  final String defaultIconPath = 'asset/image/splash.png';
+  final String defaultColorHex = '#FFFFFF';
 
   Future<void> _run() async {
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('splash');
@@ -39,101 +42,73 @@ class GenerateSplashService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Native Splash...');
+        printColor('------- Creating Native Splash -------\n', ColorText.cyan);
         await addAlreadyRun('splash');
         addDependenciesToPubspecSync(<String>['flutter_native_splash'], null);
         final String iconFile = getIconFile();
         final String color = getColor();
-        await _writeSplashFile(iconFile, color);
+        await FlutterNativeSplashManipulator()
+            .createParameters(color, iconFile);
         runNativeSplash(null);
-        await _addMainChanges();
+        await MainFileManipulator().addSplashScreen();
       },
       remove: () async {
-        stderr.writeln('Removing Native Splash...');
+        printColor('------- Removing Native Splash -------\n', ColorText.cyan);
         await removeAlreadyRun('splash');
         removeDependenciesFromPubspecSync(
           <String>['flutter_native_splash'],
           null,
         );
-        await _removeSplashFile();
-        await _removeMainChanges();
+        await FlutterNativeSplashManipulator().remove();
+        await MainFileManipulator().removeSplashScreen();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Native Splash as it's already configured.");
+        printColor(
+          "Can't add Native Splash as it's already configured.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr
-            .writeln("Can't remove Native Splash as it's not yet configured.");
+        printColor(
+          "Can't remove Native Splash as it's not yet configured.",
+          ColorText.red,
+        );
       },
     );
-    dartFormatCode();
-    dartFixCode();
   }
 
-  Future<void> _removeSplashFile() async {
-    await File(path.join('flutter_native_splash.yaml')).delete();
-  }
-
-  Future<void> _writeSplashFile(String iconFile, String color) async {
-    await File(path.join('flutter_native_splash.yaml'))
-        .writeAsString(flutter_native_splash.content(color, iconFile));
-  }
-
-  // Request the user for the image path.
+  /// Request the user for the image path.
   String getIconFile() {
     stdout.writeln(
-      'Enter the path to your splash image (ex. asset/image/splash.png):',
+      'Enter the path to your splash image (> $defaultIconPath):',
     );
-    return stdin.readLineSync() ?? '';
+    final String ret = stdin.readLineSync() ?? '';
+    if (ret.isEmpty) {
+      return defaultIconPath;
+    }
+    return ret;
   }
 
-  // Request the user for the background color.
+  /// Request the user for the background color.
   String getColor() {
-    stdout.writeln('Enter the background color hexadecimal (ex. #EAF2FF):');
+    stdout.writeln(
+      'Enter the background color hexadecimal (> $defaultColorHex):',
+    );
     final RegExp hex = RegExp('^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})');
     for (int i = 0; i < 10; i++) {
       final String value = stdin.readLineSync() ?? '';
       if (hex.hasMatch(value)) {
         return value;
       } else {
-        stderr.writeln('Invalid hexadecimal value. Try the #xxxxxx format.');
+        if (value.isEmpty) {
+          return defaultColorHex;
+        }
+        printColor(
+          'Invalid hexadecimal value. Try the #xxxxxx format.',
+          ColorText.red,
+        );
       }
     }
     exit(1);
-  }
-
-  // Remove the Storage-related lines from main.
-  Future<void> _removeMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-    await removeLinesFromFile(mainPath, <String>[
-      'FlutterNativeSplash.remove();',
-      'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
-      "import 'package:flutter_native_splash/flutter_native_splash.dart';",
-    ]);
-  }
-
-  Future<void> _addMainChanges() async {
-    final String mainPath = path.join('lib', 'base', 'main_base.dart');
-
-    await addLinesBeforeLineInFile(
-      mainPath,
-      <String, List<String>>{
-        'runApp(const MyApp());': <String>[
-          'FlutterNativeSplash.remove();',
-        ],
-      },
-    );
-
-    await addLinesAfterLineInFile(
-      mainPath,
-      <String, List<String>>{
-        'WidgetsFlutterBinding.ensureInitialized();': <String>[
-          'FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);',
-        ],
-        '// https://saynode.ch': <String>[
-          "import 'package:flutter_native_splash/flutter_native_splash.dart';",
-        ],
-      },
-    );
   }
 }

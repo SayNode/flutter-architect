@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
-import '../commands/generate/subcommands/typography/typography.dart';
 import '../commands/new/files/prefix.dart' as prefix;
 
 /// Logic for building a component.
@@ -23,6 +23,9 @@ Future<void> componentBuilder({
     if (alreadyBuilt) {
       // If the component is already built, remove it.
       await remove?.call();
+      emptyLine();
+      dartFormatCode();
+      dartFixCode();
     } else {
       // If the component is not built, reject the removal.
       await rejectRemove?.call();
@@ -32,12 +35,18 @@ Future<void> componentBuilder({
     if (!alreadyBuilt) {
       // If the component is not already built, add it.
       await add?.call();
+      emptyLine();
+      dartFormatCode();
+      dartFixCode();
     } else {
       // If the component is already built, check if should force the addition.
       if (force) {
         // If force is true, remove the component and add it again.
         await remove?.call();
         await add?.call();
+        emptyLine();
+        dartFormatCode();
+        dartFixCode();
       } else {
         // If force is false, reject the addition.
         await rejectAdd?.call();
@@ -52,7 +61,12 @@ Future<ProcessResult> addDependenciesToPubspec(
   String? workingDirectory,
 ) async {
   printColor(
-    '----------- Pub Get Output -----------',
+    'Adding the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
     ColorText.blue,
   );
   final ProcessResult result = await Process.run(
@@ -67,7 +81,8 @@ Future<ProcessResult> addDependenciesToPubspec(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
+  printColor('Dependencies added ✔\n', ColorText.green);
   return result;
 }
 
@@ -77,7 +92,12 @@ ProcessResult addDependenciesToPubspecSync(
   String? workingDirectory,
 ) {
   printColor(
-    '----------- Pub Get Output -----------',
+    'Adding the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
     ColorText.blue,
   );
   final ProcessResult result = Process.runSync(
@@ -85,6 +105,8 @@ ProcessResult addDependenciesToPubspecSync(
     <String>['pub', 'add', ...dependencies],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -92,7 +114,8 @@ ProcessResult addDependenciesToPubspecSync(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
+  printColor('Dependencies added ✔\n', ColorText.green);
   return result;
 }
 
@@ -102,7 +125,12 @@ Future<ProcessResult> removeDependenciesFromPubspec(
   String? workingDirectory,
 ) async {
   printColor(
-    '----------- Pub Get Output -----------',
+    'Removing the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
     ColorText.blue,
   );
   final ProcessResult result = await Process.run(
@@ -117,7 +145,8 @@ Future<ProcessResult> removeDependenciesFromPubspec(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
+  printColor('Dependencies removed ✔\n', ColorText.green);
   return result;
 }
 
@@ -127,7 +156,12 @@ ProcessResult removeDependenciesFromPubspecSync(
   String? workingDirectory,
 ) {
   printColor(
-    '----------- Pub Get Output -----------',
+    'Removing the following dependencies to pubspec.yaml:',
+    ColorText.white,
+  );
+  printColor(dependencies.join('\n'), ColorText.white);
+  printColor(
+    '\n----------- Pub Get Output -----------',
     ColorText.blue,
   );
   final ProcessResult result = Process.runSync(
@@ -135,6 +169,8 @@ ProcessResult removeDependenciesFromPubspecSync(
     <String>['pub', 'remove', ...dependencies],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -142,7 +178,8 @@ ProcessResult removeDependenciesFromPubspecSync(
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
+  printColor('Dependencies removed ✔\n', ColorText.green);
   return result;
 }
 
@@ -161,6 +198,8 @@ ProcessResult runNativeSplash(String? workingDirectory) {
     ],
     runInShell: true,
     workingDirectory: workingDirectory,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -168,7 +207,7 @@ ProcessResult runNativeSplash(String? workingDirectory) {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
   return result;
 }
 
@@ -182,6 +221,8 @@ void dartFormatCode() {
     'dart',
     <String>['format', '.'],
     runInShell: true,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -189,7 +230,7 @@ void dartFormatCode() {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.green);
+  emptyLine();
 }
 
 // Run dart fix
@@ -202,6 +243,8 @@ void dartFixCode() {
     'dart',
     <String>['fix', '--apply'],
     runInShell: true,
+    stdoutEncoding: Encoding.getByName('utf-8'),
+    stderrEncoding: Encoding.getByName('utf-8'),
   );
   if (result.stderr != null) {
     stderr.write(result.stderr);
@@ -209,7 +252,7 @@ void dartFixCode() {
   if (result.stdout != null) {
     stdout.write(result.stdout);
   }
-  printColor('', ColorText.black);
+  emptyLine();
 }
 
 /// Mark [command] as already ran.
@@ -434,6 +477,18 @@ Future<String> getProjectName() async {
 /// Get pre-built file prefix
 String get getPrefix => prefix.content();
 
+/// Write file
+Future<File> writeFile(String path, String content) async {
+  File file;
+  try {
+    file = await File(path).writeAsString(content);
+  } catch (e) {
+    File(path).createSync(recursive: true);
+    file = await File(path).writeAsString(content);
+  }
+  return file;
+}
+
 /// Write file with prefix
 Future<File> writeFileWithPrefix(String path, String content) async {
   File file;
@@ -458,6 +513,10 @@ Future<void> spinnerLoading(Function function) async {
   // ignore: avoid_dynamic_calls
   await function();
   timer.cancel();
+}
+
+void emptyLine() {
+  emptyLine();
 }
 
 extension StringCapitalize on String {

@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
+import 'file_manipulators/typography_manipulator.dart';
 
 class GenerateTypographyService extends Command<dynamic> {
   //-- Singleton
@@ -33,7 +33,7 @@ class GenerateTypographyService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -41,7 +41,7 @@ class GenerateTypographyService extends Command<dynamic> {
     figmaFileKey = stdin.readLineSync() ?? '';
     stdout.writeln('Enter your Figma personal access token:');
     figmaToken = stdin.readLineSync() ?? '';
-    final List<dynamic> styles = await _getFigmaStyles();
+    final List<dynamic> styles = await getFigmaStyles();
 
     final bool alreadyBuilt = await checkIfAlreadyRunWithReturn('typography');
     final bool force = argResults?['force'] ?? false;
@@ -51,55 +51,34 @@ class GenerateTypographyService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Typography...');
+        printColor('------- Creating Typography -------\n', ColorText.cyan);
         await addAlreadyRun('typography');
-        final List<dynamic> textStyles = await _getTextStyles(styles);
+        final List<dynamic> textStyles = await getTextStyles(styles);
         addDependenciesToPubspecSync(<String>['google_fonts'], null);
-        await _addTypographyFile(textStyles);
+        await TypographyManipulator(textStyles).create();
       },
       remove: () async {
-        stderr.writeln('Removing Typography...');
+        printColor('------- Removing Typography -------\n', ColorText.cyan);
         await removeAlreadyRun('typography');
         removeDependenciesFromPubspecSync(<String>['google_fonts'], null);
-        await _removeTypographyFile();
+        await TypographyManipulator(<dynamic>[]).remove();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Typography as it's already configured.");
+        printColor(
+          "Can't add Typography as it's already configured.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr.writeln("Can't remove Typography as it's not yet configured.");
+        printColor(
+          "Can't remove Typography as it's not yet configured.",
+          ColorText.red,
+        );
       },
     );
-    dartFormatCode();
-    dartFixCode();
   }
 
-  Future<void> _removeTypographyFile() async {
-    await File(path.join('lib', 'theme', 'typography.dart')).delete();
-  }
-
-  Future<void> _addTypographyFile(List<dynamic> textStyleList) async {
-    stderr.writeln(textStyleList);
-    final StringBuffer buffer = StringBuffer()
-      ..write(
-        "import 'package:flutter/material.dart'; \nimport 'package:google_fonts/google_fonts.dart'; \nclass CustomTypography { \nfinal Color color; \nCustomTypography(this.color); \n//List of textstyles\n",
-      );
-
-    for (final Map<String, dynamic> textStyle in textStyleList) {
-      buffer.write(
-        "TextStyle get k${(textStyle['name'] as String).capitalize} => GoogleFonts.${textStyle['fontFamily'].toString().decapitalize}( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);\n",
-      );
-    }
-    buffer.write(
-      'factory CustomTypography.fromColor(Color color) { \nreturn CustomTypography(color); \n} \n}',
-    );
-    await writeFileWithPrefix(
-      path.join('lib', 'theme', 'typography.dart'),
-      buffer.toString(),
-    );
-  }
-
-  Future<dynamic> _getTextStyles(List<dynamic> styles) async {
+  Future<dynamic> getTextStyles(List<dynamic> styles) async {
     final List<String> ids = <String>[];
     for (final Map<String, dynamic> style in styles) {
       if (style['style_type'] == 'TEXT') {
@@ -136,7 +115,7 @@ class GenerateTypographyService extends Command<dynamic> {
     return textStyles;
   }
 
-  Future<dynamic> _getFigmaStyles() async {
+  Future<dynamic> getFigmaStyles() async {
     try {
       final Map<String, String> headers = <String, String>{
         'X-FIGMA-TOKEN': figmaToken,

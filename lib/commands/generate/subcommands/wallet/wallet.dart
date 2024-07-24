@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../util/util.dart';
 import '../storage/storage.dart';
-import 'code/wallet_model.dart' as wallet_model;
-import 'code/wallet_service.dart' as wallet_service;
+import 'file_manipulators/wallet_manipulator.dart';
+import 'file_manipulators/wallet_service_manipulator.dart';
 
 class GenerateWalletService extends Command<dynamic> {
   //-- Singleton
@@ -32,7 +31,7 @@ class GenerateWalletService extends Command<dynamic> {
 
   @override
   Future<void> run() async {
-    await spinnerLoading(_run);
+    await _run();
   }
 
   Future<void> _run() async {
@@ -55,50 +54,31 @@ class GenerateWalletService extends Command<dynamic> {
       alreadyBuilt: alreadyBuilt,
       removeOnly: remove,
       add: () async {
-        stderr.writeln('Creating Wallet Service...');
+        printColor('----- Creating Wallet Services -----\n', ColorText.cyan);
         addDependenciesToPubspecSync(<String>['thor_devkit_dart'], null);
         await addAlreadyRun('wallet');
-        await _addWalletService();
-        await _addWalletModel();
+        await WalletManipulator().create();
+        await WalletServiceManipulator().create();
       },
       remove: () async {
-        stderr.writeln('Removing Wallet Service...');
+        printColor('----- Removing Wallet Services -----\n', ColorText.cyan);
         removeDependenciesFromPubspecSync(<String>['thor_devkit_dart'], null);
         await removeAlreadyRun('wallet');
-        await _removeWalletService();
-        await _removeWalletModel();
+        await WalletServiceManipulator().remove();
+        await WalletManipulator().remove();
       },
       rejectAdd: () async {
-        stderr.writeln("Can't add Wallet Service as it's already configured.");
+        printColor(
+          "Can't add Wallet Service as it's already configured.",
+          ColorText.red,
+        );
       },
       rejectRemove: () async {
-        stderr
-            .writeln("Can't remove Wallet Service as it's not yet configured.");
+        printColor(
+          "Can't remove Wallet Service as it's not yet configured.",
+          ColorText.red,
+        );
       },
-    );
-    dartFormatCode();
-    dartFixCode();
-  }
-
-  Future<void> _removeWalletService() async {
-    await File(path.join('lib', 'service', 'wallet_service.dart')).delete();
-  }
-
-  Future<void> _removeWalletModel() async {
-    await File(path.join('lib', 'model', 'wallet_model.dart')).delete();
-  }
-
-  Future<void> _addWalletService() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'service', 'wallet_service.dart'),
-      wallet_service.content(),
-    );
-  }
-
-  Future<void> _addWalletModel() async {
-    await writeFileWithPrefix(
-      path.join('lib', 'model', 'wallet_model.dart'),
-      wallet_model.content(),
     );
   }
 }

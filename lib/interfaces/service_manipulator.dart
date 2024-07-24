@@ -8,20 +8,20 @@ abstract class ServiceManipulator extends FileManipulator {
   @override
   Future<void> create({
     String projectName = 'Service',
-    bool initialize = false,
   }) async {
+    await super.create();
     await dependencyInjection.addService(
       name,
-      servicePath: path,
-      initialize: initialize,
+      path.substring(4, path.length),
     );
-
-    return super.create();
   }
 
   @override
   Future<void> remove() async {
-    await dependencyInjection.removeService(name);
+    await dependencyInjection.removeService(
+      name,
+      path.substring(4, path.length),
+    );
     return super.remove();
   }
 }

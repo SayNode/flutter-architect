@@ -41,64 +41,42 @@ class MainBindings extends Bindings {
   }
 
   void _injectServices() {
-    //Services injection
+    // Services injection:
   }
 
   void _injectControllers() {
-    //Controllers injection
+    // Controllers injection:
   }
 }
 """;
   }
 
-  Future<void> addService(
-    String serviceName, {
-    required String servicePath,
-    bool initialize = false,
-  }) async {
-    final File file = File(path);
-    final List<String> lines = (await file.readAsString()).split('\n');
-    final List<String> newLines = <String>[];
-    for (final String line in lines) {
-      newLines.add(line);
-      if (line.contains("import 'package:get/get.dart';")) {
-        String serviceFileName =
-            servicePath.substring(0, servicePath.indexOf('.'));
-        serviceFileName =
-            serviceFileName.substring(serviceFileName.lastIndexOf('/') + 1);
-        newLines.add(
-          "\nimport '$serviceFileName.dart';",
-        );
-      }
-      if (line.contains('//Services injection')) {
-        newLines
-          ..add('\n')
-          ..add('Get.lazyPut($serviceName.new);');
-      }
-    }
-
-    await file.writeAsString(newLines.join('\n'));
+  Future<void> addService(String serviceName, String servicePath) async {
+    await addLinesAfterLineInFile(
+      path,
+      <String, List<String>>{
+        '// https://saynode.ch': <String>[
+          "import '../$servicePath';",
+        ],
+        '// Services injection:': <String>[
+          'Get.lazyPut($serviceName.new);',
+        ],
+      },
+    );
   }
 
-  Future<void> addController(String controllerName) async {
-    final File file = File(path);
-    final List<String> lines = (await file.readAsString()).split('\n');
-    final List<String> newLines = <String>[];
-    bool foundInjectServices = false;
-    for (final String line in lines) {
-      newLines.add(line);
-
-      if (foundInjectServices && line.trim() == '}') {
-        newLines.add('\nGet.lazyPut($controllerName.new);');
-        foundInjectServices = false;
-      }
-
-      if (line.contains('void _injectControllers() {')) {
-        foundInjectServices = true;
-      }
-    }
-
-    await file.writeAsString(newLines.join('\n'));
+  Future<void> addController(String serviceName, String servicePath) async {
+    await addLinesAfterLineInFile(
+      path,
+      <String, List<String>>{
+        '// https://saynode.ch': <String>[
+          "import '../$servicePath';",
+        ],
+        '// Services injection:': <String>[
+          'Get.lazyPut($serviceName.new);',
+        ],
+      },
+    );
   }
 
   Future<void> _updateMain() async {
@@ -117,12 +95,12 @@ class MainBindings extends Bindings {
     );
   }
 
-  Future<void> removeService(String serviceName) async {
+  Future<void> removeService(String serviceName, String servicePath) async {
     await removeLinesFromFile(
       path,
       <String>[
-        'Get.lazyPut(ConnectivityService.new);',
-        "import 'connectivity_service.dart';",
+        'Get.lazyPut($serviceName.new);',
+        "import '../$servicePath';",
       ],
     );
   }
