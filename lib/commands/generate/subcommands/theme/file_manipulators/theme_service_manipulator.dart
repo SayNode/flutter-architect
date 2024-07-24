@@ -14,7 +14,7 @@ class ThemeServiceManipulator extends ServiceManipulator {
   String get name => 'ThemeService';
 
   @override
-  String get path => 'lib/services/theme_service.dart';
+  String get path => 'lib/service/theme_service.dart';
 
   Future<void> update() async {
     final String content = '''
@@ -48,7 +48,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../theme/theme.dart';
-import 'storage/storage_exception.dart';
+import '../model/storage_exception.dart';
 import 'storage/storage_service.dart';
 
 class ThemeService extends GetxService {
@@ -82,7 +82,7 @@ class ThemeService extends GetxService {
   String _getSavedTheme() {
     String value;
     try {
-      value = _storage.shared.readString('themeMode');
+      value = _storage.shared.readString('themeMode') ?? '$_themeName';
     } on StorageException catch (_) {
       setTheme('$_themeName');
       value = '$_themeName';

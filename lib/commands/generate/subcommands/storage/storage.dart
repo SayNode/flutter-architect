@@ -56,10 +56,10 @@ class GenerateStorageService extends Command<dynamic> {
           ],
           null,
         );
-        await SecureStorageServiceManipulator().create();
-        await SharedStorageServiceManipulator().create();
         await SecureStorageBaseServiceManipulator().create();
         await SharedStorageBaseServiceManipulator().create();
+        await SecureStorageServiceManipulator().create();
+        await SharedStorageServiceManipulator().create();
         await StorageBaseServiceManipulator().create();
         await StorageExceptionManipulator().create();
         await StorageServiceInterfaceManipulator().create();

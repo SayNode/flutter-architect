@@ -231,7 +231,7 @@ class MyApp extends StatelessWidget {
       path,
       <String, List<String>>{
         '// https://saynode.ch': <String>[
-          "import 'service/theme_service.dart';",
+          "import '../service/theme_service.dart';",
         ],
       },
     );
@@ -247,7 +247,7 @@ class MyApp extends StatelessWidget {
     await removeLinesFromFile(
       path,
       <String>[
-        "import 'service/theme_service.dart';",
+        "import '../service/theme_service.dart';",
       ],
     );
   }
