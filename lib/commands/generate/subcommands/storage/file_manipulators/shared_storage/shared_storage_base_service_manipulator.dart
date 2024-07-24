@@ -1,4 +1,5 @@
 import '../../../../../../interfaces/file_manipulator.dart';
+import '../../../../../../util/util.dart';
 
 class SharedStorageBaseServiceManipulator extends FileManipulator {
   @override
@@ -6,6 +7,12 @@ class SharedStorageBaseServiceManipulator extends FileManipulator {
 
   @override
   String get path => 'lib/base/storage/shared_storage_base_service.dart';
+
+  @override
+  Future<void> create() {
+    printColor(content(), ColorText.cyan);
+    return super.create();
+  }
 
   @override
   String content() => r"""
@@ -30,7 +37,7 @@ class SharedStorageBaseService extends GetxService
   }
 
   @override
-  Future<String?> readString(String key) async {
+  String? readString(String key) {
     if (!_prefs.containsKey(key)) {
       return null;
     }
@@ -47,7 +54,7 @@ class SharedStorageBaseService extends GetxService
   }
 
   @override
-  Future<int?> readInt(String key) async {
+  int? readInt(String key) {
     if (!_prefs.containsKey(key)) {
       return null;
     }
@@ -64,7 +71,7 @@ class SharedStorageBaseService extends GetxService
   }
 
   @override
-  Future<double?> readDouble(String key) async {
+  double? readDouble(String key) {
     if (!_prefs.containsKey(key)) {
       return null;
     }
@@ -81,7 +88,7 @@ class SharedStorageBaseService extends GetxService
   }
 
   @override
-  Future<bool?> readBool(String key) async {
+  bool? readBool(String key) {
     if (!_prefs.containsKey(key)) {
       return null;
     }
@@ -98,7 +105,7 @@ class SharedStorageBaseService extends GetxService
   }
 
   @override
-  Future<List<String>?> readStringList(String key) async {
+  List<String>? readStringList(String key) {
     if (!_prefs.containsKey(key)) {
       return null;
     }

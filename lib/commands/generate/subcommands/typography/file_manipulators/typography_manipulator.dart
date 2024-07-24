@@ -24,11 +24,16 @@ import 'package:google_fonts/google_fonts.dart';
 class CustomTypography {
   final Color color;
   CustomTypography(this.color);
-  // List of textstyles""");
+  // List of textstyles\n""");
 
     for (final Map<String, dynamic> textStyle in _textStyles) {
-      buffer.writeln(
-        "TextStyle get k${(textStyle['name'] as String).capitalize} => GoogleFonts.${textStyle['fontFamily'].toString().decapitalize}( \nfontSize: ${textStyle['fontSize']}, \ncolor: color, \nfontWeight: FontWeight.w${textStyle['fontWeight']}, \n);",
+      buffer.write(
+        """
+  TextStyle get k${(textStyle['name'] as String).capitalize} => GoogleFonts.${textStyle['fontFamily'].toString().decapitalize.split(' ').join()}(
+    fontSize: ${textStyle['fontSize']},
+    color: color, 
+    fontWeight: FontWeight.w${textStyle['fontWeight']},
+  );""",
       );
     }
     buffer.write('''

@@ -526,7 +526,7 @@ Future<void> spinnerLoading(Function function) async {
 }
 
 void emptyLine() {
-  emptyLine();
+  printColor('', ColorText.black);
 }
 
 extension StringCapitalize on String {
