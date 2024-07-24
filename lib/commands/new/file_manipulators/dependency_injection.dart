@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:path/path.dart' as path_package;
 
 import '../../../interfaces/file_manipulator.dart';
