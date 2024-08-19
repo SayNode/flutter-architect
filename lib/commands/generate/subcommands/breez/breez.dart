@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 
 import '../../../../util/util.dart';
@@ -77,11 +79,72 @@ class GenerateBreezService extends Command<dynamic> {
     );
   }
 
-  Future<void> _editAndroidFiles() async {}
+  Future<void> _editAndroidFiles() async {
+    await addLinesAfterLineInFile(
+        'android/settings.gradle', <String, List<String>>{
+      'plugins {': <String>[
+        '//breez imports start',
+        'id "org.jetbrains.kotlin.plugin.serialization" version "1.8.20" apply false',
+        '//breez imports end',
+      ],
+    });
+
+    final File file = File('android/app/build.gradle');
+    final String contents = await file.readAsString();
+    if (contents.contains('dependencies')) {
+      await addLinesAfterLineInFile(
+          'android/app/build.gradle', <String, List<String>>{
+        'plugins {': <String>[
+          '//breez imports start',
+          "id 'kotlinx-serialization'",
+          '//breez imports end',
+        ],
+        'dependencies {': <String>[
+          '//breez imports start',
+          'implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"',
+          'implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"',
+          '//breez imports end',
+        ],
+      });
+    } else {
+      await addLinesAfterLineInFile(
+          'android/app/build.gradle', <String, List<String>>{
+        'plugins {': <String>[
+          '//breez imports start',
+          "id 'kotlinx-serialization'",
+          '//breez imports end',
+        ],
+        '}': <String>[
+          '//breez imports start',
+          'dependencies {',
+          ' implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"',
+          ' implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"',
+          '}',
+        ],
+      });
+    }
+  }
+
+  Future<void> _addDependencies() async {
+    await addLinesAfterLineInFile('pubspec.yaml', <String, List<String>>{
+      'dependencies:': <String>[
+        ' breez_sdk:',
+        '   git:',
+        '     url:  https://github.com/breez/breez-sdk-flutter.git',
+      ],
+    });
+
+    await Process.run(
+      'flutter',
+      <String>[
+        'pub',
+        'get',
+      ],
+      runInShell: true,
+    );
+  }
 
   Future<void> _cleanAndroidFiles() async {}
 
   Future<void> _removeDependencies() async {}
-
-  Future<void> _addDependencies() async {}
 }
