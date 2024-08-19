@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 
 import 'subcommands/all.dart';
 import 'subcommands/api/api.dart';
+import 'subcommands/breez/breez.dart';
 import 'subcommands/connectivity/connectivity.dart';
 import 'subcommands/crashlytics/crashlytics.dart';
 import 'subcommands/localization/localization.dart';
@@ -29,7 +30,7 @@ class Architect extends Command<dynamic> {
     addSubcommand(GenerateConnectivityService());
     addSubcommand(GenerateAPIService());
     addSubcommand(GenerateSigninService());
-
+    addSubcommand(GenerateBreezService());
     // Utilitary commands
     addSubcommand(AllServices());
     addSubcommand(GeneratePageService());

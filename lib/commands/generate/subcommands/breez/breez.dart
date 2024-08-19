@@ -127,21 +127,14 @@ class GenerateBreezService extends Command<dynamic> {
 
   Future<void> _addDependencies() async {
     await addLinesAfterLineInFile('pubspec.yaml', <String, List<String>>{
-      'dependencies:': <String>[
-        ' breez_sdk:',
-        '   git:',
-        '     url:  https://github.com/breez/breez-sdk-flutter.git',
+      'sdk: flutter': <String>[
+        '  breez_sdk:',
+        '    git:',
+        '      url:  https://github.com/breez/breez-sdk-flutter.git',
       ],
     });
 
-    await Process.run(
-      'flutter',
-      <String>[
-        'pub',
-        'get',
-      ],
-      runInShell: true,
-    );
+    addDependenciesToPubspecSync(<String>['path_provider'], null);
   }
 
   Future<void> _cleanAndroidFiles() async {}

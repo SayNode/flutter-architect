@@ -10,7 +10,7 @@ class BreezServiceManipulator extends ServiceManipulator {
   @override
   String content() {
     return """
-import 'breeze_base_serive.dart';
+import '../base/breez_base_service.dart';
 
 class BreezService extends BreezBaseService {}
 """;
