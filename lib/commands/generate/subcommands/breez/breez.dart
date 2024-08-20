@@ -115,10 +115,11 @@ class GenerateBreezService extends Command<dynamic> {
           '//breez imports end',
         ],
         '}': <String>[
-          '//breez imports start',
           'dependencies {',
+          '//breez imports start',
           ' implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"',
           ' implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"',
+          '//breez imports end',
           '}',
         ],
       });
@@ -137,7 +138,28 @@ class GenerateBreezService extends Command<dynamic> {
     addDependenciesToPubspecSync(<String>['path_provider'], null);
   }
 
-  Future<void> _cleanAndroidFiles() async {}
+  Future<void> _cleanAndroidFiles() async {
+    await removeLinesFromFile('android/settings.gradle', <String>[
+      '//breez imports start',
+      'id "org.jetbrains.kotlin.plugin.serialization" version "1.8.20" apply false',
+      '//breez imports end',
+    ]);
 
-  Future<void> _removeDependencies() async {}
+    await removeLinesFromFile('android/app/build.gradle', <String>[
+      '//breez imports start',
+      "id 'kotlinx-serialization'",
+      '//breez imports end',
+      'implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"',
+      'implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"',
+    ]);
+  }
+
+  Future<void> _removeDependencies() async {
+    await removeLinesFromFile('pubspec.yaml', <String>[
+      '  breez_sdk:',
+      '    git:',
+      '      url:  https://github.com/breez/breez-sdk-flutter.git',
+    ]);
+    removeDependenciesFromPubspecSync(<String>['path_provider'], null);
+  }
 }
