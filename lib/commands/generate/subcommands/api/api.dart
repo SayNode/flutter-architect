@@ -4,9 +4,12 @@ import '../../../new/file_manipulators/constant_manipulator.dart';
 import '../storage/storage.dart';
 import 'file_manipulators/api_base_service_manipulator.dart';
 import 'file_manipulators/api_service_manipulator.dart';
-import 'file_manipulators/auth_response_manipulator.dart';
+import 'file_manipulators/api_response_manipulator.dart';
 import 'file_manipulators/auth_base_service_manipulator.dart';
 import 'file_manipulators/auth_service_manipulator.dart';
+import 'file_manipulators/user_base_service_manipulator.dart';
+import 'file_manipulators/user_manipulator.dart';
+import 'file_manipulators/user_service_manipulator.dart';
 
 class GenerateAPIService extends Command<dynamic> {
   GenerateAPIService() {
@@ -53,6 +56,9 @@ class GenerateAPIService extends Command<dynamic> {
         printColor('-------- Creating API service --------\n', ColorText.cyan);
         await addAlreadyRun('api');
         addDependenciesToPubspecSync(<String>['http'], null);
+        await UserManipulator().create();
+        await UserBaseServiceManipulator().create();
+        await UserServiceManipulator().create();
         await ApiBaseServiceManipulator().create();
         await ApiServiceManipulator().create();
         await AuthBaseServiceManipulator().create();
@@ -66,6 +72,9 @@ class GenerateAPIService extends Command<dynamic> {
         printColor('-------- Removing API service --------\n', ColorText.cyan);
         await removeAlreadyRun('api');
         removeDependenciesFromPubspecSync(<String>['http'], null);
+        await UserManipulator().remove();
+        await UserBaseServiceManipulator().remove();
+        await UserServiceManipulator().remove();
         await ApiBaseServiceManipulator().remove();
         await ApiServiceManipulator().remove();
         await AuthBaseServiceManipulator().remove();
