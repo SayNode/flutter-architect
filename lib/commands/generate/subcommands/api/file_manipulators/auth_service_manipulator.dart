@@ -155,7 +155,7 @@ import 'package:flutter/foundation.dart';""";
           /// Save the token
           apiService.authenticationToken = authResult.accessToken;
           await storageService.writeString('token', authResult.accessToken);
-
+          await Get.find<UserStateService>().fetch();
           return authResult;
         } catch (error) {
           await disconnectProviders();
@@ -247,7 +247,7 @@ import 'package:google_sign_in/google_sign_in.dart';""";
               'token',
               authResult.accessToken,
             );
-
+            await Get.find<UserStateService>().fetch();
             return authResult;
           } catch (error) {
             await disconnectProviders();
@@ -279,7 +279,8 @@ import 'package:google_sign_in/google_sign_in.dart';""";
   String otherImports() => """
 import '../model/auth_response.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';""";
+import 'dart:convert';
+import 'user_state_service.dart';""";
 
   String googleDisconnect() => r"""
     // Disconnect from Google.
