@@ -1,1 +1,2 @@
 cd .. && rm -r testing && dart compile exe lib/architect.dart -o architect.exe && architect-dev new --name=testing --ios --android --org=com.example && cd testing
+C:/Users/pedro/Documents/Projects/Saynode/flutter-architect/architect.exe

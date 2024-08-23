@@ -64,20 +64,50 @@ abstract class ApiBaseService extends GetxService {
         'API - called PATCH at $url',
       );
     }
-    final http.Response response = await http.patch(
-      url,
-      headers: <String, String>{
-        'key': Constants.apiKey,
-        'Content-Type': contentType ?? 'application/json',
-        ...(omitBearerToken
-            ? <String, String>{}
-            : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
-              }),
-      },
-      body: body != null ? json.encode(body) : null,
-      encoding: encoding,
-    );
+
+    http.Response? response;
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        response = await http.patch(
+          url,
+          headers: <String, String>{
+            'key': Constants.apiKey,
+            'Content-Type': contentType ?? 'application/json',
+            ...(omitBearerToken
+                ? <String, String>{}
+                : <String, String>{
+                    HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
+                  }),
+          },
+          body: body != null ? json.encode(body) : null,
+          encoding: encoding,
+        );
+        break;
+      } on http.ClientException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got ClientException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } on HandshakeException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got HandshakeException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    if (response == null) {
+      throw Exception('Unexpected error in request handling - $path');
+    }
 
     if (response.statusCode >= 500) {
       throw _APIException(
@@ -125,20 +155,51 @@ abstract class ApiBaseService extends GetxService {
         'API - called PUT at $url',
       );
     }
-    final http.Response response = await http.put(
-      url,
-      headers: <String, String>{
-        'key': Constants.apiKey,
-        'Content-Type': contentType ?? 'application/json',
-        ...(omitBearerToken
-            ? <String, String>{}
-            : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
-              }),
-      },
-      body: body != null ? json.encode(body) : null,
-      encoding: encoding,
-    );
+
+    http.Response? response;
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        response = await http.put(
+          url,
+          headers: <String, String>{
+            'key': Constants.apiKey,
+            'Content-Type': contentType ?? 'application/json',
+            ...(omitBearerToken
+                ? <String, String>{}
+                : <String, String>{
+                    HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
+                  }),
+          },
+          body: body != null ? json.encode(body) : null,
+          encoding: encoding,
+        );
+        break;
+      } on http.ClientException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got ClientException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } on HandshakeException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got HandshakeException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    if (response == null) {
+      throw Exception('Unexpected error in request handling - $path');
+    }
+
     if (response.statusCode >= 500) {
       throw _APIException(
         path,
@@ -185,20 +246,51 @@ abstract class ApiBaseService extends GetxService {
         'API - called POST at $url',
       );
     }
-    final http.Response response = await http.post(
-      url,
-      headers: <String, String>{
-        'key': Constants.apiKey,
-        'Content-Type': contentType ?? 'application/json',
-        ...(omitBearerToken
-            ? <String, String>{}
-            : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
-              }),
-      },
-      body: body != null ? json.encode(body) : null,
-      encoding: encoding,
-    );
+
+    http.Response? response;
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        response = await http.post(
+          url,
+          headers: <String, String>{
+            'key': Constants.apiKey,
+            'Content-Type': contentType ?? 'application/json',
+            ...(omitBearerToken
+                ? <String, String>{}
+                : <String, String>{
+                    HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
+                  }),
+          },
+          body: body != null ? json.encode(body) : null,
+          encoding: encoding,
+        );
+        break;
+      } on http.ClientException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got ClientException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } on HandshakeException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got HandshakeException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    if (response == null) {
+      throw Exception('Unexpected error in request handling - $path');
+    }
+
     if (response.statusCode >= 500) {
       throw _APIException(
         path,
@@ -241,18 +333,49 @@ abstract class ApiBaseService extends GetxService {
     if (log) {
       loggerService.log('API - GET to queryParameters');
     }
-    final http.Response response = await http.get(
-      url,
-      headers: <String, String>{
-        'key': Constants.apiKey,
-        'Content-Type': contentType ?? 'application/json',
-        ...(omitBearerToken
-            ? <String, String>{}
-            : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
-              }),
-      },
-    );
+
+    http.Response? response;
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        response = await http.get(
+          url,
+          headers: <String, String>{
+            'key': Constants.apiKey,
+            'Content-Type': contentType ?? 'application/json',
+            ...(omitBearerToken
+                ? <String, String>{}
+                : <String, String>{
+                    HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
+                  }),
+          },
+        );
+        break;
+      } on http.ClientException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got ClientException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } on HandshakeException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got HandshakeException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    if (response == null) {
+      throw Exception('Unexpected error in request handling - $path');
+    }
+
     if (response.statusCode >= 500) {
       throw _APIException(
         path,
@@ -300,20 +423,51 @@ abstract class ApiBaseService extends GetxService {
         'API - called DELETE at $url',
       );
     }
-    final http.Response response = await http.delete(
-      url,
-      headers: <String, String>{
-        'key': Constants.apiKey,
-        'Content-Type': contentType ?? 'application/json',
-        ...(omitBearerToken
-            ? <String, String>{}
-            : <String, String>{
-                HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
-              }),
-      },
-      body: body != null ? json.encode(body) : null,
-      encoding: encoding,
-    );
+
+    http.Response? response;
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        response = await http.delete(
+          url,
+          headers: <String, String>{
+            'key': Constants.apiKey,
+            'Content-Type': contentType ?? 'application/json',
+            ...(omitBearerToken
+                ? <String, String>{}
+                : <String, String>{
+                    HttpHeaders.authorizationHeader: 'Bearer $authenticationToken',
+                  }),
+          },
+          body: body != null ? json.encode(body) : null,
+          encoding: encoding,
+        );
+        break;
+      } on http.ClientException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got ClientException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } on HandshakeException catch (e, _) {
+        if (i == 4) {
+          throw Exception(
+            'Got HandshakeException 5 times in a row, when requesting to $path - $e',
+          );
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+
+    if (response == null) {
+      throw Exception('Unexpected error in request handling - $path');
+    }
+
     if (response.statusCode >= 500) {
       throw _APIException(
         path,
