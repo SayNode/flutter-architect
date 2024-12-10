@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -11,8 +13,8 @@ import 'file_manipulators/custom_scaffold_manipulator.dart';
 import 'file_manipulators/dependency_injection.dart';
 import 'file_manipulators/error_page.dart';
 import 'file_manipulators/logger_service_manipulator.dart';
-import 'file_manipulators/main_file_manipulator.dart';
 import 'file_manipulators/main_base_file_manipulator.dart';
+import 'file_manipulators/main_file_manipulator.dart';
 import 'file_manipulators/util_file_manipulator.dart';
 import 'files/analysis_options.dart' as analysis_option;
 import 'files/codemagic_yaml.dart' as codemagic_yaml;
@@ -136,6 +138,10 @@ class Creator extends Command<dynamic> {
     // Fix and format dart code
     dartFixCode();
     dartFormatCode();
+    final bool fvmInstalled = await _installFVM();
+    if (fvmInstalled) {
+      await _setFVMVersion();
+    }
   }
 
   /// Deleted directories for non-supported platforms
@@ -381,5 +387,67 @@ class Creator extends Command<dynamic> {
     printColor('-- $directory/widget ✔', ColorText.green);
 
     emptyLine();
+  }
+
+  Future<bool> _installFVM() async {
+    try {
+      final ProcessResult result = await Process.run(
+        'dart',
+        <String>['pub', 'global', 'activate', 'fvm'],
+        runInShell: true,
+      );
+      if (result.exitCode == 0) {
+        printColor('FVM installed ✔', ColorText.green);
+        return true;
+      } else {
+        printColor('FVM installation failed', ColorText.red);
+        printColor(result.stderr, ColorText.red);
+        return false;
+      }
+    } catch (e) {
+      printColor('FVM installation failed: $e', ColorText.red);
+      return false;
+    }
+  }
+
+  Future<bool> _setFVMVersion() async {
+    final ProcessResult output = await Process.run(
+      'flutter',
+      <String>['--version'],
+      runInShell: true,
+    );
+
+    // Use a regular expression to extract the version number
+    final RegExp versionRegExp = RegExp(r'Flutter (\d+\.\d+\.\d+)');
+    final Match? match = versionRegExp.firstMatch(output.stdout.toString());
+
+    final String flutterVersion = match!.group(1)!;
+
+    //get current flutter version
+    try {
+      final Process process = await Process.start(
+        'fvm',
+        <String>['use', flutterVersion],
+        runInShell: true,
+      );
+
+      // Listen to stdout
+      process.stdout.transform(utf8.decoder).listen((String data) {
+        if (data.contains('Would you like to install it now')) {
+          process.stdin.writeln('y');
+        } else {
+          printColor(data, ColorText.cyan);
+        }
+      });
+
+      // Listen to stderr
+      process.stderr.transform(utf8.decoder).listen((String data) {
+        printColor(data, ColorText.cyan);
+      });
+      return true;
+    } on TimeoutException catch (e) {
+      printColor('The process timed out: $e', ColorText.red);
+      return false;
+    }
   }
 }
