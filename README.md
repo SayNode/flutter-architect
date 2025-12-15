@@ -7,7 +7,7 @@ You can use this tool to generate Flutter projects for all platforms, but keep i
 To install the CLI, open a terminal and enter the following command.
 
 ```bash
-npm install -g flutter-architect 
+npm install -g @saynode_ag/flutter-architect
 ```
 
 ## How to setup the tool for local development
