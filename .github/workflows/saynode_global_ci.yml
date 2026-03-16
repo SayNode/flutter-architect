@@ -1,0 +1,10 @@
+name: saynode_global_ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonar:
+    uses: SayNode/github-workflows/.github/workflows/sonar.yml@main
+  # global:
+  #   uses: SayNode/.github-workflows/.github/workflows/global.yml@main
