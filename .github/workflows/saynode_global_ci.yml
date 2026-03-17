@@ -5,6 +5,6 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
   sonar:
-    uses: SayNode/github-workflows/workflows/sonar.yml@main
+    uses: SayNode/github-workflows/.github/workflows/sonar.yml@main
   # global:
   #   uses: SayNode/.github-workflows/.github/workflows/global.yml@main
